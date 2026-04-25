@@ -1,0 +1,57 @@
+@startuml component_diagram
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam componentStyle rectangle
+skinparam defaultFontSize 12
+skinparam linetype ortho
+
+title Component Diagram — Orchestrator Modules
+
+package "orchestrator/" {
+    component "EpisodeLoader\n(loader.py)" as loader #LightBlue
+    component "PromptBuilder\n(prompts.py)" as prompts #LightBlue
+    component "ComfyUIClient\n(comfyui_client.py)" as client #LightBlue
+    component "ShotRenderer\n(renderer.py)" as renderer #LightBlue
+    component "EpisodeAssembler\n(assembler.py)" as assembler #LightBlue
+}
+
+package "orchestrator.py (CLI)" {
+    component "CLI Entry Point" as cli #LightYellow
+}
+
+component "episode_01.json" as json #White
+component "workflow_api.json" as wf #White
+component "ComfyUI\nServer" as comfy #LightGreen
+component "FFmpeg" as ffmpeg #LightGreen
+
+cli --> loader : "1. load episode"
+cli --> renderer : "2. render all shots"
+cli --> assembler : "3. concatenate"
+
+loader <-- json
+renderer --> prompts : "build start/end\nprompts"
+renderer --> client : "queue + poll"
+client --> comfy : "HTTP API\n(:8188)"
+renderer <-- wf : "template"
+assembler --> ffmpeg : "subprocess"
+
+loader ..> prompts : "EpisodeData,\nSceneData, ShotData"
+prompts ..> renderer : "start_prompt,\nend_prompt strings"
+client ..> renderer : "prompt_id,\ncompletion bool"
+
+note right of loader
+  Output dataclasses:
+  - EpisodeData
+  - SceneData
+  - ShotData
+  - CharacterData
+  - EnvironmentData
+end note
+
+note right of renderer
+  Output dataclass:
+  - RenderResult
+    (shot_id, prompt_id, success)
+end note
+
+@enduml

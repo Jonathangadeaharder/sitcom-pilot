@@ -1,0 +1,75 @@
+@startuml hardware_mapping
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+
+title Hardware Mapping — Apple M5 Pro 64GB MPS Pipeline
+
+rectangle "Apple M5 Pro — 64GB Unified Memory" as soc #F8F8F8 {
+    
+    rectangle "Media Engine" as media #FFB3B3 {
+        rectangle "VideoToolbox\nh264_videotoolbox" as vt
+        note right of vt
+          FFmpeg encoding:
+          - Title card generation
+          - Video normalization
+          - Audio mux + tpad
+          - Final concatenation
+        end note
+    }
+    
+    rectangle "GPU (MPS Backend)" as gpu #B3FFB3 {
+        rectangle "Flux2\n(ComfyUI)" as flux {
+            note right of flux
+              Image generation:
+              - Character portraits
+              - Scene backgrounds
+              - Shot compositions
+            end note
+        }
+        rectangle "LTX-2.3 Distilled\n(22B params)" as ltx {
+            note right of ltx
+              Video generation:
+              - Stage 1: 384x256 (8 steps)
+              - Stage 2: 768x512 upsample (3 steps)
+              - ~5 min/segment on MPS
+            end note
+        }
+        rectangle "Fish-Speech\n(TTS)" as fish {
+            note right of fish
+              Audio generation:
+              - 4 character reference voices
+              - --device mps --half
+              - ~2s/line inference
+            end note
+        }
+    }
+    
+    rectangle "CPU Cores" as cpu #B3D9FF {
+        rectangle "Python\nOrchestrator" as orch
+        rectangle "FFmpeg\n(demux/mux)" as ff_cpu
+        note right of ff_cpu
+          Software path:
+          - Audio decode (WAV)
+          - Container operations
+          - tpad filter
+        end note
+    }
+    
+    rectangle "Unified Memory (64GB)" as ram #FFFFB3 {
+        card "~46GB LTX-2.3 checkpoint\n(distilled safetensors)" as ltx_mem
+        card "~5GB Gemma-3-12B\n(text encoder)" as gemma_mem
+        card "~1GB Fish-Speech\n(TTS model)" as fish_mem
+        card "~1GB Flux2\n(image gen)" as flux_mem
+        card "~11GB free\n(active tensors)" as free_mem
+    }
+}
+
+note bottom of soc
+  **Memory constraint:** Only ONE of {LTX-2.3, Fish-Speech, Flux2}
+  can run at a time. Orchestrator sequences them.
+  
+  **Not used:** CUDA (NVIDIA-only), CPU for ML inference
+end note
+
+@enduml

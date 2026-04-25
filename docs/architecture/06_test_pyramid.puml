@@ -1,0 +1,62 @@
+@startuml test_pyramid
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+
+title Test Pyramid — Orchestrator Test Strategy
+
+rectangle "End-to-End Tests" as e2e #FF6B6B {
+    note as e2e_note
+      **Manual / CI only**
+      Full pipeline with real ComfyUI
+      - Load episode_01.json
+      - Render shots via ComfyUI API
+      - Assemble with FFmpeg
+      - Verify output MP4
+    end note
+}
+
+rectangle "Integration Tests (tests/test_integration.py)" as integration #FFD93D {
+    note as int_note
+      **Pairs of units interacting**
+      - Loader → PromptBuilder: valid prompts from loaded data
+      - Loader → Renderer: full render flow with mock client
+      - PromptBuilder → Renderer: both prompts injected correctly
+      - Renderer → Assembler: concat list from render results
+      - Full pipeline: Loader → Renderer → Assembler (mocked HTTP)
+    end note
+}
+
+rectangle "Unit Tests (tests/test_*.py)" as unit #6BCB77 {
+    note as unit_note
+      **Each unit in isolation**
+      - test_loader.py: JSON parsing, validation, edge cases
+      - test_prompts.py: prompt construction, env+char composition
+      - test_comfyui_client.py: HTTP mock, retry logic, crash recovery
+      - test_renderer.py: workflow injection, LoRA file naming
+      - test_assembler.py: concat list, FFmpeg invocation, VideoToolbox
+    end note
+}
+
+e2e -[hidden]down- integration
+integration -[hidden]down- unit
+
+note right of e2e
+  Count: ~2-3
+  Speed: Minutes
+  Scope: Full system
+end note
+
+note right of integration
+  Count: ~6-8
+  Speed: Seconds
+  Scope: Pairs
+end note
+
+note right of unit
+  Count: ~20-25
+  Speed: Milliseconds
+  Scope: Single class
+end note
+
+@enduml

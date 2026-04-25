@@ -1,0 +1,102 @@
+@startuml class_diagram
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+title Class Diagram — Orchestrator Data Model & Interfaces
+
+class EpisodeLoader {
+    + load(path: Path) EpisodeData
+}
+
+class EpisodeData {
+    + title: str
+    + cast: dict[str, CharacterData]
+    + environments: dict[str, EnvironmentData]
+    + scenes: list[SceneData]
+}
+
+class CharacterData {
+    + profile: str
+    + trigger_word: str
+}
+
+class EnvironmentData {
+    + profile: str
+    + trigger_word: str
+}
+
+class SceneData {
+    + scene_id: str
+    + environment: str
+    + characters_present: list[str]
+    + shots: list[ShotData]
+}
+
+class ShotData {
+    + shot_id: str
+    + camera_angle: str
+    + action_start: str
+    + action_end: str
+    + audio_path: str
+    + seed: int
+}
+
+class PromptBuilder {
+    - QUALITY_SUFFIX: str
+    + build_start_prompt(shot, scene, episode) str
+    + build_end_prompt(shot, scene, episode) str
+    - _character_triggers(scene, episode) str
+}
+
+class ComfyUIClient {
+    - _base_url: str
+    + is_server_running() bool
+    + queue_prompt(workflow, max_retries) str
+    + wait_for_completion(prompt_id, timeout) bool
+    + start_server(comfy_dir, start_cmd) Popen
+}
+
+class ShotRenderer {
+    - _client: ComfyUIClient
+    - _builder: PromptBuilder
+    + render_shot(shot, scene, episode, template) RenderResult
+    + render_scene(scene, episode, template) list[RenderResult]
+    + render_episode(episode, template) dict[str, list[RenderResult]]
+    - _inject_env(workflow, env_file) None
+    - _inject_chars(workflow, char_files) None
+    - _inject_prompts(workflow, start, end) None
+    - _inject_meta(workflow, shot) None
+}
+
+class RenderResult {
+    + shot_id: str
+    + prompt_id: str
+    + success: bool
+}
+
+class EpisodeAssembler {
+    + output_dir: Path
+    - _video_codec: str
+    + concatenate(clips, output_path) bool
+    - _write_concat_list(clips) Path
+    + {_detect_videotoolbox() bool
+}
+
+EpisodeLoader --> EpisodeData
+EpisodeData *-- CharacterData
+EpisodeData *-- EnvironmentData
+EpisodeData *-- SceneData
+SceneData *-- ShotData
+ShotRenderer --> ComfyUIClient
+ShotRenderer --> PromptBuilder
+ShotRenderer --> RenderResult
+PromptBuilder ..> EpisodeData : reads
+PromptBuilder ..> ShotData : reads
+PromptBuilder ..> SceneData : reads
+ShotRenderer ..> EpisodeData : reads
+ShotRenderer ..> SceneData : reads
+ShotRenderer ..> ShotData : reads
+
+@enduml

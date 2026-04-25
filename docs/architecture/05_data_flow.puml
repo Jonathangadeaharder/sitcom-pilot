@@ -1,0 +1,64 @@
+@startuml data_flow
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+
+title Data Flow Diagram — Episode JSON to Final MP4
+
+cloud "Writer" as writer
+
+folder "Input Files" #LightYellow {
+    artifact "episode_01.json" as json
+    artifact "workflow_api.json" as template
+    artifact "audio/*.wav" as audio
+}
+
+rectangle "EpisodeLoader" as loader #LightBlue {
+    card "EpisodeData\n(SceneData, ShotData,\nCharacterData, EnvironmentData)" as ep_data
+}
+
+rectangle "PromptBuilder" as pb #LightBlue {
+    card "start_prompt: str\nend_prompt: str" as prompts
+}
+
+rectangle "ShotRenderer" as renderer #LightBlue {
+    card "workflow (dict)\ninjected with:\n- lora_name (env)\n- lora_name (chars)\n- text (start/end)\n- seed\n- audio" as workflow
+    card "RenderResult\n(shot_id, prompt_id, success)" as results
+}
+
+rectangle "ComfyUIClient" as client #LightGreen {
+    card "HTTP POST /prompt\nHTTP GET /history/{id}" as api
+}
+
+rectangle "EpisodeAssembler" as assembler #LightCoral {
+    card "concat_list.txt" as concat
+    card "final.mp4" as final
+}
+
+database "ComfyUI Server\n(:8188)" as comfy
+database "FFmpeg\n(VideoToolbox h264)" as ffmpeg
+
+writer --> json : "writes"
+json --> loader
+template --> renderer
+audio --> renderer : "paths in\nshot data"
+
+loader --> ep_data
+ep_data --> pb
+ep_data --> renderer
+pb --> prompts
+prompts --> renderer
+renderer --> workflow
+renderer --> results
+
+workflow --> client
+client --> api
+api --> comfy : "HTTP"
+comfy --> api : "prompt_id,\ncompletion"
+
+results --> assembler
+assembler --> concat
+concat --> ffmpeg : "subprocess"
+ffmpeg --> final
+
+@enduml

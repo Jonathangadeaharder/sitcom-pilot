@@ -1,0 +1,223 @@
+{
+  "episode_title": "Buffering S01E01: The Bug",
+  "cast": {
+    "maya": {
+      "profile": "maya_v1",
+      "trigger_word": "East Asian woman in her late 20s, short straight black hair with subtle blue highlights, round wire-frame glasses, wearing an oversized dark purple hoodie with a small robot logo, dark jeans, white sneakers, confident posture but tired eyes, warm skin tone"
+    },
+    "derek": {
+      "profile": "derek_v1",
+      "trigger_word": "Tall Black man in his early 30s, immaculately trimmed short beard, confident smile, wearing a fitted navy blazer over a bright graphic tee with geometric patterns, slim khaki chinos, clean white leather shoes, silver watch"
+    },
+    "priya": {
+      "profile": "priya_v1",
+      "trigger_word": "South Asian woman in her mid 20s, long dark wavy hair often in a loose side braid, warm brown eyes, wearing a mustard yellow cardigan over a white blouse, colorful printed scarf, high-waisted olive green pants, brown ankle boots, always carrying a leather-bound sketchbook"
+    },
+    "finn": {
+      "profile": "finn_v1",
+      "trigger_word": "Pale Irish man in his late 20s, messy curly red hair, light freckles across his nose, perpetually confused wide-eyed expression, wearing a loud Hawaiian shirt with palm trees over a plain white t-shirt, cargo shorts, worn sandals"
+    }
+  },
+  "environments": {
+    "living_room": {
+      "profile": "living_room_v2",
+      "trigger_word": "Modern San Francisco apartment living room with a panoramic window showing the Bay Bridge at golden hour, cluttered with tech gadgets, a large whiteboard covered in diagrams, mismatched furniture including a worn leather couch and beanbag chairs, tangled cables, a broken espresso machine on a side table, warm ambient lighting"
+    },
+    "kitchen": {
+      "profile": "kitchen_v1",
+      "trigger_word": "Small galley kitchen in a San Francisco apartment, cluttered countertops with smart home gadgets, a tablet mounted on the fridge showing notifications, coffee mugs with tech company logos, morning light streaming through a small window, cozy and lived-in"
+    },
+    "maya_desk": {
+      "profile": "maya_desk_v1",
+      "trigger_word": "Corner desk setup in a San Francisco apartment, three monitors showing code and terminal windows, mechanical keyboard with custom keycaps, desk lamp casting warm light, energy drink cans, sticky notes everywhere, a small succulent plant, late night atmosphere"
+    },
+    "hallway": {
+      "profile": "hallway_v1",
+      "trigger_word": "Narrow apartment hallway with coats hanging on hooks, shoes piled by the door, a smart doorbell with a blinking red light, package boxes stacked against the wall, overhead fluorescent light"
+    },
+    "rooftop": {
+      "profile": "rooftop_v1",
+      "trigger_word": "San Francisco apartment building rooftop at dusk, panoramic city skyline view with fog rolling in, string lights hung between posts, a couple of folding chairs and a small table, the Bay Bridge glowing in the background, cinematic golden hour lighting"
+    }
+  },
+  "scenes": [
+    {
+      "scene_id": "001",
+      "environment": "maya_desk",
+      "characters_present": ["maya"],
+      "shots": [
+        {
+          "shot_id": "001_01",
+          "camera_angle": "close-up on face, monitor glow illuminating features, slow zoom in",
+          "action_start": "Maya stares at her monitor in disbelief, her face lit by the blue glow of cascading error logs, mouth slightly open in shock",
+          "action_end": "Maya slowly removes her glasses and rubs her tired eyes, then puts them back on — the errors are still there",
+          "audio_path": "output/voices/scene_001_full.wav",
+          "seed": 1000
+        },
+        {
+          "shot_id": "001_02",
+          "camera_angle": "medium shot from side, showing Maya and the three monitors",
+          "action_start": "Maya slumps back in her chair, defeated, head tilted toward the ceiling, arms limp at her sides",
+          "action_end": "Maya sits up straight with renewed determination, jaw set, eyes locked on the screen — she reaches for an empty energy drink can, finds it empty, tosses it aside",
+          "audio_path": "output/voices/scene_001_full.wav",
+          "seed": 1001
+        },
+        {
+          "shot_id": "001_03",
+          "camera_angle": "over-the-shoulder shot from behind monitors, phone in hand",
+          "action_start": "Maya grabs her phone from the desk, scrolling through contacts with urgency, her face illuminated by the phone screen",
+          "action_end": "Maya holds the phone to her ear, waiting for an answer, free hand gripping the edge of the desk — tension in her knuckles",
+          "audio_path": "output/voices/scene_001_full.wav",
+          "seed": 1002
+        }
+      ]
+    },
+    {
+      "scene_id": "002",
+      "environment": "kitchen",
+      "characters_present": ["derek", "priya", "finn"],
+      "shots": [
+        {
+          "shot_id": "002_01",
+          "camera_angle": "medium wide shot, eye level, capturing Derek at counter and Priya at table",
+          "action_start": "Derek stands at the kitchen counter in his blazer, scrolling through his phone with one hand and pouring coffee with the other — missing the mug entirely, coffee pooling on the counter",
+          "action_end": "Priya glances up from her sketchbook with mild annoyance, one eyebrow raised, as Derek enthusiastically waves his phone showing his PetCoin logo",
+          "audio_path": "output/voices/scene_002_full.wav",
+          "seed": 2000
+        },
+        {
+          "shot_id": "002_02",
+          "camera_angle": "tracking shot following Finn as he enters, then cutting between the three characters",
+          "action_start": "Finn bursts through the kitchen doorway in his Hawaiian shirt, eyes wide and alarmed, clutching his phone like evidence at a crime scene",
+          "action_end": "Finn stands in the center of the kitchen, arms spread in exasperation as Derek grins and Priya deadpans about the coffee maker and toaster being in love",
+          "audio_path": "output/voices/scene_002_full.wav",
+          "seed": 2001
+        },
+        {
+          "shot_id": "002_03",
+          "camera_angle": "two-shot of Finn calling after Priya, Derek laughing in background",
+          "action_start": "Priya stands up from the table, tucking her sketchbook under her arm, shaking her head with a resigned smirk as she heads for the door",
+          "action_end": "Finn calls after her about the smart lock logging bathroom breaks, while Derek leans against the counter, phone raised, still grinning about blockchain",
+          "audio_path": "output/voices/scene_002_full.wav",
+          "seed": 2002
+        }
+      ]
+    },
+    {
+      "scene_id": "003",
+      "environment": "living_room",
+      "characters_present": ["maya", "finn", "derek"],
+      "shots": [
+        {
+          "shot_id": "003_01",
+          "camera_angle": "wide establishing shot of the living room, then quick pan to Maya at the door",
+          "action_start": "Maya bursts through the living room entrance, laptop clutched under her arm, hair disheveled from hours at the desk, eyes wild with urgency",
+          "action_end": "The room freezes — Finn crouching by a smart plug with a magnifying glass looks up, Derek mid-pitch on the couch with an imaginary audience turns — all eyes on Maya",
+          "audio_path": "output/voices/scene_003_full.wav",
+          "seed": 3000
+        },
+        {
+          "shot_id": "003_02",
+          "camera_angle": "over-the-shoulder alternating between Maya and Finn, with Derek visible on couch",
+          "action_start": "Finn pulls out his laptop and begins typing rapidly, his bewildered expression sharpening into focus as code scrolls across the screen",
+          "action_end": "Finn looks up from the screen and points at Maya — the git blame reveals it was her code, three weeks ago at 2:14 AM — Maya buries her face in her hands",
+          "audio_path": "output/voices/scene_003_full.wav",
+          "seed": 3001
+        },
+        {
+          "shot_id": "003_03",
+          "camera_angle": "medium shot of Derek on the couch, Maya and Finn visible in foreground",
+          "action_start": "Derek leans back on the couch, adjusting his blazer with a self-satisfied grin, arms spread wide as if delivering a TED talk",
+          "action_end": "Derek delivers his punchline about never writing code with a cheerful shrug, while Maya lifts her head from her hands to glare at him",
+          "audio_path": "output/voices/scene_003_full.wav",
+          "seed": 3002
+        }
+      ]
+    },
+    {
+      "scene_id": "004",
+      "environment": "maya_desk",
+      "characters_present": ["maya", "finn"],
+      "shots": [
+        {
+          "shot_id": "004_01",
+          "camera_angle": "wide shot showing both characters hunched at the desk, monitors glowing red with failing tests",
+          "action_start": "Maya and Finn sit side by side at the desk, both hunched forward, illuminated by the harsh glow of multiple monitors showing cascading red test failures",
+          "action_end": "Finn points at a specific line on screen while Maya types furiously, empty energy drink cans accumulating like a small fortress around their keyboards",
+          "audio_path": "output/voices/scene_004_full.wav",
+          "seed": 4000
+        },
+        {
+          "shot_id": "004_02",
+          "camera_angle": "push in to close-up on Finn's face, then Maya's reaction",
+          "action_start": "Finn reads the damage report from the screen with clinical precision — undefined table, broken search, labrador profile photo — his expression shifting from analytical to amused",
+          "action_end": "Maya leans back in her chair, laughing despite herself at the labrador's 4.8-star rating, then quickly composes her face back to determined focus",
+          "audio_path": "output/voices/scene_004_full.wav",
+          "seed": 4001
+        },
+        {
+          "shot_id": "004_03",
+          "camera_angle": "two-shot, medium close, both visible with monitors in background",
+          "action_start": "Maya checks the time on her phone and sits up straight with steel in her eyes — nine hours to fix fourteen tests",
+          "action_end": "Finn mentions the smart home devices having meetings at 3:12 AM with charts to prove it — Maya stares at him for a long beat, then deliberately turns back to her keyboard",
+          "audio_path": "output/voices/scene_004_full.wav",
+          "seed": 4002
+        }
+      ]
+    },
+    {
+      "scene_id": "005",
+      "environment": "living_room",
+      "characters_present": ["maya", "derek", "priya", "finn"],
+      "shots": [
+        {
+          "shot_id": "005_01",
+          "camera_angle": "group shot, medium wide, all four roommates in frame, whiteboard behind Maya",
+          "action_start": "All four roommates are gathered in the living room in the late evening — Maya stands by the whiteboard covered in crossed-out diagrams, eyes bright with cautious hope",
+          "action_end": "Finn looks up from his laptop on the floor, suspicious — even test nine is passing — while Derek pumps his fist and credits his sage-burning for the success",
+          "audio_path": "output/voices/scene_005_full.wav",
+          "seed": 5000
+        },
+        {
+          "shot_id": "005_02",
+          "camera_angle": "medium shots cutting between Derek with phone, Priya's skeptical face, and Finn on the floor",
+          "action_start": "Derek holds up his phone showing a dog-with-sunglasses logo, beaming with pride — Priya recoils in aesthetic disgust",
+          "action_end": "Finn calmly shows his phone — the smart fridge has autonomously ordered forty pounds of artisanal cheese using Derek's credit card — Derek's face cycles through confusion to horror",
+          "audio_path": "output/voices/scene_005_full.wav",
+          "seed": 5001
+        },
+        {
+          "shot_id": "005_03",
+          "camera_angle": "close-up on Maya's finger hovering over the enter key, then pull back to include the group",
+          "action_start": "Priya smirks and delivers her blockchain jab — Derek sputters defensively — Maya cuts through the chaos with her finger poised over the enter key",
+          "action_end": "Maya counts down — three, two, one — finger presses enter, the room holds its breath, all four faces frozen in a mix of terror and anticipation",
+          "audio_path": "output/voices/scene_005_full.wav",
+          "seed": 5002
+        }
+      ]
+    },
+    {
+      "scene_id": "006",
+      "environment": "maya_desk",
+      "characters_present": ["maya", "finn"],
+      "shots": [
+        {
+          "shot_id": "006_01",
+          "camera_angle": "close-up on monitor showing green deployment success, slow pull back to reveal Maya and Finn",
+          "action_start": "A monitor fills the frame displaying a green deployment success screen — the camera slowly pulls back to reveal Maya slumped in her chair, exhausted but smiling softly",
+          "action_end": "Finn sits beside her, equally spent, chin propped on his hand — the apartment is quiet save for the hum of monitors — Maya's eyes are half-closed with quiet satisfaction",
+          "audio_path": "output/voices/scene_006_full.wav",
+          "seed": 6000
+        },
+        {
+          "shot_id": "006_02",
+          "camera_angle": "two-shot, intimate framing, warm desk lamp light",
+          "action_start": "Maya mumbles 'ship it' and her eyes drift shut — Finn looks at his phone with a mixture of concern and bewilderment",
+          "action_end": "Finn stares at his phone screen showing the smart doorbell's compliment to the delivery driver, then slowly looks up at the camera with a completely lost expression — the room falls silent",
+          "audio_path": "output/voices/scene_006_full.wav",
+          "seed": 6001
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+@startuml render_sequence
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontSize 11
+
+title Sequence Diagram — Shot Rendering Flow
+
+actor CLI
+participant "EpisodeLoader" as loader
+participant "ShotRenderer" as renderer
+participant "PromptBuilder" as builder
+participant "ComfyUIClient" as client
+participant "ComfyUI\nServer" as comfy
+participant "EpisodeAssembler" as assembler
+participant "FFmpeg" as ffmpeg
+
+CLI -> loader : load("episode_01.json")
+loader --> CLI : EpisodeData
+
+loop for each scene in episode
+    loop for each shot in scene
+
+        CLI -> renderer : render_shot(shot, scene, episode, template)
+        renderer -> builder : build_start_prompt(shot, scene, episode)
+        builder --> renderer : "env, camera, chars, action_start -- RAW..."
+        renderer -> builder : build_end_prompt(shot, scene, episode)
+        builder --> renderer : "env, camera, chars, action_end -- RAW..."
+
+        renderer -> renderer : inject into workflow template\n(env lora, char loras,\nstart/end prompts, seed, audio)
+
+        alt ComfyUI unreachable
+            client -> client : retry (exponential backoff)
+            client -> comfy : restart if needed
+        end
+
+        renderer -> client : queue_prompt(workflow)
+        client -> comfy : POST /prompt {workflow}
+        comfy --> client : {"prompt_id": "abc-123"}
+
+        loop poll until done
+            client -> comfy : GET /history/{prompt_id}
+            comfy --> client : {} (pending)
+        end
+        comfy --> client : {prompt_id: {...status...}}
+
+        client --> renderer : prompt_id, success=True
+        renderer --> CLI : RenderResult(shot_id, prompt_id, success)
+
+    end
+end
+
+CLI -> assembler : concatenate(rendered_clips, output)
+assembler -> assembler : write concat_list.txt
+assembler -> ffmpeg : ffmpeg -f concat -i list.txt -c:v h264_videotoolbox ...
+ffmpeg --> assembler : success=True
+assembler --> CLI : final.mp4 path
+
+@enduml

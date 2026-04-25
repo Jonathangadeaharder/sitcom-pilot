@@ -1,0 +1,43 @@
+@startuml system_context
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam componentStyle rectangle
+skinparam defaultFontSize 12
+
+title System Context Diagram — AI Showrunner Pipeline
+
+actor "Writer" as writer
+actor "Viewer" as viewer
+
+package "AI Showrunner" {
+    component "Orchestrator\n(Python Director)" as orch #LightBlue
+    component "episode_01.json\n(Cut-Sheet)" as json #LightYellow
+    component "workflow_api.json\n(ComfyUI Template)" as wf #LightYellow
+}
+
+package "External Services" {
+    component "ComfyUI\n(Flux2 + LTX-2.3)" as comfy #LightGreen
+    component "Fish-Speech\n(TTS API :8090)" as fish #LightGreen
+    component "FFmpeg\n(Assembly)" as ffmpeg #LightGreen
+}
+
+package "Hardware" {
+    component "Apple M5 Pro\n64GB Unified Memory\n(MPS Backend)" as hw #Pink
+}
+
+folder "output/" as out {
+    component "Final MP4\n(Pilot Episode)" as mp4
+}
+
+writer --> json : "writes\nJSON cut-sheet"
+orch <-- json : "loads"
+orch <-- wf : "loads"
+orch --> comfy : "renders\nshots via API"
+orch --> fish : "generates\naudio (Phase 2)"
+orch --> ffmpeg : "assembles\nfinal video"
+ffmpeg --> mp4
+comfy ..> hw : "MPS inference"
+fish ..> hw : "MPS inference"
+mp4 --> viewer : "watches"
+
+@enduml
