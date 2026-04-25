@@ -60,3 +60,71 @@ def test_load_preserves_unknown_env_reference(tmp_path):
     loader = EpisodeLoader()
     episode = loader.load(episode_json)
     assert episode.scenes[0].environment == "NONEXISTENT"
+
+
+def test_load_assigns_all_shot_fields(tmp_path):
+    episode_json = tmp_path / "episode.json"
+    episode_json.write_text(json.dumps({
+        "episode_title": "FieldCheck",
+        "cast": {"A": {"profile": "ap", "trigger_word": "at"}},
+        "environments": {"R": {"profile": "rp", "trigger_word": "rt"}},
+        "scenes": [{"scene_id": "S1", "environment": "R",
+                     "characters_present": ["A"],
+                     "shots": [{"shot_id": "S1_SH1", "camera_angle": "close",
+                                "action_start": "walking", "action_end": "running",
+                                "audio_path": "snd.wav", "seed": 77}]}]
+    }))
+    loader = EpisodeLoader()
+    episode = loader.load(episode_json)
+    shot = episode.scenes[0].shots[0]
+    assert shot.shot_id == "S1_SH1"
+    assert shot.camera_angle == "close"
+    assert shot.action_start == "walking"
+    assert shot.action_end == "running"
+    assert shot.audio_path == "snd.wav"
+    assert shot.seed == 77
+
+
+def test_load_assigns_cast_profile_and_trigger(tmp_path):
+    episode_json = tmp_path / "episode.json"
+    episode_json.write_text(json.dumps({
+        "episode_title": "CastCheck",
+        "cast": {"Bob": {"profile": "bob_v3", "trigger_word": "bob_man"}},
+        "environments": {},
+        "scenes": []
+    }))
+    loader = EpisodeLoader()
+    episode = loader.load(episode_json)
+    assert episode.cast["Bob"].profile == "bob_v3"
+    assert episode.cast["Bob"].trigger_word == "bob_man"
+
+
+def test_load_assigns_env_profile_and_trigger(tmp_path):
+    episode_json = tmp_path / "episode.json"
+    episode_json.write_text(json.dumps({
+        "episode_title": "EnvCheck",
+        "cast": {},
+        "environments": {"Cafe": {"profile": "cafe_v2", "trigger_word": "coffee shop"}},
+        "scenes": []
+    }))
+    loader = EpisodeLoader()
+    episode = loader.load(episode_json)
+    assert episode.environments["Cafe"].profile == "cafe_v2"
+    assert episode.environments["Cafe"].trigger_word == "coffee shop"
+
+
+def test_load_assigns_scene_characters_present(tmp_path):
+    episode_json = tmp_path / "episode.json"
+    episode_json.write_text(json.dumps({
+        "episode_title": "CharsCheck",
+        "cast": {
+            "A": {"profile": "a", "trigger_word": "aa"},
+            "B": {"profile": "b", "trigger_word": "bb"},
+        },
+        "environments": {},
+        "scenes": [{"scene_id": "S1", "environment": "R",
+                     "characters_present": ["A", "B"], "shots": []}]
+    }))
+    loader = EpisodeLoader()
+    episode = loader.load(episode_json)
+    assert episode.scenes[0].characters_present == ["A", "B"]

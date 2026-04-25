@@ -269,3 +269,90 @@ def test_render_shot_no_env_data(mock_client):
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), node_map=NodeMap(env_profile="40"))
     result = renderer.render_shot(ep.scenes[0].shots[0], ep.scenes[0], ep, template)
     assert result.success is True
+
+
+def test_render_shot_start_end_prompts_go_to_correct_nodes(episode, mock_client, workflow_template):
+    mock_client.queue_prompt.return_value = "pid"
+    mock_client.wait_for_completion.return_value = True
+    renderer = ShotRenderer(client=mock_client, builder=PromptBuilder())
+    renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, workflow_template)
+    call_args = mock_client.queue_prompt.call_args[0][0]
+    start_text = call_args["6"]["inputs"]["text"]
+    end_text = call_args["12"]["inputs"]["text"]
+    assert "standing" in start_text
+    assert "sitting" not in start_text
+    assert "sitting" in end_text
+    assert "standing" not in end_text
+
+
+def test_render_shot_non_recovery_does_not_check_server(episode, mock_client, workflow_template):
+    mock_client.queue_prompt.return_value = "pid"
+    mock_client.wait_for_completion.return_value = True
+    renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), crash_recovery=False)
+    renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, workflow_template)
+    mock_client.is_server_running.assert_not_called()
+
+
+def test_render_shot_result_contains_prompt_id(episode, mock_client, workflow_template):
+    mock_client.queue_prompt.return_value = "my-prompt-id"
+    mock_client.wait_for_completion.return_value = True
+    renderer = ShotRenderer(client=mock_client, builder=PromptBuilder())
+    result = renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, workflow_template)
+    assert result.prompt_id == "my-prompt-id"
+
+
+def test_render_shot_retries_calls_ensure_server_with_correct_args(episode, mock_client, node_map):
+    mock_client.queue_prompt.side_effect = [ConnectionError("refused"), "pid-retry"]
+    mock_client.wait_for_completion.return_value = True
+    mock_client.is_server_running.return_value = False
+    mock_client.ensure_server_running = MagicMock()
+    template = {"6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}}, "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}}, "40": {"inputs": {"lora_name": ""}}, "41": {"inputs": {"lora_name": ""}}}
+    renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), node_map=node_map, crash_recovery=True, server_cmd=["python", "main.py"], server_cwd="/opt/comfyui")
+    renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
+    mock_client.ensure_server_running.assert_called_once_with(["python", "main.py"], "/opt/comfyui")
+
+
+def test_render_shot_crash_recovery_skips_restart_when_server_up(episode, mock_client, node_map):
+    mock_client.queue_prompt.side_effect = [ConnectionError("refused"), "pid-ok"]
+    mock_client.wait_for_completion.return_value = True
+    mock_client.is_server_running.return_value = True
+    mock_client.ensure_server_running = MagicMock()
+    template = {"6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}}, "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}}, "40": {"inputs": {"lora_name": ""}}, "41": {"inputs": {"lora_name": ""}}}
+    renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), node_map=node_map, crash_recovery=True, server_cmd=["python", "main.py"], server_cwd="/opt/comfyui")
+    result = renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
+    assert result.success is True
+    mock_client.ensure_server_running.assert_not_called()
+
+
+def test_render_shot_crash_recovery_raises_correct_exception(episode, mock_client, node_map):
+    mock_client.queue_prompt.side_effect = ConnectionError("refused")
+    mock_client.is_server_running.return_value = False
+    mock_client.ensure_server_running = MagicMock()
+    template = {"6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}}, "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}}, "40": {"inputs": {"lora_name": ""}}, "41": {"inputs": {"lora_name": ""}}}
+    renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), node_map=node_map, crash_recovery=True, server_cmd=["python", "main.py"], server_cwd="/opt", max_crash_retries=2)
+    with patch("time.sleep"):
+        with pytest.raises(ConnectionError, match="refused"):
+            renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
+
+
+def test_inject_workflow_with_minimal_template(mock_client):
+    template = {"6": {}, "12": {}, "25": {}, "3": {}, "40": {}, "41": {}}
+    ep = EpisodeData(title="T", cast={"X": CharacterData("x_v1", "xxx")}, environments={"R": EnvironmentData("r_v1", "room")}, scenes=[SceneData("S1", "R", ["X"], [ShotData("S1_SH1", "wide", "a", "b", "aud.wav", 7)])])
+    mock_client.queue_prompt.return_value = "pid"
+    mock_client.wait_for_completion.return_value = True
+    renderer = ShotRenderer(client=mock_client, builder=PromptBuilder())
+    renderer.render_shot(ep.scenes[0].shots[0], ep.scenes[0], ep, template)
+    wf = mock_client.queue_prompt.call_args[0][0]
+    assert wf["6"]["inputs"]["text"] != ""
+    assert wf["3"]["inputs"]["seed"] == 7
+    assert wf["25"]["inputs"]["audio"] == "aud.wav"
+
+
+def test_render_scene_cooldown_sleeps_correct_duration(episode, mock_client, workflow_template):
+    mock_client.queue_prompt.return_value = "pid"
+    mock_client.wait_for_completion.return_value = True
+    renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), cooldown_seconds=5.0)
+    with patch("time.sleep") as mock_sleep:
+        renderer.render_scene(episode.scenes[0], episode, workflow_template)
+        for call in mock_sleep.call_args_list:
+            assert call[0][0] == 5.0

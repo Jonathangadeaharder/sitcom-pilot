@@ -46,3 +46,28 @@ def test_load_handles_corrupt_json(tmp_path):
     state.write_text("NOT VALID JSON{{{")
     tracker = ProgressTracker(state_file=state)
     assert tracker.completed_shot_ids() == []
+
+
+def test_save_creates_parent_directory(tmp_path):
+    state = tmp_path / "subdir" / "deep" / "state.json"
+    tracker = ProgressTracker(state_file=state)
+    tracker.mark_done("X")
+    assert state.exists()
+
+
+def test_save_writes_sorted_json(tmp_path):
+    state = tmp_path / "state.json"
+    tracker = ProgressTracker(state_file=state)
+    tracker.mark_done("C")
+    tracker.mark_done("A")
+    tracker.mark_done("B")
+    import json
+    data = json.loads(state.read_text())
+    assert data["completed"] == ["A", "B", "C"]
+
+
+def test_load_handles_missing_key(tmp_path):
+    state = tmp_path / "state.json"
+    state.write_text('{"other_key": []}')
+    tracker = ProgressTracker(state_file=state)
+    assert tracker.completed_shot_ids() == []

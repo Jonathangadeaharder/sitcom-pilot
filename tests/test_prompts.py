@@ -129,3 +129,33 @@ def test_start_and_end_prompts_differ(sample_episode):
     start = builder.build_start_prompt(shot, scene, sample_episode)
     end = builder.build_end_prompt(shot, scene, sample_episode)
     assert start != end
+
+
+def test_build_end_prompt_contains_action_end_not_start(sample_episode):
+    from orchestrator.prompts import PromptBuilder
+    builder = PromptBuilder()
+    scene = sample_episode.scenes[0]
+    shot = scene.shots[0]
+    prompt = builder.build_end_prompt(shot, scene, sample_episode)
+    assert "Jerry pointing, George nodding" in prompt
+    assert "Jerry standing, George sitting" not in prompt
+
+
+def test_build_start_prompt_contains_action_start_not_end(sample_episode):
+    from orchestrator.prompts import PromptBuilder
+    builder = PromptBuilder()
+    scene = sample_episode.scenes[0]
+    shot = scene.shots[0]
+    prompt = builder.build_start_prompt(shot, scene, sample_episode)
+    assert "Jerry standing, George sitting" in prompt
+    assert "Jerry pointing, George nodding" not in prompt
+
+
+def test_build_end_prompt_contains_env_and_chars(sample_episode):
+    from orchestrator.prompts import PromptBuilder
+    builder = PromptBuilder()
+    scene = sample_episode.scenes[0]
+    shot = scene.shots[0]
+    prompt = builder.build_end_prompt(shot, scene, sample_episode)
+    assert "90s apartment, couch, daylight" in prompt
+    assert "jry_guy, wearing a puffy shirt" in prompt
