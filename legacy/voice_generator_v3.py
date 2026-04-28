@@ -13,6 +13,7 @@ This module uses S1 (parenthesis) syntax for maximum compatibility.
 
 import json
 import subprocess
+import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -46,6 +47,13 @@ VALID_EFFECTS = frozenset({
 def load_episode(path: Path) -> dict:
     with open(path) as f:
         data = json.load(f)
+    if data.get("schema_version") == "2.0":
+        print(
+            "This script only supports v1 (shot-based) episode files. "
+            "For v2 beat-based episodes, use the src/sitcom_pilot pipeline.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
     for required in ("scenes", "cast", "environments"):
         if required not in data:
             raise ValueError(f"Missing required field: {required}")

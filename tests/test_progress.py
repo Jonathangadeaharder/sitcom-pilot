@@ -1,5 +1,3 @@
-import pytest
-from pathlib import Path
 from sitcom_pilot.progress import ProgressTracker
 
 

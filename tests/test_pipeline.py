@@ -1,14 +1,21 @@
 from __future__ import annotations
 
 import json
-from dataclasses import replace
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sitcom_pilot.loader import EpisodeData, SceneData, ShotData, CharacterData, EnvironmentData, EpisodeLoader
-import sys
+from sitcom_pilot.loader import (
+    CharacterData,
+    EnvironmentData,
+    EpisodeData,
+    EpisodeLoader,
+    SceneData,
+    ShotData,
+)
+
 # legacy/ is already on sys.path via conftest.py — pipeline.py lives there now
 _LEGACY = str(Path(__file__).parent.parent / "legacy")
 if _LEGACY not in sys.path:

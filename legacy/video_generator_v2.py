@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
 from sitcom_pilot.loader import EpisodeLoader
@@ -12,7 +14,9 @@ from sitcom_pilot.prompts import PromptBuilder
 
 PROJECT_ROOT = Path(__file__).parent
 OUTPUT_DIR = PROJECT_ROOT / "output" / "s01e02"
-LTX_ROOT = Path("/Users/jonathangadeaharder/Documents/projects/LTX-2")
+import os
+
+LTX_ROOT = Path(os.environ.get("LTX_ROOT", "/Users/jonathangadeaharder/Documents/projects/LTX-2"))
 LTX_PYTHON = str(LTX_ROOT / ".venv" / "bin" / "python")
 
 DISTILLED_CKPT = LTX_ROOT / "checkpoints" / "ltx-2.3-22b-distilled-1.1.safetensors"

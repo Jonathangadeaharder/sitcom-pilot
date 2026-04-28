@@ -8,6 +8,8 @@ import time
 from dataclasses import replace
 from pathlib import Path
 
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
 from sitcom_pilot.loader import EpisodeData, EpisodeLoader, SceneData, ShotData
@@ -143,7 +145,7 @@ def run_pipeline(
     renderer = ShotRenderer(
         client=client,
         builder=PromptBuilder(),
-        node_map=nm,
+        node_map=node_map,
         cooldown_seconds=cooldown,
         crash_recovery=crash_recovery,
         server_cmd=server_cmd,

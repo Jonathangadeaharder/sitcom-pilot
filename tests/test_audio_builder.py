@@ -1,8 +1,5 @@
 import json
-from pathlib import Path
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import patch
 
 
 def _make_episode_v2(tmp_path, scenes=None, cast=None, envs=None):
@@ -182,6 +179,21 @@ class TestBuildShotAudio:
         dialogue = [{"speaker": "maya", "emotion": "calm", "tone": None, "effect": None, "text": "Hi."}]
         result = build_shot_audio(dialogue, "maya", output)
         assert result is True
+
+    @patch("sitcom_pilot.audio_builder.synthesize_dialogue_line")
+    def test_aborts_on_line_failure(self, mock_synth, tmp_path):
+        from sitcom_pilot.audio_builder import build_shot_audio
+
+        mock_synth.return_value = False
+
+        dialogue = [
+            {"speaker": "maya", "emotion": "calm", "tone": None, "effect": None, "text": "Line 1."},
+            {"speaker": "maya", "emotion": "calm", "tone": None, "effect": None, "text": "Line 2."},
+        ]
+        output = tmp_path / "shot.wav"
+        result = build_shot_audio(dialogue, "maya", output)
+        assert result is False
+        mock_synth.assert_called_once()
 
 
 class TestBuildFishTextFromDialogue:

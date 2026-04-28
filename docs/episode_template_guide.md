@@ -36,9 +36,6 @@ All render fields are optional and will use AIServices defaults if not specified
 |-------|------|---------|-------------|
 | `fps` | integer | 24 | Frames per second for video output |
 | `resolution` | array | [1280, 720] | Video resolution [width, height] |
-| `pause_between_speech_sec` | number | 0.4 | Pause between speech beats in seconds |
-| `pause_between_scenes_sec` | number | 1.2 | Pause between scenes in seconds |
-| `default_silent_beat_duration` | number | 3.0 | Default duration for silent beats in seconds |
 
 ### Cast Section
 

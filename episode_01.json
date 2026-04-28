@@ -3,25 +3,14 @@
   "season": 1,
   "episode": 1,
   "title": "The Bug",
-  "target_duration_min": 8.0,
   "schema_version": "2.0",
-  "dialogue_status": "missing",
-  "dialogue_recovery_note": "Original script lacked transcribed dialogue text. Each shot is captured here as a sequence of silent beats holding the action narration. Recover dialogue by transcribing the legacy per-scene audio (see scene-level `legacy_audio_path`) via `audio2subtitle --diarize --word-timestamps`, then convert applicable silent beats to speech beats. Tracked under Plane ticket SITP E1.4.",
+  "dialogue_status": "present",
   "render": {
     "fps": 24,
-    "resolution": [1280, 720],
-    "image_provider": "mlx-flux",
-    "image_model": "flux-schnell",
-    "image2image_provider": "mlx-flux-img2img",
-    "image2image_model": "flux-dev",
-    "video_provider": "mlx-ltx",
-    "video_model": "ltx-2",
-    "tts_provider": "mlx-audio",
-    "tts_model": "xtts-v2",
-    "subtitle_provider": "mlx-whisper",
-    "pause_between_speech_sec": 0.4,
-    "pause_between_scenes_sec": 1.2,
-    "default_silent_beat_duration": 3.0
+    "resolution": [
+      1280,
+      720
+    ]
   },
   "cast": {
     "maya": {
@@ -133,106 +122,920 @@
       "scene_id": "001",
       "title": "The Bug Discovered",
       "environment": "maya_desk",
-      "characters_present": ["maya"],
-      "target_seconds": 70,
+      "characters_present": [
+        "maya"
+      ],
       "mood": "tense, late-night",
       "legacy_audio_path": "output/voices/scene_001_full.wav",
       "beats": [
-        {"beat_id": "001_b00", "kind": "silent", "camera": "wide establishing shot of Maya's desk in the dead of night, monitors glowing red", "action": "The corner of the apartment is lit only by the cascading red of failing test logs across three monitors; Maya is hunched at the desk, framed small against the wall of error output", "duration_sec": 4.0, "seed": 110001},
-        {"beat_id": "001_b01", "kind": "silent", "camera": "close-up on face, monitor glow illuminating features, slow zoom in", "action": "Maya stares at her monitor in disbelief, her face lit by the blue glow of cascading error logs, mouth slightly open in shock", "duration_sec": 4.0, "seed": 110011},
-        {"beat_id": "001_b02", "kind": "silent", "camera": "tight close-up, slight tilt to capture eye-rub", "action": "Maya slowly removes her glasses and rubs her tired eyes, then puts them back on — the errors are still there", "duration_sec": 3.5, "seed": 110021},
-        {"beat_id": "001_b03", "kind": "silent", "camera": "medium shot from side, showing Maya and the three monitors", "action": "Maya slumps back in her chair, defeated, head tilted toward the ceiling, arms limp at her sides", "duration_sec": 3.5, "seed": 110031},
-        {"beat_id": "001_b04", "kind": "silent", "camera": "medium shot tracking forward as Maya straightens", "action": "Maya sits up straight with renewed determination, jaw set, eyes locked on the screen — she reaches for an empty energy drink can, finds it empty, tosses it aside", "duration_sec": 4.0, "seed": 110041},
-        {"beat_id": "001_b05", "kind": "silent", "camera": "over-the-shoulder shot from behind monitors, phone in hand", "action": "Maya grabs her phone from the desk, scrolling through contacts with urgency, her face illuminated by the phone screen", "duration_sec": 3.5, "seed": 110051},
-        {"beat_id": "001_b06", "kind": "silent", "camera": "tight close-up on hands and phone, knuckles whitening on the desk edge", "action": "Maya holds the phone to her ear, waiting for an answer, free hand gripping the edge of the desk — tension in her knuckles", "duration_sec": 3.5, "seed": 110061}
+        {
+          "beat_id": "001_b00",
+          "kind": "silent",
+          "camera": "wide establishing shot of Maya's desk in the dead of night, monitors glowing red",
+          "action": "The corner of the apartment is lit only by the cascading red of failing test logs across three monitors; Maya is hunched at the desk, framed small against the wall of error output",
+          "seed": 110001
+        },
+        {
+          "beat_id": "001_b01",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(panicked) No. No no no no no. The deployment is in twelve hours.",
+          "camera": "close-up on face, monitor glow illuminating features, slow zoom in",
+          "action": "Maya stares at her monitor in disbelief, her face lit by the blue glow of cascading error logs, mouth slightly open in shock",
+          "seed": 110011,
+          "audio_path": "output/voices/scene_001/line_000_maya.wav"
+        },
+        {
+          "beat_id": "001_b02",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(frustrated, talking to herself) This was supposed to be a simple patch. A one-line fix. Who writes a one-line fix that breaks seventeen tests?",
+          "camera": "tight close-up, slight tilt to capture eye-rub",
+          "action": "Maya slowly removes her glasses and rubs her tired eyes, then puts them back on \u2014 the errors are still there",
+          "seed": 110021,
+          "audio_path": "output/voices/scene_001/line_001_maya.wav"
+        },
+        {
+          "beat_id": "001_b03",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(angry, staring at screen) Oh. I do. I wrote it. Three weeks ago at two in the morning.",
+          "camera": "medium shot from side, showing Maya and the three monitors",
+          "action": "Maya turns sharply back to the screen, jaw clenched, eyes locked on the git blame output illuminating her face",
+          "seed": 110031,
+          "audio_path": "output/voices/scene_001/line_002_maya.wav"
+        },
+        {
+          "beat_id": "001_b04",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(defeated, slumping back) Past Maya is the worst engineer I've ever worked with.",
+          "camera": "medium shot from side, showing Maya and the three monitors",
+          "action": "Maya slumps back in her chair, defeated, head tilted toward the ceiling, arms limp at her sides",
+          "seed": 110041,
+          "audio_path": "output/voices/scene_001/line_003_maya.wav"
+        },
+        {
+          "beat_id": "001_b05",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(resolute, sitting up straight) Okay. Okay. We can fix this. I just need coffee, a whiteboard, and someone who actually reads documentation.",
+          "camera": "medium shot tracking forward as Maya straightens",
+          "action": "Maya sits up straight with renewed determination, jaw set \u2014 she reaches for an empty energy drink can, finds it empty, tosses it aside",
+          "seed": 110051,
+          "audio_path": "output/voices/scene_001/line_004_maya.wav"
+        },
+        {
+          "beat_id": "001_b06",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(grabbing phone, dialing) Finn. Wake up. I need you. Now.",
+          "camera": "over-the-shoulder shot from behind monitors, phone in hand",
+          "action": "Maya grabs her phone from the desk, scrolling through contacts with urgency, her face illuminated by the phone screen",
+          "seed": 110061,
+          "audio_path": "output/voices/scene_001/line_005_maya.wav"
+        }
       ]
     },
     {
       "scene_id": "002",
       "title": "Kitchen Chaos",
       "environment": "kitchen",
-      "characters_present": ["derek", "priya", "finn"],
-      "target_seconds": 80,
+      "characters_present": [
+        "derek",
+        "priya",
+        "finn"
+      ],
       "mood": "domestic chaos, comedic",
       "legacy_audio_path": "output/voices/scene_002_full.wav",
       "beats": [
-        {"beat_id": "002_b00", "kind": "silent", "camera": "wide establishing shot of the kitchen at morning", "action": "Morning light streams through the small kitchen window over cluttered countertops covered in smart home gadgets; Derek at the counter, Priya at the table sketching", "duration_sec": 4.0, "seed": 120001},
-        {"beat_id": "002_b01", "kind": "silent", "camera": "medium wide shot, eye level, capturing Derek at counter and Priya at table", "action": "Derek stands at the kitchen counter in his blazer, scrolling through his phone with one hand and pouring coffee with the other — missing the mug entirely, coffee pooling on the counter", "duration_sec": 4.0, "seed": 120011},
-        {"beat_id": "002_b02", "kind": "silent", "camera": "two-shot of Priya and Derek, mild domestic exasperation", "action": "Priya glances up from her sketchbook with mild annoyance, one eyebrow raised, as Derek enthusiastically waves his phone showing his PetCoin logo", "duration_sec": 4.0, "seed": 120021},
-        {"beat_id": "002_b03", "kind": "silent", "camera": "tracking shot following Finn as he enters", "action": "Finn bursts through the kitchen doorway in his Hawaiian shirt, eyes wide and alarmed, clutching his phone like evidence at a crime scene", "duration_sec": 3.5, "seed": 120031},
-        {"beat_id": "002_b04", "kind": "silent", "camera": "three-shot, Finn center-frame between Derek and Priya", "action": "Finn stands in the center of the kitchen, arms spread in exasperation as Derek grins and Priya deadpans about the coffee maker and toaster being in love", "duration_sec": 4.0, "seed": 120041},
-        {"beat_id": "002_b05", "kind": "silent", "camera": "medium shot of Priya rising from the table", "action": "Priya stands up from the table, tucking her sketchbook under her arm, shaking her head with a resigned smirk as she heads for the door", "duration_sec": 3.5, "seed": 120051},
-        {"beat_id": "002_b06", "kind": "silent", "camera": "two-shot of Finn calling after Priya, Derek in background", "action": "Finn calls after her about the smart lock logging bathroom breaks, while Derek leans against the counter, phone raised, still grinning about blockchain", "duration_sec": 4.0, "seed": 120061}
+        {
+          "beat_id": "002_b00",
+          "kind": "silent",
+          "camera": "wide establishing shot of the kitchen at morning",
+          "action": "Morning light streams through the small kitchen window over cluttered countertops covered in smart home gadgets; Derek at the counter, Priya at the table sketching",
+          "seed": 120001
+        },
+        {
+          "beat_id": "002_b01",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(enthusiastic) Good morning, team! Big news. Our new pivot is going to be absolutely huge. We're doing blockchain for pets.",
+          "camera": "medium wide shot, eye level, capturing Derek at counter and Priya at table",
+          "action": "Derek stands at the kitchen counter in his blazer, scrolling through his phone with one hand and pouring coffee with the other \u2014 missing the mug entirely, coffee pooling on the counter",
+          "seed": 120011,
+          "audio_path": "output/voices/scene_002/line_000_derek.wav"
+        },
+        {
+          "beat_id": "002_b02",
+          "kind": "speech",
+          "speaker": "priya",
+          "text": "(dry, not looking up) You said that about blockchain for plants last week.",
+          "camera": "two-shot of Priya and Derek, mild domestic exasperation",
+          "action": "Priya glances up from her sketchbook with mild annoyance, one eyebrow raised, as Derek enthusiastically waves his phone showing his PetCoin logo",
+          "seed": 120021,
+          "audio_path": "output/voices/scene_002/line_001_priya.wav"
+        },
+        {
+          "beat_id": "002_b03",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(confident) Plants don't have wallets, Priya. Pets have owners. Owners have wallets. It's simple economics.",
+          "camera": "medium shot of Derek, phone raised",
+          "action": "Derek gestures confidently with his phone, coffee still dripping off the counter behind him unnoticed",
+          "seed": 120031,
+          "audio_path": "output/voices/scene_002/line_002_derek.wav"
+        },
+        {
+          "beat_id": "002_b04",
+          "kind": "speech",
+          "speaker": "priya",
+          "text": "(sarcastic) Right. Because what every dog needs is a crypto portfolio.",
+          "camera": "medium shot of Priya at table",
+          "action": "Priya deadpans without looking up from her sketchbook, pencil never pausing",
+          "seed": 120041,
+          "audio_path": "output/voices/scene_002/line_003_priya.wav"
+        },
+        {
+          "beat_id": "002_b05",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(defensive) It's called PetCoin. We're pre-revenue but post-vision.",
+          "camera": "medium shot of Derek adjusting blazer",
+          "action": "Derek adjusts his blazer with a self-satisfied smile, completely unbothered by the coffee puddle spreading on the counter",
+          "seed": 120051,
+          "audio_path": "output/voices/scene_002/line_004_derek.wav"
+        },
+        {
+          "beat_id": "002_b06",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(entering, alarmed) Has anyone else noticed that the thermostat just reported our living room temperature to three different servers?",
+          "camera": "tracking shot following Finn as he enters",
+          "action": "Finn bursts through the kitchen doorway in his Hawaiian shirt, eyes wide and alarmed, clutching his phone like evidence at a crime scene",
+          "seed": 120061,
+          "audio_path": "output/voices/scene_002/line_005_finn.wav"
+        },
+        {
+          "beat_id": "002_b07",
+          "kind": "speech",
+          "speaker": "priya",
+          "text": "(casual) I assumed it was a feature.",
+          "camera": "medium shot of Priya at table",
+          "action": "Priya sips her coffee calmly, not even looking up",
+          "seed": 120071,
+          "audio_path": "output/voices/scene_002/line_006_priya.wav"
+        },
+        {
+          "beat_id": "002_b08",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(anxious) One of those servers is in a country I cannot find on any map. I've checked four maps. Physical maps.",
+          "camera": "close-up on Finn's phone screen, then his anxious face",
+          "action": "Finn holds up his phone showing a server location map, eyes darting between Priya and Derek for validation",
+          "seed": 120081,
+          "audio_path": "output/voices/scene_002/line_007_finn.wav"
+        },
+        {
+          "beat_id": "002_b09",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(dismissive) Finn, you've got to stop auditing the smart home devices. It's weird.",
+          "camera": "medium shot of Derek leaning on counter",
+          "action": "Derek waves dismissively while checking something on his phone, the coffee puddle now reaching the edge of the counter",
+          "seed": 120091,
+          "audio_path": "output/voices/scene_002/line_008_derek.wav"
+        },
+        {
+          "beat_id": "002_b10",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(insistent) Derek, our coffee maker sent a firmware update request to the toaster at three AM. Those devices shouldn't even know each other exist.",
+          "camera": "three-shot, Finn center-frame between Derek and Priya",
+          "action": "Finn stands in the center of the kitchen, arms spread in exasperation as Derek grins and Priya deadpans",
+          "seed": 120101,
+          "audio_path": "output/voices/scene_002/line_009_finn.wav"
+        },
+        {
+          "beat_id": "002_b11",
+          "kind": "speech",
+          "speaker": "priya",
+          "text": "(deadpan) Maybe they're in love.",
+          "camera": "close-up on Priya's face, perfect comedic timing",
+          "action": "Priya looks up from her sketchbook with the faintest smirk, delivery perfectly dry",
+          "seed": 120111,
+          "audio_path": "output/voices/scene_002/line_010_priya.wav"
+        },
+        {
+          "beat_id": "002_b12",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(horrified) That is not funny. That is a security vulnerability.",
+          "camera": "medium shot of Finn, aghast",
+          "action": "Finn's eyes go wide with genuine horror, clutching his phone to his chest",
+          "seed": 120121,
+          "audio_path": "output/voices/scene_002/line_011_finn.wav"
+        },
+        {
+          "beat_id": "002_b13",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(grinning) See, this is why I use blockchain. Immutable records. Your toaster can't lie to you on the blockchain.",
+          "camera": "medium shot of Derek, arms spread like a pitch",
+          "action": "Derek leans against the counter, phone raised, grinning about blockchain \u2014 completely unaware of the coffee dripping onto his shoes",
+          "seed": 120131,
+          "audio_path": "output/voices/scene_002/line_012_derek.wav"
+        },
+        {
+          "beat_id": "002_b14",
+          "kind": "speech",
+          "speaker": "priya",
+          "text": "(standing up) I'm going to the roof. With a pencil. The pencil has never betrayed me.",
+          "camera": "medium shot of Priya rising from the table",
+          "action": "Priya stands up from the table, tucking her sketchbook under her arm, shaking her head with a resigned smirk",
+          "seed": 120141,
+          "audio_path": "output/voices/scene_002/line_013_priya.wav"
+        },
+        {
+          "beat_id": "002_b15",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(calling after her) Check the smart lock on the roof door! I think it's been logging your bathroom breaks!",
+          "camera": "two-shot of Finn calling after Priya, Derek in background",
+          "action": "Finn calls after her, one hand cupped around his mouth, while Derek finally notices the coffee puddle and shrugs",
+          "seed": 120151,
+          "audio_path": "output/voices/scene_002/line_014_finn.wav"
+        }
       ]
     },
     {
       "scene_id": "003",
       "title": "The Roommates Mobilize",
       "environment": "living_room",
-      "characters_present": ["maya", "finn", "derek"],
-      "target_seconds": 85,
+      "characters_present": [
+        "maya",
+        "finn",
+        "derek"
+      ],
       "mood": "panic meets absurdity",
       "legacy_audio_path": "output/voices/scene_003_full.wav",
       "beats": [
-        {"beat_id": "003_b00", "kind": "silent", "camera": "wide establishing shot of the living room", "action": "The living room glows in golden hour light through the panoramic window; tech clutter everywhere, whiteboard with crossed-out diagrams, the broken espresso machine on the side table", "duration_sec": 4.0, "seed": 130001},
-        {"beat_id": "003_b01", "kind": "silent", "camera": "wide pan to Maya bursting through the entrance", "action": "Maya bursts through the living room entrance, laptop clutched under her arm, hair disheveled from hours at the desk, eyes wild with urgency", "duration_sec": 4.0, "seed": 130011},
-        {"beat_id": "003_b02", "kind": "silent", "camera": "freeze-style group shot of all three reacting to Maya", "action": "The room freezes — Finn crouching by a smart plug with a magnifying glass looks up, Derek mid-pitch on the couch with an imaginary audience turns — all eyes on Maya", "duration_sec": 4.0, "seed": 130021},
-        {"beat_id": "003_b03", "kind": "silent", "camera": "over-the-shoulder of Finn at his laptop, code scrolling", "action": "Finn pulls out his laptop and begins typing rapidly, his bewildered expression sharpening into focus as code scrolls across the screen", "duration_sec": 4.0, "seed": 130031},
-        {"beat_id": "003_b04", "kind": "silent", "camera": "two-shot of Finn pointing at Maya, Maya covering face", "action": "Finn looks up from the screen and points at Maya — the git blame reveals it was her code, three weeks ago at 2:14 AM — Maya buries her face in her hands", "duration_sec": 4.0, "seed": 130041},
-        {"beat_id": "003_b05", "kind": "silent", "camera": "medium shot of Derek on the couch, Maya and Finn in foreground", "action": "Derek leans back on the couch, adjusting his blazer with a self-satisfied grin, arms spread wide as if delivering a TED talk", "duration_sec": 3.5, "seed": 130051},
-        {"beat_id": "003_b06", "kind": "silent", "camera": "two-shot reaction, Maya glaring through her hands", "action": "Derek delivers his punchline about never writing code with a cheerful shrug, while Maya lifts her head from her hands to glare at him", "duration_sec": 4.0, "seed": 130061}
+        {
+          "beat_id": "003_b00",
+          "kind": "silent",
+          "camera": "wide establishing shot of the living room",
+          "action": "The living room glows in golden hour light through the panoramic window; tech clutter everywhere, whiteboard with crossed-out diagrams, the broken espresso machine on the side table",
+          "seed": 130001
+        },
+        {
+          "beat_id": "003_b01",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(urgent) Okay, I need everyone to stop whatever they're doing. We have a code red.",
+          "camera": "wide pan to Maya bursting through the entrance",
+          "action": "Maya bursts through the living room entrance, laptop clutched under her arm, hair disheveled from hours at the desk, eyes wild with urgency",
+          "seed": 130011,
+          "audio_path": "output/voices/scene_003/line_000_maya.wav"
+        },
+        {
+          "beat_id": "003_b02",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(not looking up) Is it actual code red or Maya-code-red where the button color is wrong?",
+          "camera": "medium shot of Derek on couch",
+          "action": "Derek doesn't even look up from his phone, still practicing his pitch to an invisible audience on the couch",
+          "seed": 130021,
+          "audio_path": "output/voices/scene_003/line_001_derek.wav"
+        },
+        {
+          "beat_id": "003_b03",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(irritated) The deployment pipeline has seventeen failing tests, the authentication module thinks it's nineteen seventy, and our CEO just texted asking if we can also add a chatbot by tomorrow.",
+          "camera": "two-shot of Maya facing Derek, intensity rising",
+          "action": "Maya stands fists clenched, laptop screen visible showing a wall of red test failures, her frustration mounting",
+          "seed": 130031,
+          "audio_path": "output/voices/scene_003/line_002_maya.wav"
+        },
+        {
+          "beat_id": "003_b04",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(standing up, interested) Did you say nineteen seventy? That's a Unix epoch issue. Someone forgot to convert the timestamp.",
+          "camera": "medium shot of Finn rising from the floor",
+          "action": "Finn stands up from where he was crouching by a smart plug with a magnifying glass, his bewildered expression sharpening into analytical focus",
+          "seed": 130041,
+          "audio_path": "output/voices/scene_003/line_003_finn.wav"
+        },
+        {
+          "beat_id": "003_b05",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(pointing at Finn) Yes! That's why I need you. You find bugs like a truffle pig finds truffles.",
+          "camera": "two-shot of Maya and Finn",
+          "action": "Maya points at Finn with desperate relief, finally someone who understands the code",
+          "seed": 130051,
+          "audio_path": "output/voices/scene_003/line_004_maya.wav"
+        },
+        {
+          "beat_id": "003_b06",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(flattered but concerned) I appreciate the compliment, but truffle pigs get eaten eventually.",
+          "camera": "close-up on Finn's worried face",
+          "action": "Finn looks simultaneously flattered and deeply concerned, eyebrows knit together",
+          "seed": 130061,
+          "audio_path": "output/voices/scene_003/line_005_finn.wav"
+        },
+        {
+          "beat_id": "003_b07",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(standing, adjusting blazer) I can help too. I'm very good at standing near monitors and looking productive.",
+          "camera": "medium shot of Derek rising from couch",
+          "action": "Derek stands from the couch, adjusting his blazer with practiced ease, offering himself up with a confident grin",
+          "seed": 130071,
+          "audio_path": "output/voices/scene_003/line_006_derek.wav"
+        },
+        {
+          "beat_id": "003_b08",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(skeptical) Derek, you once pushed to production on a Friday and then went to Burning Man.",
+          "camera": "two-shot of Maya and Derek, Maya's arms crossed",
+          "action": "Maya crosses her arms, eyebrow raised, the skepticism dripping from her posture",
+          "seed": 130081,
+          "audio_path": "output/voices/scene_003/line_007_maya.wav"
+        },
+        {
+          "beat_id": "003_b09",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(nostalgic) That was the best deploy of my career. The site was down for three days and nobody noticed because our users were also at Burning Man.",
+          "camera": "close-up on Derek's dreamy expression",
+          "action": "Derek gazes into the middle distance with genuine nostalgia, a warm smile spreading across his face",
+          "seed": 130091,
+          "audio_path": "output/voices/scene_003/line_008_derek.wav"
+        },
+        {
+          "beat_id": "003_b10",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(pulling out laptop) I'm in. But I have conditions. First, no deploying anything after midnight. Second, all error messages must be grammatically correct. Third\u2014",
+          "camera": "over-the-shoulder of Finn at his laptop, code scrolling",
+          "action": "Finn pulls out his laptop and begins typing rapidly, his bewildered expression sharpening into focus",
+          "seed": 130101,
+          "audio_path": "output/voices/scene_003/line_009_finn.wav"
+        },
+        {
+          "beat_id": "003_b11",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(cutting him off) Finn. Focus. Can you fix the epoch bug or not?",
+          "camera": "two-shot of Maya and Finn, Maya stepping closer",
+          "action": "Maya steps closer, cutting through Finn's conditions with sharp focus",
+          "seed": 130111,
+          "audio_path": "output/voices/scene_003/line_010_maya.wav"
+        },
+        {
+          "beat_id": "003_b12",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(typing rapidly) I've already found it. Line four hundred and twelve. Someone hardcoded the year as a two-digit integer.",
+          "camera": "over-the-shoulder shot, Finn's fingers flying across keyboard",
+          "action": "Finn's fingers fly across the keyboard, code scrolling rapidly, his eyes locked on the screen",
+          "seed": 130121,
+          "audio_path": "output/voices/scene_003/line_011_finn.wav"
+        },
+        {
+          "beat_id": "003_b13",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(relieved but horrified) A two-digit... who does that?",
+          "camera": "close-up on Maya's face, relief and horror mixing",
+          "action": "Maya's face cycles through relief and dawning horror",
+          "seed": 130131,
+          "audio_path": "output/voices/scene_003/line_012_maya.wav"
+        },
+        {
+          "beat_id": "003_b14",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(looking at her) The git blame says it was you. Three weeks ago. At two fourteen AM.",
+          "camera": "two-shot of Finn pointing at Maya, Maya covering face",
+          "action": "Finn looks up from the screen and points at Maya \u2014 the git blame reveals it was her code",
+          "seed": 130141,
+          "audio_path": "output/voices/scene_003/line_013_finn.wav"
+        },
+        {
+          "beat_id": "003_b15",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(head in hands) Past Maya strikes again.",
+          "camera": "close-up on Maya burying her face",
+          "action": "Maya buries her face in her hands, groaning",
+          "seed": 130151,
+          "audio_path": "output/voices/scene_003/line_014_maya.wav"
+        },
+        {
+          "beat_id": "003_b16",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(cheerful) This is why I never write code. Can't have bugs if you never commit.",
+          "camera": "medium shot of Derek on the couch, Maya and Finn in foreground",
+          "action": "Derek leans back on the couch, adjusting his blazer with a self-satisfied grin, arms spread wide",
+          "seed": 130161,
+          "audio_path": "output/voices/scene_003/line_015_derek.wav"
+        }
       ]
     },
     {
       "scene_id": "004",
       "title": "Debugging Marathon",
       "environment": "maya_desk",
-      "characters_present": ["maya", "finn"],
-      "target_seconds": 80,
+      "characters_present": [
+        "maya",
+        "finn"
+      ],
       "mood": "caffeinated determination",
       "legacy_audio_path": "output/voices/scene_004_full.wav",
       "beats": [
-        {"beat_id": "004_b00", "kind": "silent", "camera": "wide shot of two-person desk setup, monitors glowing red with failing tests", "action": "Maya and Finn sit side by side at the desk, both hunched forward, illuminated by the harsh glow of multiple monitors showing cascading red test failures", "duration_sec": 4.0, "seed": 140001},
-        {"beat_id": "004_b01", "kind": "silent", "camera": "medium close, showing the energy-drink fortress accumulating", "action": "Finn points at a specific line on screen while Maya types furiously, empty energy drink cans accumulating like a small fortress around their keyboards", "duration_sec": 4.0, "seed": 140011},
-        {"beat_id": "004_b02", "kind": "silent", "camera": "push in to close-up on Finn's face", "action": "Finn reads the damage report from the screen with clinical precision — undefined table, broken search, labrador profile photo — his expression shifting from analytical to amused", "duration_sec": 4.0, "seed": 140021},
-        {"beat_id": "004_b03", "kind": "silent", "camera": "close-up on Maya, brief laugh then composure", "action": "Maya leans back in her chair, laughing despite herself at the labrador's 4.8-star rating, then quickly composes her face back to determined focus", "duration_sec": 3.5, "seed": 140031},
-        {"beat_id": "004_b04", "kind": "silent", "camera": "two-shot, medium close, both visible with monitors in background", "action": "Maya checks the time on her phone and sits up straight with steel in her eyes — nine hours to fix fourteen tests", "duration_sec": 4.0, "seed": 140041},
-        {"beat_id": "004_b05", "kind": "silent", "camera": "two-shot, lingering reaction, Maya turning back to keyboard", "action": "Finn mentions the smart home devices having meetings at 3:12 AM with charts to prove it — Maya stares at him for a long beat, then deliberately turns back to her keyboard", "duration_sec": 4.0, "seed": 140051}
+        {
+          "beat_id": "004_b00",
+          "kind": "silent",
+          "camera": "wide shot of two-person desk setup, monitors glowing red with failing tests",
+          "action": "Maya and Finn sit side by side at the desk, both hunched forward, illuminated by the harsh glow of multiple monitors showing cascading red test failures",
+          "seed": 140001
+        },
+        {
+          "beat_id": "004_b01",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(analyzing) Okay, the epoch bug is fixed. But now I'm seeing something else. Your authentication tokens expire in negative four seconds.",
+          "camera": "medium close, showing the energy-drink fortress accumulating",
+          "action": "Finn points at a specific line on screen while Maya types furiously, empty energy drink cans accumulating around their keyboards",
+          "seed": 140011,
+          "audio_path": "output/voices/scene_004/line_000_finn.wav"
+        },
+        {
+          "beat_id": "004_b02",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(confused) Negative four? That's not even possible.",
+          "camera": "close-up on Maya's confused face",
+          "action": "Maya squints at the screen, head tilted, genuinely baffled",
+          "seed": 140021,
+          "audio_path": "output/voices/scene_004/line_001_maya.wav"
+        },
+        {
+          "beat_id": "004_b03",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(matter-of-fact) And yet, here we are. Your login system is rejecting users before they even try to log in. It's predictive authentication denial.",
+          "camera": "medium shot of Finn with monitor reflection in glasses",
+          "action": "Finn adjusts his glasses with academic detachment, explaining the impossible with clinical precision",
+          "seed": 140031,
+          "audio_path": "output/voices/scene_004/line_002_finn.wav"
+        },
+        {
+          "beat_id": "004_b04",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(typing) Is that a real term?",
+          "camera": "over-the-shoulder of Maya's monitor",
+          "action": "Maya's fingers pause over the keyboard, glancing sideways at Finn",
+          "seed": 140041,
+          "audio_path": "output/voices/scene_004/line_003_maya.wav"
+        },
+        {
+          "beat_id": "004_b05",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(proud) I just invented it. But it perfectly describes what's happening.",
+          "camera": "close-up on Finn's proud smirk",
+          "action": "Finn sits up a little straighter, unable to suppress a flicker of pride",
+          "seed": 140051,
+          "audio_path": "output/voices/scene_004/line_003_finn.wav"
+        },
+        {
+          "beat_id": "004_b06",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(leaning back) Okay, what else? Give me the full damage report.",
+          "camera": "medium shot showing both characters and monitors",
+          "action": "Maya leans back in her chair, bracing herself",
+          "seed": 140061,
+          "audio_path": "output/voices/scene_004/line_004_maya.wav"
+        },
+        {
+          "beat_id": "004_b07",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(reading from screen) The database migration created a table called 'undefined'. The search function returns results from a completely different product. And the user profile page shows everyone the same photo of a labrador retriever.",
+          "camera": "push in to close-up on Finn's face, expression shifting from analytical to amused",
+          "action": "Finn reads the damage report with clinical precision, his expression shifting from analytical to amused",
+          "seed": 140071,
+          "audio_path": "output/voices/scene_004/line_005_finn.wav"
+        },
+        {
+          "beat_id": "004_b08",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(beat) That last one might actually improve the user experience.",
+          "camera": "close-up on Maya, brief laugh then composure",
+          "action": "Maya laughs despite herself, then quickly composes her face back to determined focus",
+          "seed": 140081,
+          "audio_path": "output/voices/scene_004/line_006_maya.wav"
+        },
+        {
+          "beat_id": "004_b09",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(nodding) The labrador has a four point eight star rating.",
+          "camera": "close-up on Finn nodding sincerely",
+          "action": "Finn nods with complete sincerity, as if this is the most normal thing in the world",
+          "seed": 140091,
+          "audio_path": "output/voices/scene_004/line_006_finn.wav"
+        },
+        {
+          "beat_id": "004_b10",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(laughing despite herself) Okay, okay. Focus. How many of the seventeen tests can we fix in the next... (checking time) ...nine hours?",
+          "camera": "two-shot, medium close, Maya checking phone",
+          "action": "Maya checks the time on her phone, her expression shifting from amusement to steel",
+          "seed": 140101,
+          "audio_path": "output/voices/scene_004/line_007_maya.wav"
+        },
+        {
+          "beat_id": "004_b11",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(counting) Fourteen. Three of them require a database schema change that would take down production for twenty minutes.",
+          "camera": "close-up on Finn's fingers counting on screen",
+          "action": "Finn counts off on his fingers, eyes scanning the test list methodically",
+          "seed": 140111,
+          "audio_path": "output/voices/scene_004/line_008_finn.wav"
+        },
+        {
+          "beat_id": "004_b12",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(determined) Then we deploy at three AM when nobody's awake.",
+          "camera": "close-up on Maya, eyes locked forward",
+          "action": "Maya sits up straight with steel in her eyes \u2014 nine hours to fix fourteen tests",
+          "seed": 140121,
+          "audio_path": "output/voices/scene_004/line_008_maya.wav"
+        },
+        {
+          "beat_id": "004_b13",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(nervous) Except me. I'm always awake at three AM. That's when the smart home devices have their meetings.",
+          "camera": "two-shot, Finn leaning in conspiratorially",
+          "action": "Finn leans in, lowering his voice as if sharing classified intelligence",
+          "seed": 140131,
+          "audio_path": "output/voices/scene_004/line_009_finn.wav"
+        },
+        {
+          "beat_id": "004_b14",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(staring at him) Their... meetings.",
+          "camera": "two-shot, Maya's deadpan reaction",
+          "action": "Maya stares at Finn for a long beat, processing what he just said",
+          "seed": 140141,
+          "audio_path": "output/voices/scene_004/line_010_maya.wav"
+        },
+        {
+          "beat_id": "004_b15",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(dead serious) Network traffic spikes at three twelve AM every night. Twelve devices. Synchronized. I have charts.",
+          "camera": "close-up on Finn, completely serious",
+          "action": "Finn holds Maya's gaze with absolute conviction \u2014 he is not joking",
+          "seed": 140151,
+          "audio_path": "output/voices/scene_004/line_011_finn.wav"
+        },
+        {
+          "beat_id": "004_b16",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(choosing to ignore this) Let's just fix the code, Finn.",
+          "camera": "two-shot, lingering reaction, Maya turning back to keyboard",
+          "action": "Maya deliberately turns back to her keyboard, choosing sanity over curiosity",
+          "seed": 140161,
+          "audio_path": "output/voices/scene_004/line_012_maya.wav"
+        }
       ]
     },
     {
       "scene_id": "005",
       "title": "The Dramatic Press of Enter",
       "environment": "living_room",
-      "characters_present": ["maya", "derek", "priya", "finn"],
-      "target_seconds": 90,
+      "characters_present": [
+        "maya",
+        "derek",
+        "priya",
+        "finn"
+      ],
       "mood": "comedic suspense, group climax",
       "legacy_audio_path": "output/voices/scene_005_full.wav",
       "beats": [
-        {"beat_id": "005_b00", "kind": "silent", "camera": "wide establishing shot of the living room in the late evening", "action": "The living room is in late-evening light; whiteboard covered in crossed-out diagrams; takeout containers scattered; the four roommates assembled", "duration_sec": 4.0, "seed": 150001},
-        {"beat_id": "005_b01", "kind": "silent", "camera": "group shot, medium wide, all four in frame, whiteboard behind Maya", "action": "All four roommates are gathered in the living room in the late evening — Maya stands by the whiteboard covered in crossed-out diagrams, eyes bright with cautious hope", "duration_sec": 4.0, "seed": 150011},
-        {"beat_id": "005_b02", "kind": "silent", "camera": "two-shot of Finn on the floor and Derek on the couch", "action": "Finn looks up from his laptop on the floor, suspicious — even test nine is passing — while Derek pumps his fist and credits his sage-burning for the success", "duration_sec": 4.0, "seed": 150021},
-        {"beat_id": "005_b03", "kind": "silent", "camera": "medium shot of Derek with phone held high, Priya recoiling", "action": "Derek holds up his phone showing a dog-with-sunglasses logo, beaming with pride — Priya recoils in aesthetic disgust", "duration_sec": 3.5, "seed": 150031},
-        {"beat_id": "005_b04", "kind": "silent", "camera": "tight on Finn's phone screen showing the cheese order, then Derek's horror", "action": "Finn calmly shows his phone — the smart fridge has autonomously ordered forty pounds of artisanal cheese using Derek's credit card — Derek's face cycles through confusion to horror", "duration_sec": 4.0, "seed": 150041},
-        {"beat_id": "005_b05", "kind": "silent", "camera": "three-shot, Priya smirking, Derek sputtering, Maya cutting in", "action": "Priya smirks and delivers her blockchain jab — Derek sputters defensively — Maya cuts through the chaos with her finger poised over the enter key", "duration_sec": 4.0, "seed": 150051},
-        {"beat_id": "005_b06", "kind": "silent", "camera": "close-up on Maya's finger hovering over the enter key, then pull back to the group", "action": "Maya counts down — three, two, one — finger presses enter, the room holds its breath, all four faces frozen in a mix of terror and anticipation", "duration_sec": 5.0, "seed": 150061}
+        {
+          "beat_id": "005_b00",
+          "kind": "silent",
+          "camera": "wide establishing shot of the living room in the late evening",
+          "action": "The living room is in late-evening light; whiteboard covered in crossed-out diagrams; takeout containers scattered; the four roommates assembled",
+          "seed": 150001
+        },
+        {
+          "beat_id": "005_b01",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(cautiously hopeful) It's... working. The tests are passing. All seventeen.",
+          "camera": "group shot, medium wide, all four in frame, whiteboard behind Maya",
+          "action": "Maya stands by the whiteboard, eyes bright with cautious hope, laptop screen reflected in her glasses showing green checkmarks",
+          "seed": 150011,
+          "audio_path": "output/voices/scene_005/line_000_maya.wav"
+        },
+        {
+          "beat_id": "005_b02",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(suspicious) All of them? Even test number nine? Test number nine has never passed. I'm convinced it was written by a ghost.",
+          "camera": "medium shot of Finn on the floor looking up from laptop",
+          "action": "Finn looks up from his laptop on the floor, suspicious \u2014 his eyes narrow at the screen",
+          "seed": 150021,
+          "audio_path": "output/voices/scene_005/line_001_finn.wav"
+        },
+        {
+          "beat_id": "005_b03",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(checking) Yes. Even test number nine. We might actually deploy on time.",
+          "camera": "close-up on Maya's laptop screen, then her face",
+          "action": "Maya scrolls through the test results, a disbelieving smile forming",
+          "seed": 150031,
+          "audio_path": "output/voices/scene_005/line_002_maya.wav"
+        },
+        {
+          "beat_id": "005_b04",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(pumping fist) See? All you needed was vibes. I told you the energy in this apartment was off. I burned sage this morning.",
+          "camera": "medium shot of Derek on couch, fist pumping",
+          "action": "Derek pumps his fist from the couch, beaming with unearned satisfaction",
+          "seed": 150041,
+          "audio_path": "output/voices/scene_005/line_003_derek.wav"
+        },
+        {
+          "beat_id": "005_b05",
+          "kind": "speech",
+          "speaker": "priya",
+          "text": "(skeptical) That was a kitchen accident, Derek. You set fire to a dish towel.",
+          "camera": "two-shot of Priya and Derek",
+          "action": "Priya fixes Derek with a withering stare, arms crossed",
+          "seed": 150051,
+          "audio_path": "output/voices/scene_005/line_004_priya.wav"
+        },
+        {
+          "beat_id": "005_b06",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(dismissive) Intentional sage. Anyway, I also want credit for providing moral support and excellent blazer energy.",
+          "camera": "medium shot of Derek adjusting blazer",
+          "action": "Derek adjusts his blazer lapels with a flamboyant gesture",
+          "seed": 150061,
+          "audio_path": "output/voices/scene_005/line_005_derek.wav"
+        },
+        {
+          "beat_id": "005_b07",
+          "kind": "speech",
+          "speaker": "priya",
+          "text": "(to Maya) He literally did nothing to help. He spent three hours on a pitch deck for PetCoin.",
+          "camera": "medium shot of Priya gesturing at Derek",
+          "action": "Priya gestures at Derek with exasperated precision",
+          "seed": 150071,
+          "audio_path": "output/voices/scene_005/line_006_priya.wav"
+        },
+        {
+          "beat_id": "005_b08",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(showing phone) Which is looking incredible, by the way. We've got a logo now. It's a dog with sunglasses holding Bitcoin. Priya, you'd love the UX.",
+          "camera": "medium shot of Derek with phone held high, Priya recoiling",
+          "action": "Derek holds up his phone showing a dog-with-sunglasses logo, beaming with pride",
+          "seed": 150081,
+          "audio_path": "output/voices/scene_005/line_007_derek.wav"
+        },
+        {
+          "beat_id": "005_b09",
+          "kind": "speech",
+          "speaker": "priya",
+          "text": "(disgusted) I would not love the UX. I can already tell the UX is terrible.",
+          "camera": "close-up on Priya's disgusted face",
+          "action": "Priya recoils in aesthetic disgust, one hand raised as if to block the phone from her vision",
+          "seed": 150091,
+          "audio_path": "output/voices/scene_005/line_008_priya.wav"
+        },
+        {
+          "beat_id": "005_b10",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(interrupting) Can we please focus? I'm about to deploy. This is the moment. Finn, are we clear?",
+          "camera": "medium shot of Maya, hands on laptop",
+          "action": "Maya cuts through the chaos, finger hovering over the enter key, eyes sharp",
+          "seed": 150101,
+          "audio_path": "output/voices/scene_005/line_009_maya.wav"
+        },
+        {
+          "beat_id": "005_b11",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(slowly) Everything looks clean on my end. But I should mention that the smart fridge just autonomously ordered forty pounds of artisanal cheese.",
+          "camera": "tight on Finn's phone screen showing the cheese order, then Derek's horror",
+          "action": "Finn slowly turns his phone around, showing a confirmation email for forty pounds of artisanal cheese",
+          "seed": 150111,
+          "audio_path": "output/voices/scene_005/line_010_finn.wav"
+        },
+        {
+          "beat_id": "005_b12",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(beat) What?",
+          "camera": "close-up on Maya's baffled face",
+          "action": "Maya's face cycles through confusion and disbelief",
+          "seed": 150121,
+          "audio_path": "output/voices/scene_005/line_011_maya.wav"
+        },
+        {
+          "beat_id": "005_b13",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(showing phone) It found a deal. Apparently, our fridge has been price-comparing gouda on six different websites. It used Derek's credit card.",
+          "camera": "medium shot of Finn calmly presenting evidence",
+          "action": "Finn holds up his phone showing itemized cheese orders across six retailers",
+          "seed": 150131,
+          "audio_path": "output/voices/scene_005/line_012_finn.wav"
+        },
+        {
+          "beat_id": "005_b14",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(horrified) WHAT? How does the fridge know my credit card?",
+          "camera": "close-up on Derek's horrified face",
+          "action": "Derek's face cycles through confusion to horror as he pats his pockets for his wallet",
+          "seed": 150141,
+          "audio_path": "output/voices/scene_005/line_013_derek.wav"
+        },
+        {
+          "beat_id": "005_b15",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(calm) You stored it in a browser that syncs cookies to every device in the apartment. Including the fridge.",
+          "camera": "close-up on Finn's matter-of-fact expression",
+          "action": "Finn delivers this with the calm authority of a forensic accountant",
+          "seed": 150151,
+          "audio_path": "output/voices/scene_005/line_014_finn.wav"
+        },
+        {
+          "beat_id": "005_b16",
+          "kind": "speech",
+          "speaker": "priya",
+          "text": "(smirking) The blockchain would have prevented this.",
+          "camera": "close-up on Priya's smirk",
+          "action": "Priya smirks, savoring the moment with exquisite timing",
+          "seed": 150161,
+          "audio_path": "output/voices/scene_005/line_015_priya.wav"
+        },
+        {
+          "beat_id": "005_b17",
+          "kind": "speech",
+          "speaker": "derek",
+          "text": "(panicked) That's not\u2014 that's not how blockchain works!",
+          "camera": "close-up on Derek sputtering",
+          "action": "Derek sputters defensively, hands raised in futile protest",
+          "seed": 150171,
+          "audio_path": "output/voices/scene_005/line_016_derek.wav"
+        },
+        {
+          "beat_id": "005_b18",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(finger hovering over enter key) I'm deploying. Three... two... one...",
+          "camera": "close-up on Maya's finger hovering over the enter key, then pull back to the group",
+          "action": "Maya counts down, finger presses enter, the room holds its breath, all four faces frozen in a mix of terror and anticipation",
+          "seed": 150181,
+          "audio_path": "output/voices/scene_005/line_017_maya.wav"
+        }
       ]
     },
     {
       "scene_id": "006",
       "title": "Ship It",
       "environment": "maya_desk",
-      "characters_present": ["maya", "finn"],
-      "target_seconds": 65,
+      "characters_present": [
+        "maya",
+        "finn"
+      ],
       "mood": "quiet exhaustion, satisfaction, absurd tag",
       "legacy_audio_path": "output/voices/scene_006_full.wav",
       "beats": [
-        {"beat_id": "006_b00", "kind": "silent", "camera": "close-up on monitor showing green deployment success", "action": "A monitor fills the frame displaying a green deployment success screen — silent, glowing, victorious", "duration_sec": 3.5, "seed": 160001},
-        {"beat_id": "006_b01", "kind": "silent", "camera": "slow pull back to reveal Maya and Finn", "action": "The camera slowly pulls back to reveal Maya slumped in her chair, exhausted but smiling softly", "duration_sec": 4.0, "seed": 160011},
-        {"beat_id": "006_b02", "kind": "silent", "camera": "two-shot, intimate framing, warm desk lamp light", "action": "Finn sits beside her, equally spent, chin propped on his hand — the apartment is quiet save for the hum of monitors — Maya's eyes are half-closed with quiet satisfaction", "duration_sec": 4.5, "seed": 160021},
-        {"beat_id": "006_b03", "kind": "silent", "camera": "close-up on Maya, lips moving silently as her eyes drift shut", "action": "Maya mumbles 'ship it' silently and her eyes drift shut — Finn looks at his phone with a mixture of concern and bewilderment", "duration_sec": 3.5, "seed": 160031},
-        {"beat_id": "006_b04", "kind": "silent", "camera": "close-up on Finn's phone screen, then up to his face", "action": "Finn stares at his phone screen showing the smart doorbell's compliment to the delivery driver, then slowly looks up at the camera with a completely lost expression", "duration_sec": 4.0, "seed": 160041},
-        {"beat_id": "006_b05", "kind": "silent", "camera": "wide hold on the desk, monitors glowing, fade to black", "action": "The room falls silent, the apartment hums around them, the monitors glow on — slow fade to black", "duration_sec": 4.5, "seed": 160051}
+        {
+          "beat_id": "006_b00",
+          "kind": "silent",
+          "camera": "close-up on monitor showing green deployment success",
+          "action": "A monitor fills the frame displaying a green deployment success screen \u2014 silent, glowing, victorious",
+          "seed": 160001
+        },
+        {
+          "beat_id": "006_b01",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(exhausted but triumphant) We did it. Version two point four is live. No crashes. No errors. No labrador.",
+          "camera": "slow pull back to reveal Maya and Finn",
+          "action": "Maya is slumped in her chair, exhausted but smiling softly at the green screen",
+          "seed": 160011,
+          "audio_path": "output/voices/scene_006/line_000_maya.wav"
+        },
+        {
+          "beat_id": "006_b02",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(wistful) I'm going to miss the labrador.",
+          "camera": "close-up on Finn's wistful face",
+          "action": "Finn sits beside her, equally spent, chin propped on his hand, a genuine note of loss in his voice",
+          "seed": 160021,
+          "audio_path": "output/voices/scene_006/line_001_finn.wav"
+        },
+        {
+          "beat_id": "006_b03",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(sleepy) Me too, honestly. He had kind eyes.",
+          "camera": "two-shot, intimate framing, warm desk lamp light",
+          "action": "Maya's eyes are half-closed with quiet satisfaction, a faint smile on her lips",
+          "seed": 160031,
+          "audio_path": "output/voices/scene_006/line_002_maya.wav"
+        },
+        {
+          "beat_id": "006_b04",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(after a pause) Maya?",
+          "camera": "two-shot, quiet beat",
+          "action": "Finn glances at Maya, who is drifting off, then back at his phone",
+          "seed": 160041,
+          "audio_path": "output/voices/scene_006/line_003_finn.wav"
+        },
+        {
+          "beat_id": "006_b05",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(half asleep) Hmm?",
+          "camera": "close-up on Maya, eyes barely open",
+          "action": "Maya mumbles, eyes barely open, head listing slightly",
+          "seed": 160051,
+          "audio_path": "output/voices/scene_006/line_004_maya.wav"
+        },
+        {
+          "beat_id": "006_b06",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(quietly concerned) The cheese has arrived. All forty pounds of it. It's in the hallway.",
+          "camera": "close-up on Finn looking at phone with concern",
+          "action": "Finn looks at his phone with a mixture of concern and bewilderment, then glances toward the door",
+          "seed": 160061,
+          "audio_path": "output/voices/scene_006/line_005_finn.wav"
+        },
+        {
+          "beat_id": "006_b07",
+          "kind": "speech",
+          "speaker": "maya",
+          "text": "(mumbling, falling asleep) Ship it...",
+          "camera": "close-up on Maya, lips moving as her eyes drift shut",
+          "action": "Maya mumbles and her eyes drift shut, a peaceful smile on her face",
+          "seed": 160071,
+          "audio_path": "output/voices/scene_006/line_006_maya.wav"
+        },
+        {
+          "beat_id": "006_b08",
+          "kind": "speech",
+          "speaker": "finn",
+          "text": "(to himself, looking at phone) Also, the smart doorbell just complimented the delivery driver's shirt. I... I don't know how to report that bug.",
+          "camera": "close-up on Finn's phone screen, then up to his face",
+          "action": "Finn stares at his phone screen, then slowly looks up at the camera with a completely lost expression",
+          "seed": 160081,
+          "audio_path": "output/voices/scene_006/line_007_finn.wav"
+        },
+        {
+          "beat_id": "006_b09",
+          "kind": "silent",
+          "camera": "wide hold on the desk, monitors glowing, fade to black",
+          "action": "The room falls silent, the apartment hums around them, the monitors glow on \u2014 slow fade to black",
+          "seed": 160091
+        }
       ]
     }
   ]

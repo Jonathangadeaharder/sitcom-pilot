@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 import copy
 import logging
 import time
 from dataclasses import dataclass
 from typing import Any
+
 from sitcom_pilot.comfyui_client import ComfyUIClient
 from sitcom_pilot.loader import EpisodeData, SceneData, ShotData
 from sitcom_pilot.node_map import NodeMap
@@ -49,7 +51,8 @@ class ShotRenderer:
 
         env_data = episode.environments.get(scene.environment)
         if env_data:
-            workflow.get(nm.env_profile, {}).setdefault("inputs", {})["lora_name"] = f"{env_data.profile}.safetensors"
+            node = workflow.get(nm.env_profile, {}).setdefault("inputs", {})
+            node["lora_name"] = f"{env_data.profile}.safetensors"
 
         for idx, char_name in enumerate(scene.characters_present):
             if idx >= len(nm.char_profiles):
@@ -57,7 +60,8 @@ class ShotRenderer:
             char_data = episode.cast.get(char_name)
             if char_data:
                 node_id = nm.char_profiles[idx]
-                workflow.get(node_id, {}).setdefault("inputs", {})["lora_name"] = f"{char_data.profile}.safetensors"
+                node = workflow.get(node_id, {}).setdefault("inputs", {})
+                node["lora_name"] = f"{char_data.profile}.safetensors"
 
         start_prompt = self._builder.build_start_prompt(shot, scene, episode)
         end_prompt = self._builder.build_end_prompt(shot, scene, episode)

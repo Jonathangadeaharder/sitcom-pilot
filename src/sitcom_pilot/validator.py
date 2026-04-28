@@ -34,6 +34,8 @@ class EpisodeValidator:
                 data = json.load(f)
         except (OSError, json.JSONDecodeError) as exc:
             return [f"Cannot parse JSON: {exc}"]
+        if not isinstance(data, dict):
+            return [f"Expected a JSON object at top level, got {type(data).__name__}"]
         return self.validate(data, strict=strict)
 
     def validate(self, data: dict[str, Any], strict: bool = False) -> list[str]:
@@ -42,19 +44,17 @@ class EpisodeValidator:
         schema_version = data.get("schema_version")
         if schema_version != "2.0":
             errors.append(f"schema_version must be '2.0', got {schema_version!r}")
-            # Can't validate further without the right schema
             return errors
 
-        # JSON Schema validation (if jsonschema is available)
         if _JSONSCHEMA_AVAILABLE:
             errors.extend(self._jsonschema_validate(data))
         else:
             errors.extend(self._structural_validate(data))
 
-        # Business-rule checks (always run — strict mode is for future use)
         errors.extend(self._check_scene_environment_refs(data))
         errors.extend(self._check_scene_character_refs(data))
         errors.extend(self._check_beat_ids_unique(data))
+        errors.extend(self._check_beat_speaker_refs(data))
         errors.extend(self._check_speech_beats_have_text(data))
 
         return errors
@@ -139,6 +139,19 @@ class EpisodeValidator:
                     seen.add(bid)
         return errors
 
+    def _check_beat_speaker_refs(self, data: dict[str, Any]) -> list[str]:
+        cast = set(data.get("cast", {}).keys())
+        errors = []
+        for scene in data.get("scenes", []):
+            for beat in scene.get("beats", []):
+                speaker = beat.get("speaker")
+                if speaker and beat.get("kind") == "speech" and speaker not in cast:
+                    errors.append(
+                        f"Beat '{beat.get('beat_id')}' in scene "
+                        f"'{scene.get('scene_id')}' references unknown speaker '{speaker}'"
+                    )
+        return errors
+
     def _check_speech_beats_have_text(self, data: dict[str, Any]) -> list[str]:
         errors = []
         for scene in data.get("scenes", []):
@@ -173,8 +186,6 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("paths", nargs="+", metavar="EPISODE_JSON",
                         help="Path(s) to episode JSON file(s)")
-    parser.add_argument("--strict", action="store_true",
-                        help="Also enforce business rules (reference integrity, unique IDs, etc.)")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Only print errors, not OK messages")
     args = parser.parse_args(argv)
@@ -184,7 +195,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for raw_path in args.paths:
         path = Path(raw_path)
-        errors = validator.validate_file(path, strict=args.strict)
+        errors = validator.validate_file(path)
         if errors:
             any_failed = True
             print(f"FAIL  {path}")

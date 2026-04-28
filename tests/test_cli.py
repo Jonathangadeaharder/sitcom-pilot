@@ -1,8 +1,8 @@
 import json
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
-from sitcom_pilot.node_map import NodeMap
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 EPISODE_JSON = {
     "episode_title": "CLI Test",

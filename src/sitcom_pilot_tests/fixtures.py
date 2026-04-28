@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 
@@ -27,5 +26,5 @@ def sample_episode():
 def sample_episode_path(tmp_path, sample_episode):
     """Provide a path to a sample episode file."""
     path = tmp_path / "episode.json"
-    path.write_text(json.dumps(sample_episode))
+    path.write_text(json.dumps(sample_episode), encoding="utf-8")
     return path

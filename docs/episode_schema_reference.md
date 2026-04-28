@@ -45,15 +45,6 @@ Frames per second for video output. Must be >= 1.
 #### `resolution` (array, optional, default: [1280, 720])
 Video resolution as [width, height]. Must be exactly 2 integers.
 
-#### `pause_between_speech_sec` (number, optional, default: 0.4)
-Pause between speech beats in seconds. Must be >= 0.
-
-#### `pause_between_scenes_sec` (number, optional, default: 1.2)
-Pause between scenes in seconds. Must be >= 0.
-
-#### `default_silent_beat_duration` (number, optional, default: 3.0)
-Default duration for silent beats in seconds. Must be >= 0.
-
 ### Cast Section
 
 The `cast` section defines characters. Each character is keyed by a unique character ID.

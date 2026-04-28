@@ -58,22 +58,22 @@ if _PYDANTIC_AVAILABLE:
         image_provider: str = Field(default="mlx-flux")
         video_provider: str = Field(default="mlx-ltx")
         tts_provider: str = Field(default="mlx-audio")
-        asr_provider: str = Field(default="mlx-whisper")
+        asr_provider: str | None = Field(default=None)
 
 else:
     # Minimal fallback when pydantic-settings is not installed
     class PipelineConfig:  # type: ignore[no-redef]
         def __init__(self, **kwargs):
             defaults = {
-                "comfyui_url": "http://127.0.0.1:8188",
-                "output_dir": Path("output"),
-                "run_id": "",
-                "cooldown_seconds": 0.0,
-                "max_crash_retries": 3,
-                "image_provider": "mlx-flux",
-                "video_provider": "mlx-ltx",
-                "tts_provider": "mlx-audio",
-                "asr_provider": "mlx-whisper",
+                "comfyui_url": os.environ.get("SITCOM_COMFYUI_URL", "http://127.0.0.1:8188"),
+                "output_dir": Path(os.environ.get("SITCOM_OUTPUT_DIR", "output")),
+                "run_id": os.environ.get("SITCOM_RUN_ID", ""),
+                "cooldown_seconds": float(os.environ.get("SITCOM_COOLDOWN_SECONDS", "0.0")),
+                "max_crash_retries": int(os.environ.get("SITCOM_MAX_CRASH_RETRIES", "3")),
+                "image_provider": os.environ.get("SITCOM_IMAGE_PROVIDER", "mlx-flux"),
+                "video_provider": os.environ.get("SITCOM_VIDEO_PROVIDER", "mlx-ltx"),
+                "tts_provider": os.environ.get("SITCOM_TTS_PROVIDER", "mlx-audio"),
+                "asr_provider": os.environ.get("SITCOM_ASR_PROVIDER") or None,
             }
             for k, v in {**defaults, **kwargs}.items():
                 setattr(self, k, v)
@@ -89,5 +89,5 @@ else:
                 image_provider=os.environ.get("SITCOM_IMAGE_PROVIDER", "mlx-flux"),
                 video_provider=os.environ.get("SITCOM_VIDEO_PROVIDER", "mlx-ltx"),
                 tts_provider=os.environ.get("SITCOM_TTS_PROVIDER", "mlx-audio"),
-                asr_provider=os.environ.get("SITCOM_ASR_PROVIDER", "mlx-whisper"),
+                asr_provider=os.environ.get("SITCOM_ASR_PROVIDER") or None,
             )

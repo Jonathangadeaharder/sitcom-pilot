@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
 from sitcom_pilot.config import PipelineConfig
 
 
@@ -34,7 +33,7 @@ def test_default_providers():
     assert cfg.image_provider == "mlx-flux"
     assert cfg.video_provider == "mlx-ltx"
     assert cfg.tts_provider == "mlx-audio"
-    assert cfg.asr_provider == "mlx-whisper"
+    assert cfg.asr_provider is None
 
 
 def test_env_override_comfyui_url():

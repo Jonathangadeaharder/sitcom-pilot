@@ -1202,6 +1202,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "mutmut" },
+    { name = "pygments" },
     { name = "pytest" },
     { name = "pytest-cov" },
 ]
@@ -1220,6 +1221,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "mutmut", specifier = ">=3.5.0" },
+    { name = "pygments", specifier = ">=2.20.0" },
     { name = "pytest", specifier = ">=9.0.3" },
     { name = "pytest-cov", specifier = ">=7.1.0" },
 ]

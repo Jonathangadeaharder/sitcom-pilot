@@ -29,11 +29,6 @@
       "const": "2.0",
       "description": "Schema version (must be '2.0')"
     },
-    "target_duration_min": { 
-      "type": "number", 
-      "minimum": 0,
-      "description": "Target episode duration in minutes"
-    },
     "dialogue_status": { 
       "type": "string", 
       "enum": ["present", "missing", "partial"],
@@ -60,24 +55,6 @@
           "maxItems": 2,
           "default": [1280, 720],
           "description": "Video resolution [width, height]"
-        },
-        "pause_between_speech_sec": { 
-          "type": "number", 
-          "minimum": 0, 
-          "default": 0.4,
-          "description": "Pause between speech beats in seconds"
-        },
-        "pause_between_scenes_sec": { 
-          "type": "number", 
-          "minimum": 0, 
-          "default": 1.2,
-          "description": "Pause between scenes in seconds"
-        },
-        "default_silent_beat_duration": { 
-          "type": "number", 
-          "minimum": 0, 
-          "default": 3.0,
-          "description": "Default duration for silent beats in seconds"
         }
       },
       "additionalProperties": false
@@ -204,11 +181,6 @@
           "items": { "type": "string" },
           "description": "List of character IDs present in the scene"
         },
-        "target_seconds": { 
-          "type": "number", 
-          "minimum": 0,
-          "description": "Target duration for the scene in seconds"
-        },
         "mood": { 
           "type": "string",
           "description": "Mood or atmosphere of the scene"
@@ -246,11 +218,6 @@
         "action": { 
           "type": "string",
           "description": "Action or description of what happens in the beat"
-        },
-        "duration_sec": { 
-          "type": "number", 
-          "minimum": 0,
-          "description": "Duration of the beat in seconds"
         },
         "seed": { 
           "type": "integer",

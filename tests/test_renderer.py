@@ -1,11 +1,17 @@
-import pytest
 from unittest.mock import MagicMock, patch
-from sitcom_pilot.loader import (
-    CharacterData, EnvironmentData, SceneData, ShotData, EpisodeData,
-)
+
+import pytest
+
 from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.loader import (
+    CharacterData,
+    EnvironmentData,
+    EpisodeData,
+    SceneData,
+    ShotData,
+)
 from sitcom_pilot.node_map import NodeMap
+from sitcom_pilot.prompts import PromptBuilder
 from sitcom_pilot.renderer import ShotRenderer
 
 

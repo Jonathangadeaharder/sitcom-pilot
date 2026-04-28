@@ -1,6 +1,5 @@
 import json
-import pytest
-from pathlib import Path
+
 from sitcom_pilot.loader import EpisodeLoader
 
 

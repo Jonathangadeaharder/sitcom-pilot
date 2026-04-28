@@ -1,7 +1,9 @@
 import json
 import urllib.error
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from sitcom_pilot.comfyui_client import ComfyUIClient
 
 

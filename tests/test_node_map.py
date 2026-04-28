@@ -1,4 +1,3 @@
-import pytest
 from sitcom_pilot.node_map import NodeMap
 
 

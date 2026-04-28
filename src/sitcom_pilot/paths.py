@@ -1,8 +1,19 @@
 from __future__ import annotations
 
 import datetime
+import re
 import uuid
 from pathlib import Path
+
+_PATH_COMPONENT_RE = re.compile(r"^[^/\\:.]+$")
+
+
+def _validate_path_component(value: str, name: str) -> str:
+    if not value or not _PATH_COMPONENT_RE.match(value) or ".." in value:
+        raise ValueError(
+            f"Invalid {name} '{value}': must be a single path component without slashes or '..'"
+        )
+    return value
 
 
 class RunPaths:
@@ -31,7 +42,10 @@ class RunPaths:
 
     def __init__(self, root: Path, run_id: str = ""):
         self.root = Path(root)
-        self.run_id = run_id or self._generate_run_id()
+        if run_id:
+            self.run_id = _validate_path_component(run_id, "run_id")
+        else:
+            self.run_id = self._generate_run_id()
         self.run_dir = self.root / self.run_id
 
     # ------------------------------------------------------------------
@@ -67,16 +81,24 @@ class RunPaths:
     # ------------------------------------------------------------------
 
     def beat_image(self, scene_id: str, beat_id: str) -> Path:
-        return self.beats_dir / scene_id / f"{beat_id}.png"
+        s = _validate_path_component(scene_id, "scene_id")
+        b = _validate_path_component(beat_id, "beat_id")
+        return self.beats_dir / s / f"{b}.png"
 
     def beat_video(self, scene_id: str, beat_id: str) -> Path:
-        return self.beats_dir / scene_id / f"{beat_id}.mp4"
+        s = _validate_path_component(scene_id, "scene_id")
+        b = _validate_path_component(beat_id, "beat_id")
+        return self.beats_dir / s / f"{b}.mp4"
 
     def beat_audio(self, scene_id: str, beat_id: str) -> Path:
-        return self.audio_dir / scene_id / f"{beat_id}.wav"
+        s = _validate_path_component(scene_id, "scene_id")
+        b = _validate_path_component(beat_id, "beat_id")
+        return self.audio_dir / s / f"{b}.wav"
 
     def beat_subtitle(self, scene_id: str, beat_id: str) -> Path:
-        return self.subtitles_dir / scene_id / f"{beat_id}.srt"
+        s = _validate_path_component(scene_id, "scene_id")
+        b = _validate_path_component(beat_id, "beat_id")
+        return self.subtitles_dir / s / f"{b}.srt"
 
     # ------------------------------------------------------------------
     # Assembly paths
@@ -100,6 +122,7 @@ class RunPaths:
             d.mkdir(parents=True, exist_ok=True)
 
     def ensure_scene_dirs(self, scene_id: str) -> None:
+        _validate_path_component(scene_id, "scene_id")
         dirs = [
             self.beats_dir / scene_id,
             self.audio_dir / scene_id,

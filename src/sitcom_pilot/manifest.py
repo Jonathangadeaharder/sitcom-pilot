@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import tempfile
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
@@ -37,6 +38,10 @@ class SceneRecord:
     @property
     def failed(self) -> int:
         return sum(1 for b in self.beats if b.status == "failed")
+
+    @property
+    def skipped(self) -> int:
+        return sum(1 for b in self.beats if b.status == "skipped")
 
 
 @dataclass
@@ -83,8 +88,14 @@ class RunManifest:
 
     def save(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        with open(path, "w") as f:
-            json.dump(self._to_dict(), f, indent=2)
+        fd, tmp = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+        try:
+            with open(fd, "w") as f:
+                json.dump(self._to_dict(), f, indent=2)
+            Path(tmp).replace(path)
+        except BaseException:
+            Path(tmp).unlink(missing_ok=True)
+            raise
 
     @classmethod
     def load(cls, path: Path) -> RunManifest:
@@ -126,6 +137,7 @@ class RunManifest:
                     "total": sc.total,
                     "rendered": sc.rendered,
                     "failed": sc.failed,
+                    "skipped": sc.skipped,
                     "beats": [asdict(b) for b in sc.beats],
                 }
                 for sc in self.scenes
@@ -145,5 +157,9 @@ class RunManifest:
         total = sum(s.total for s in self.scenes)
         rendered = sum(s.rendered for s in self.scenes)
         failed = sum(s.failed for s in self.scenes)
-        pending = total - rendered - failed
-        return {"total": total, "rendered": rendered, "failed": failed, "pending": pending}
+        skipped = sum(s.skipped for s in self.scenes)
+        pending = total - rendered - failed - skipped
+        return {
+            "total": total, "rendered": rendered,
+            "failed": failed, "skipped": skipped, "pending": pending,
+        }

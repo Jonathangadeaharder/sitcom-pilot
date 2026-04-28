@@ -1,16 +1,14 @@
 import json
-import pytest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
-from sitcom_pilot.loader import EpisodeLoader
-from sitcom_pilot.node_map import NodeMap
-from sitcom_pilot.prompts import PromptBuilder
-from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.renderer import ShotRenderer
-from sitcom_pilot.assembler import EpisodeAssembler
-from sitcom_pilot.progress import ProgressTracker
-from sitcom_pilot.loader import CharacterData, EnvironmentData, SceneData, ShotData, EpisodeData
 
+from sitcom_pilot.assembler import EpisodeAssembler
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.loader import (
+    EpisodeLoader,
+)
+from sitcom_pilot.progress import ProgressTracker
+from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.renderer import ShotRenderer
 
 EPISODE_JSON = {
     "episode_title": "E2E Test Episode",

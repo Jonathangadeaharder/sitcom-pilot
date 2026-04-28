@@ -19,11 +19,19 @@ import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
+
 from voice_generator_v3 import (
     build_fish_text,
     check_fish_api,
     synthesize_line,
+)
+
+V2_EPISODE_GUARD = (
+    "This script only supports v1 (shot-based) episode files. "
+    "For v2 beat-based episodes, use the src/sitcom_pilot pipeline."
 )
 
 FISH_API_URL = "http://127.0.0.1:8090"
@@ -61,6 +69,8 @@ class TimingMap:
 def load_scene(episode_path: Path, scene_id: str) -> dict:
     with open(episode_path) as f:
         episode = json.load(f)
+    if episode.get("schema_version") == "2.0":
+        raise SystemExit(V2_EPISODE_GUARD)
     for scene in episode["scenes"]:
         if scene["scene_id"] == scene_id:
             return {"scene": scene, "cast": episode["cast"], "environments": episode["environments"]}

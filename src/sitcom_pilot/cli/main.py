@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import typer
 from pathlib import Path
-from sitcom_pilot.config import PipelineConfig
-from sitcom_pilot.loader import EpisodeLoader
+
+import typer
+
 from sitcom_pilot.validator import EpisodeValidator
 
 app = typer.Typer(help="Sitcom Pilot CLI")
@@ -12,11 +12,10 @@ app = typer.Typer(help="Sitcom Pilot CLI")
 @app.command()
 def validate(
     episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
-    strict: bool = typer.Option(False, help="Enable strict validation"),
 ) -> None:
     """Validate an episode JSON file."""
     validator = EpisodeValidator()
-    errors = validator.validate_file(Path(episode_path), strict=strict)
+    errors = validator.validate_file(Path(episode_path))
     if errors:
         for error in errors:
             typer.echo(f"Error: {error}", err=True)
@@ -30,9 +29,12 @@ def run(
     config_file: str = typer.Option(None, help="Path to config file"),
 ) -> None:
     """Run the sitcom pilot pipeline."""
-    typer.echo(f"Running pipeline for {episode_path}")
-    # Implementation here
-    pass
+    typer.echo(
+        "The 'run' command is not yet implemented. "
+        "Use the legacy scripts in legacy/ for now.",
+        err=True,
+    )
+    raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

@@ -2,11 +2,8 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
-import pytest
-from sitcom_pilot.loader import EpisodeLoader, BeatData, VoiceConfig
-
+from sitcom_pilot.loader import BeatData, EpisodeLoader, VoiceConfig
 
 V2_EPISODE = {
     "show": "Buffering",
@@ -24,9 +21,6 @@ V2_EPISODE = {
         "tts_provider": "mlx-audio",
         "tts_model": "xtts-v2",
         "subtitle_provider": "mlx-whisper",
-        "pause_between_speech_sec": 0.4,
-        "pause_between_scenes_sec": 1.2,
-        "default_silent_beat_duration": 3.0,
     },
     "cast": {
         "maya": {

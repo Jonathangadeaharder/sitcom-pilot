@@ -4,15 +4,14 @@
   "episode": 1,
   "title": "The Pilot",
   "schema_version": "2.0",
-  "target_duration_min": 8.0,
   "dialogue_status": "present",
   "dialogue_recovery_note": "",
   "render": {
     "fps": 24,
-    "resolution": [1280, 720],
-    "pause_between_speech_sec": 0.4,
-    "pause_between_scenes_sec": 1.2,
-    "default_silent_beat_duration": 3.0
+    "resolution": [
+      1280,
+      720
+    ]
   },
   "cast": {
     "maya": {
@@ -71,8 +70,10 @@
       "scene_id": "001",
       "title": "The Bug Discovered",
       "environment": "living_room",
-      "characters_present": ["maya", "derek"],
-      "target_seconds": 70,
+      "characters_present": [
+        "maya",
+        "derek"
+      ],
       "mood": "tense, late-night",
       "beats": [
         {
@@ -80,7 +81,6 @@
           "kind": "silent",
           "camera": "wide establishing shot of the living room",
           "action": "The living room is lit by the glow of multiple monitors; Maya is hunched over her laptop, Derek is on the couch scrolling his phone",
-          "duration_sec": 4.0,
           "seed": 110001
         },
         {
@@ -88,7 +88,6 @@
           "kind": "speech",
           "camera": "close-up on Maya's face",
           "action": "Maya stares at her screen in disbelief",
-          "duration_sec": 3.0,
           "seed": 110002,
           "speaker": "maya",
           "text": "This can't be right. All fourteen tests are failing.",
@@ -99,7 +98,6 @@
           "kind": "speech",
           "camera": "two-shot of Maya and Derek",
           "action": "Derek looks up from his phone with concern",
-          "duration_sec": 3.5,
           "seed": 110003,
           "speaker": "derek",
           "text": "Wait, all of them? What did you push?",

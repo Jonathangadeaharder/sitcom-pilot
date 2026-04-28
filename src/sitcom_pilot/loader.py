@@ -117,6 +117,10 @@ class EpisodeLoader:
             raw = json.load(f)
 
         schema_version = raw.get("schema_version", "1.0")
+        if schema_version not in ("1.0", "2.0"):
+            raise ValueError(
+                f"Unsupported schema_version '{schema_version}'; expected '1.0' or '2.0'"
+            )
         is_v2 = schema_version == "2.0"
 
         cast = self._load_cast(raw.get("cast", {}), is_v2)

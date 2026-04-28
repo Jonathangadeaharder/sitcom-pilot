@@ -166,6 +166,12 @@ def build_shot_audio(
         )
         if success:
             line_files.append(line_file)
+        else:
+            logger.error(
+                "Dialogue line %d failed for speaker '%s'; aborting shot",
+                i, line["speaker"],
+            )
+            return False
     if not line_files:
         return False
     return concatenate_wavs(line_files, output_path, pause_sec=0.4)

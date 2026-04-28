@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import json
 import logging
 import subprocess
@@ -53,7 +54,9 @@ class ComfyUIClient:
                 time.sleep(2 ** attempt)
         raise last_error
 
-    def wait_for_completion(self, prompt_id: str, timeout: int = 600, poll_interval: float = 3.0) -> bool:
+    def wait_for_completion(
+        self, prompt_id: str, timeout: int = 600, poll_interval: float = 3.0,
+    ) -> bool:
         start = time.time()
         while time.time() - start < timeout:
             try:

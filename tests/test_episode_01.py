@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from sitcom_pilot.loader import EpisodeLoader
 
 
@@ -49,4 +50,4 @@ def test_episode_01_render_config_loaded():
     path = Path(__file__).parent.parent / "episode_01.json"
     episode = EpisodeLoader().load(path)
     assert episode.render_config.get("fps") == 24
-    assert episode.render_config.get("image_provider") == "mlx-flux"
+    assert episode.render_config.get("resolution") == [1280, 720]
