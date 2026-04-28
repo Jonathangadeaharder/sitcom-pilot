@@ -4,10 +4,10 @@ import logging
 import time
 from dataclasses import dataclass
 from typing import Any
-from orchestrator.comfyui_client import ComfyUIClient
-from orchestrator.loader import EpisodeData, SceneData, ShotData
-from orchestrator.node_map import NodeMap
-from orchestrator.prompts import PromptBuilder
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.loader import EpisodeData, SceneData, ShotData
+from sitcom_pilot.node_map import NodeMap
+from sitcom_pilot.prompts import PromptBuilder
 
 logger = logging.getLogger(__name__)
 
