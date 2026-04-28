@@ -2,48 +2,99 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://sitcom-pilot/schemas/episode_v2.schema.json",
   "title": "Episode",
-  "description": "Beat-based episode schema v2.0 for the Sitcom Pilot pipeline.",
+  "description": "Beat-based episode schema v2.0 for the Sitcom Pilot pipeline. All render fields are optional and will use AIServices defaults if not specified.",
   "type": "object",
   "required": ["show", "season", "episode", "title", "schema_version", "cast", "environments", "scenes"],
   "properties": {
-    "show":               { "type": "string" },
-    "season":             { "type": "integer", "minimum": 1 },
-    "episode":            { "type": "integer", "minimum": 1 },
-    "title":              { "type": "string" },
-    "schema_version":     { "type": "string", "const": "2.0" },
-    "target_duration_min":{ "type": "number", "minimum": 0 },
-    "dialogue_status":    { "type": "string", "enum": ["present", "missing", "partial"] },
-    "dialogue_recovery_note": { "type": "string" },
+    "show": { 
+      "type": "string",
+      "description": "Name of the show (e.g., 'Buffering')"
+    },
+    "season": { 
+      "type": "integer", 
+      "minimum": 1,
+      "description": "Season number"
+    },
+    "episode": { 
+      "type": "integer", 
+      "minimum": 1,
+      "description": "Episode number within the season"
+    },
+    "title": { 
+      "type": "string",
+      "description": "Episode title"
+    },
+    "schema_version": { 
+      "type": "string", 
+      "const": "2.0",
+      "description": "Schema version (must be '2.0')"
+    },
+    "target_duration_min": { 
+      "type": "number", 
+      "minimum": 0,
+      "description": "Target episode duration in minutes"
+    },
+    "dialogue_status": { 
+      "type": "string", 
+      "enum": ["present", "missing", "partial"],
+      "description": "Status of dialogue in the episode"
+    },
+    "dialogue_recovery_note": { 
+      "type": "string",
+      "description": "Notes about dialogue recovery process"
+    },
     "render": {
       "type": "object",
+      "description": "Render configuration. All fields are optional and will use AIServices defaults.",
       "properties": {
-        "fps":                      { "type": "integer", "minimum": 1 },
-        "resolution":               { "type": "array", "items": { "type": "integer" }, "minItems": 2, "maxItems": 2 },
-        "image_provider":           { "type": "string" },
-        "image_model":              { "type": "string" },
-        "image2image_provider":     { "type": "string" },
-        "image2image_model":        { "type": "string" },
-        "video_provider":           { "type": "string" },
-        "video_model":              { "type": "string" },
-        "tts_provider":             { "type": "string" },
-        "tts_model":                { "type": "string" },
-        "subtitle_provider":        { "type": "string" },
-        "pause_between_speech_sec": { "type": "number", "minimum": 0 },
-        "pause_between_scenes_sec": { "type": "number", "minimum": 0 },
-        "default_silent_beat_duration": { "type": "number", "minimum": 0 }
+        "fps": { 
+          "type": "integer", 
+          "minimum": 1, 
+          "default": 24,
+          "description": "Frames per second for video output"
+        },
+        "resolution": { 
+          "type": "array", 
+          "items": { "type": "integer" }, 
+          "minItems": 2, 
+          "maxItems": 2,
+          "default": [1280, 720],
+          "description": "Video resolution [width, height]"
+        },
+        "pause_between_speech_sec": { 
+          "type": "number", 
+          "minimum": 0, 
+          "default": 0.4,
+          "description": "Pause between speech beats in seconds"
+        },
+        "pause_between_scenes_sec": { 
+          "type": "number", 
+          "minimum": 0, 
+          "default": 1.2,
+          "description": "Pause between scenes in seconds"
+        },
+        "default_silent_beat_duration": { 
+          "type": "number", 
+          "minimum": 0, 
+          "default": 3.0,
+          "description": "Default duration for silent beats in seconds"
+        }
       },
       "additionalProperties": false
     },
     "cast": {
       "type": "object",
+      "description": "Character definitions. Keys are character IDs.",
       "additionalProperties": { "$ref": "#/$defs/CharacterV2" }
     },
     "environments": {
       "type": "object",
+      "description": "Environment definitions. Keys are environment IDs.",
       "additionalProperties": { "$ref": "#/$defs/EnvironmentV2" }
     },
     "scenes": {
       "type": "array",
+      "description": "List of scenes in the episode",
       "items": { "$ref": "#/$defs/Scene" }
     }
   },
@@ -52,21 +103,59 @@
     "CharacterV2": {
       "type": "object",
       "required": ["name", "visual"],
+      "description": "Character definition with visual description and optional voice configuration",
       "properties": {
-        "name":              { "type": "string" },
-        "role":              { "type": "string" },
-        "visual":            { "type": "string" },
-        "reference_images":  { "type": "array", "items": { "type": "string" } },
-        "lora":              { "type": ["string", "null"] },
+        "name": { 
+          "type": "string",
+          "description": "Character's full name"
+        },
+        "role": { 
+          "type": "string",
+          "description": "Character's role in the story"
+        },
+        "visual": { 
+          "type": "string",
+          "description": "Detailed visual description of the character"
+        },
+        "reference_images": { 
+          "type": "array", 
+          "items": { "type": "string" },
+          "description": "Paths to reference images for the character"
+        },
+        "lora": { 
+          "type": ["string", "null"],
+          "description": "LoRA model path for character consistency"
+        },
         "voice": {
           "type": "object",
+          "description": "Voice configuration for text-to-speech",
           "properties": {
-            "provider":   { "type": "string" },
-            "voice_id":   { "type": "string" },
-            "clone_from": { "type": "string" },
-            "seed":       { "type": "integer" },
-            "temperature":{ "type": "number" },
-            "language":   { "type": "string" }
+            "provider": { 
+              "type": "string", 
+              "default": "text2speech",
+              "description": "TTS provider (default: 'text2speech' from AIServices)"
+            },
+            "voice_id": { 
+              "type": "string",
+              "description": "Voice ID or reference audio path"
+            },
+            "clone_from": { 
+              "type": "string",
+              "description": "Path to reference audio for voice cloning"
+            },
+            "seed": { 
+              "type": "integer",
+              "description": "Random seed for voice generation"
+            },
+            "temperature": { 
+              "type": "number",
+              "description": "Voice generation temperature"
+            },
+            "language": { 
+              "type": "string", 
+              "default": "en",
+              "description": "Language code"
+            }
           },
           "additionalProperties": false
         }
@@ -76,26 +165,61 @@
     "EnvironmentV2": {
       "type": "object",
       "required": ["trigger_word"],
+      "description": "Environment definition with trigger word for image generation",
       "properties": {
-        "trigger_word":    { "type": "string" },
-        "reference_image": { "type": "string" },
-        "style":           { "type": "string" }
+        "trigger_word": { 
+          "type": "string",
+          "description": "Trigger word or detailed description for environment generation"
+        },
+        "reference_image": { 
+          "type": "string",
+          "description": "Path to reference image for the environment"
+        },
+        "style": { 
+          "type": "string",
+          "description": "Style description for the environment"
+        }
       },
       "additionalProperties": true
     },
     "Scene": {
       "type": "object",
       "required": ["scene_id", "environment", "characters_present", "beats"],
+      "description": "Scene definition with beats",
       "properties": {
-        "scene_id":           { "type": "string" },
-        "title":              { "type": "string" },
-        "environment":        { "type": "string" },
-        "characters_present": { "type": "array", "items": { "type": "string" } },
-        "target_seconds":     { "type": "number", "minimum": 0 },
-        "mood":               { "type": "string" },
-        "legacy_audio_path":  { "type": "string" },
+        "scene_id": { 
+          "type": "string",
+          "description": "Unique scene identifier"
+        },
+        "title": { 
+          "type": "string",
+          "description": "Scene title"
+        },
+        "environment": { 
+          "type": "string",
+          "description": "Environment ID where the scene takes place"
+        },
+        "characters_present": { 
+          "type": "array", 
+          "items": { "type": "string" },
+          "description": "List of character IDs present in the scene"
+        },
+        "target_seconds": { 
+          "type": "number", 
+          "minimum": 0,
+          "description": "Target duration for the scene in seconds"
+        },
+        "mood": { 
+          "type": "string",
+          "description": "Mood or atmosphere of the scene"
+        },
+        "legacy_audio_path": { 
+          "type": "string",
+          "description": "Path to legacy audio file (for migration)"
+        },
         "beats": {
           "type": "array",
+          "description": "List of beats in the scene",
           "items": { "$ref": "#/$defs/Beat" }
         }
       },
@@ -104,20 +228,55 @@
     "Beat": {
       "type": "object",
       "required": ["beat_id", "kind"],
+      "description": "Beat definition - either speech or silent",
       "properties": {
-        "beat_id":      { "type": "string" },
-        "kind":         { "type": "string", "enum": ["speech", "silent"] },
-        "camera":       { "type": "string" },
-        "action":       { "type": "string" },
-        "duration_sec": { "type": "number", "minimum": 0 },
-        "seed":         { "type": "integer" },
-        "speaker":      { "type": "string" },
-        "text":         { "type": "string" },
-        "audio_path":   { "type": "string" }
+        "beat_id": { 
+          "type": "string",
+          "description": "Unique beat identifier"
+        },
+        "kind": { 
+          "type": "string", 
+          "enum": ["speech", "silent"],
+          "description": "Type of beat: 'speech' or 'silent'"
+        },
+        "camera": { 
+          "type": "string",
+          "description": "Camera angle or shot description"
+        },
+        "action": { 
+          "type": "string",
+          "description": "Action or description of what happens in the beat"
+        },
+        "duration_sec": { 
+          "type": "number", 
+          "minimum": 0,
+          "description": "Duration of the beat in seconds"
+        },
+        "seed": { 
+          "type": "integer",
+          "description": "Random seed for generation"
+        },
+        "speaker": { 
+          "type": "string",
+          "description": "Character ID of the speaker (required for speech beats)"
+        },
+        "text": { 
+          "type": "string",
+          "description": "Dialogue text (required for speech beats)"
+        },
+        "audio_path": { 
+          "type": "string",
+          "description": "Path to audio file (for speech beats)"
+        }
       },
       "additionalProperties": true,
-      "if":   { "properties": { "kind": { "const": "speech" } }, "required": ["kind"] },
-      "then": { "required": ["speaker", "text"] }
+      "if": { 
+        "properties": { "kind": { "const": "speech" } }, 
+        "required": ["kind"] 
+      },
+      "then": { 
+        "required": ["speaker", "text"] 
+      }
     }
   }
 }
