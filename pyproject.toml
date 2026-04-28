@@ -34,7 +34,6 @@ sitcom-pilot = "sitcom_pilot.cli.main:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-python_paths = ["src"]
 
 [tool.ruff]
 line-length = 100
