@@ -1,7 +1,7 @@
 import json
 import pytest
 from pathlib import Path
-from orchestrator.loader import EpisodeLoader
+from sitcom_pilot.loader import EpisodeLoader
 
 
 def test_load_valid_episode_returns_episode_data(tmp_path):

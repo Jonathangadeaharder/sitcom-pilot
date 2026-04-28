@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from orchestrator.progress import ProgressTracker
+from sitcom_pilot.progress import ProgressTracker
 
 
 def test_mark_done_creates_entry(tmp_path):

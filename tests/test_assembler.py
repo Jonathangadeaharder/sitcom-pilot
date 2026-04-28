@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from pathlib import Path
-from orchestrator.assembler import EpisodeAssembler
+from sitcom_pilot.assembler import EpisodeAssembler
 
 
 @pytest.fixture

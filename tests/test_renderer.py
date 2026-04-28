@@ -1,12 +1,12 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from orchestrator.loader import (
+from sitcom_pilot.loader import (
     CharacterData, EnvironmentData, SceneData, ShotData, EpisodeData,
 )
-from orchestrator.comfyui_client import ComfyUIClient
-from orchestrator.prompts import PromptBuilder
-from orchestrator.node_map import NodeMap
-from orchestrator.renderer import ShotRenderer
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.node_map import NodeMap
+from sitcom_pilot.renderer import ShotRenderer
 
 
 @pytest.fixture

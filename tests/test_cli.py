@@ -2,7 +2,7 @@ import json
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
-from orchestrator.node_map import NodeMap
+from sitcom_pilot.node_map import NodeMap
 
 EPISODE_JSON = {
     "episode_title": "CLI Test",
@@ -26,7 +26,7 @@ def _load_main_module():
     import importlib.util
     spec = importlib.util.spec_from_file_location(
         "_orchestrator_main",
-        str(Path(__file__).resolve().parent.parent / "legacy" / "orchestrator.py"),
+        str(Path(__file__).resolve().parent.parent / "legacy" / "sitcom_pilot.py"),
     )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -39,7 +39,7 @@ def test_dry_run_prints_prompts(tmp_path, capsys):
     wf = tmp_path / "workflow.json"
     wf.write_text(json.dumps({"6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}}, "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}}, "40": {"inputs": {"lora_name": ""}}, "41": {"inputs": {"lora_name": ""}}}))
     import sys
-    with patch.object(sys, "argv", ["orchestrator.py", str(ep), "--workflow", str(wf), "--dry-run"]):
+    with patch.object(sys, "argv", ["sitcom_pilot.py", str(ep), "--workflow", str(wf), "--dry-run"]):
         mod = _load_main_module()
         mod.main()
     output = capsys.readouterr().out
@@ -64,10 +64,10 @@ def test_render_and_assemble(tmp_path):
 
     mock_client_cls = MagicMock(return_value=mock_client)
 
-    with patch("orchestrator.comfyui_client.ComfyUIClient", mock_client_cls):
+    with patch("sitcom_pilot.comfyui_client.ComfyUIClient", mock_client_cls):
         with patch("subprocess.run", return_value=MagicMock(returncode=0)):
             import sys
-            with patch.object(sys, "argv", ["orchestrator.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)]):
+            with patch.object(sys, "argv", ["sitcom_pilot.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)]):
                 mod = _load_main_module()
                 mod.main()
 
@@ -82,9 +82,9 @@ def test_cli_exits_when_server_down(tmp_path):
     mock_client = MagicMock()
     mock_client.is_server_running.return_value = False
     mock_client_cls = MagicMock(return_value=mock_client)
-    with patch("orchestrator.comfyui_client.ComfyUIClient", mock_client_cls):
+    with patch("sitcom_pilot.comfyui_client.ComfyUIClient", mock_client_cls):
         import sys
-        with patch.object(sys, "argv", ["orchestrator.py", str(ep), "--workflow", str(wf)]):
+        with patch.object(sys, "argv", ["sitcom_pilot.py", str(ep), "--workflow", str(wf)]):
             mod = _load_main_module()
             with pytest.raises(SystemExit) as exc_info:
                 mod.main()
@@ -105,9 +105,9 @@ def test_cli_with_resume(tmp_path):
     mock_client.get_output_paths.return_value = ["shot.mp4"]
     mock_client_cls = MagicMock(return_value=mock_client)
     import sys
-    with patch("orchestrator.comfyui_client.ComfyUIClient", mock_client_cls):
+    with patch("sitcom_pilot.comfyui_client.ComfyUIClient", mock_client_cls):
         with patch("subprocess.run", return_value=MagicMock(returncode=0)):
-            with patch.object(sys, "argv", ["orchestrator.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir), "--resume", str(progress_file)]):
+            with patch.object(sys, "argv", ["sitcom_pilot.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir), "--resume", str(progress_file)]):
                 mod = _load_main_module()
                 mod.main()
     assert mock_client.queue_prompt.call_count == 2
@@ -121,7 +121,7 @@ def test_cli_with_node_map(tmp_path, capsys):
     nm = tmp_path / "nodemap.json"
     nm.write_text(json.dumps({"start_prompt": "100", "end_prompt": "200", "audio": "300", "seed": "400", "env_profile": "500", "char_profiles": ["600"]}))
     import sys
-    with patch.object(sys, "argv", ["orchestrator.py", str(ep), "--workflow", str(wf), "--dry-run", "--node-map", str(nm)]):
+    with patch.object(sys, "argv", ["sitcom_pilot.py", str(ep), "--workflow", str(wf), "--dry-run", "--node-map", str(nm)]):
         mod = _load_main_module()
         mod.main()
     output = capsys.readouterr().out
@@ -140,8 +140,8 @@ def test_cli_no_outputs_to_assemble(tmp_path, capsys):
     mock_client.wait_for_completion.return_value = False
     mock_client_cls = MagicMock(return_value=mock_client)
     import sys
-    with patch("orchestrator.comfyui_client.ComfyUIClient", mock_client_cls):
-        with patch.object(sys, "argv", ["orchestrator.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)]):
+    with patch("sitcom_pilot.comfyui_client.ComfyUIClient", mock_client_cls):
+        with patch.object(sys, "argv", ["sitcom_pilot.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)]):
             mod = _load_main_module()
             mod.main()
     output = capsys.readouterr().out
@@ -162,9 +162,9 @@ def test_cli_crash_recovery(tmp_path):
     mock_client.ensure_server_running = MagicMock()
     mock_client_cls = MagicMock(return_value=mock_client)
     import sys
-    with patch("orchestrator.comfyui_client.ComfyUIClient", mock_client_cls):
+    with patch("sitcom_pilot.comfyui_client.ComfyUIClient", mock_client_cls):
         with patch("subprocess.run", return_value=MagicMock(returncode=0)):
-            with patch.object(sys, "argv", ["orchestrator.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir), "--crash-recovery", "--server-cmd", "python", "main.py", "--server-cwd", "/opt"]):
+            with patch.object(sys, "argv", ["sitcom_pilot.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir), "--crash-recovery", "--server-cmd", "python", "main.py", "--server-cwd", "/opt"]):
                 mod = _load_main_module()
                 mod.main()
     assert mock_client.queue_prompt.call_count == 2

@@ -1,10 +1,10 @@
-"""Tests for orchestrator.paths — RunPaths output directory contract."""
+"""Tests for sitcom_pilot.paths — RunPaths output directory contract."""
 from __future__ import annotations
 
 from pathlib import Path
 
 import pytest
-from orchestrator.paths import RunPaths
+from sitcom_pilot.paths import RunPaths
 
 
 def test_run_dir_uses_provided_run_id(tmp_path):

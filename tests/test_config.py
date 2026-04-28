@@ -1,4 +1,4 @@
-"""Tests for orchestrator.config — PipelineConfig."""
+"""Tests for sitcom_pilot.config — PipelineConfig."""
 from __future__ import annotations
 
 import os
@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from orchestrator.config import PipelineConfig
+from sitcom_pilot.config import PipelineConfig
 
 
 def test_default_comfyui_url():

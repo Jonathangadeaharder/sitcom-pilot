@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from orchestrator.loader import EpisodeData, SceneData, ShotData, CharacterData, EnvironmentData, EpisodeLoader
+from sitcom_pilot.loader import EpisodeData, SceneData, ShotData, CharacterData, EnvironmentData, EpisodeLoader
 import sys
 # legacy/ is already on sys.path via conftest.py — pipeline.py lives there now
 _LEGACY = str(Path(__file__).parent.parent / "legacy")

@@ -1,5 +1,5 @@
 from pathlib import Path
-from orchestrator.loader import EpisodeLoader
+from sitcom_pilot.loader import EpisodeLoader
 
 
 def test_episode_01_loads():

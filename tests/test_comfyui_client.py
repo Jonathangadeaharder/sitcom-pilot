@@ -2,7 +2,7 @@ import json
 import urllib.error
 import pytest
 from unittest.mock import patch, MagicMock
-from orchestrator.comfyui_client import ComfyUIClient
+from sitcom_pilot.comfyui_client import ComfyUIClient
 
 
 @pytest.fixture

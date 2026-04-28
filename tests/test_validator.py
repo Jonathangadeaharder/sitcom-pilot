@@ -1,11 +1,11 @@
-"""Tests for orchestrator.validator — EpisodeValidator."""
+"""Tests for sitcom_pilot.validator — EpisodeValidator."""
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
 import pytest
-from orchestrator.validator import EpisodeValidator
+from sitcom_pilot.validator import EpisodeValidator
 
 
 # ---------------------------------------------------------------------------

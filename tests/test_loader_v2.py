@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 import pytest
-from orchestrator.loader import EpisodeLoader, BeatData, VoiceConfig
+from sitcom_pilot.loader import EpisodeLoader, BeatData, VoiceConfig
 
 
 V2_EPISODE = {

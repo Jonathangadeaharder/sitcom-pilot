@@ -1,5 +1,5 @@
 import pytest
-from orchestrator.node_map import NodeMap
+from sitcom_pilot.node_map import NodeMap
 
 
 def test_default_node_map_has_required_fields():
