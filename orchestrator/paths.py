@@ -100,7 +100,12 @@ class RunPaths:
             d.mkdir(parents=True, exist_ok=True)
 
     def ensure_scene_dirs(self, scene_id: str) -> None:
-        for d in (self.beats_dir / scene_id, self.audio_dir / scene_id, self.subtitles_dir / scene_id):
+        dirs = [
+            self.beats_dir / scene_id,
+            self.audio_dir / scene_id,
+            self.subtitles_dir / scene_id,
+        ]
+        for d in dirs:
             d.mkdir(parents=True, exist_ok=True)
 
     # ------------------------------------------------------------------
@@ -109,6 +114,6 @@ class RunPaths:
 
     @staticmethod
     def _generate_run_id() -> str:
-        ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%S")
+        ts = datetime.datetime.now(datetime.UTC).strftime("%Y%m%dT%H%M%S")
         short = str(uuid.uuid4())[:8]
         return f"{ts}-{short}"

@@ -5,7 +5,6 @@ import subprocess
 import urllib.error
 import urllib.request
 from pathlib import Path
-from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +51,12 @@ def build_fish_text_from_dialogue(line: dict) -> str:
     return text
 
 
-def _make_payload(fish_text: str, character_id: str, seed: int = 42, temperature: float = 0.8) -> dict:
+def _make_payload(
+    fish_text: str,
+    character_id: str,
+    seed: int = 42,
+    temperature: float = 0.8,
+) -> dict:
     return {
         "text": fish_text,
         "references": [],
@@ -124,7 +128,13 @@ def concatenate_wavs(wav_files: list[Path], output_path: Path, pause_sec: float 
     pad_str = "".join(pad_parts)
     concat_refs = "".join(f"[p{i}]" for i in range(n))
     filter_str = f"{pad_str}{concat_refs}concat=n={n}:v=0:a=1[out]"
-    cmd = ["ffmpeg", "-y", *inputs, "-filter_complex", filter_str, "-map", "[out]", "-ar", "44100", "-ac", "1", str(output_path)]
+    cmd = [
+        "ffmpeg", "-y", *inputs,
+        "-filter_complex", filter_str,
+        "-map", "[out]",
+        "-ar", "44100", "-ac", "1",
+        str(output_path),
+    ]
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         return result.returncode == 0 and output_path.exists()

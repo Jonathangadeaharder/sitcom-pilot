@@ -62,13 +62,19 @@ class RunManifest:
     # ------------------------------------------------------------------
 
     @classmethod
-    def create(cls, run_id: str, episode_path: Path, episode_title: str, schema_version: str = "2.0") -> "RunManifest":
+    def create(
+        cls,
+        run_id: str,
+        episode_path: Path,
+        episode_title: str,
+        schema_version: str = "2.0",
+    ) -> RunManifest:
         return cls(
             run_id=run_id,
             episode_path=str(episode_path),
             episode_title=episode_title,
             schema_version=schema_version,
-            started_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            started_at=datetime.datetime.now(datetime.UTC).isoformat(),
         )
 
     # ------------------------------------------------------------------
@@ -81,7 +87,7 @@ class RunManifest:
             json.dump(self._to_dict(), f, indent=2)
 
     @classmethod
-    def load(cls, path: Path) -> "RunManifest":
+    def load(cls, path: Path) -> RunManifest:
         with open(path) as f:
             data = json.load(f)
         scenes = [
@@ -133,10 +139,11 @@ class RunManifest:
 
     def finish(self, status: str = "completed") -> None:
         self.status = status
-        self.finished_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        self.finished_at = datetime.datetime.now(datetime.UTC).isoformat()
 
     def summary(self) -> dict[str, int]:
         total = sum(s.total for s in self.scenes)
         rendered = sum(s.rendered for s in self.scenes)
         failed = sum(s.failed for s in self.scenes)
-        return {"total": total, "rendered": rendered, "failed": failed, "pending": total - rendered - failed}
+        pending = total - rendered - failed
+        return {"total": total, "rendered": rendered, "failed": failed, "pending": pending}

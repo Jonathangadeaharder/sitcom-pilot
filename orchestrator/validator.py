@@ -5,7 +5,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 # Optional jsonschema support
 try:
     import jsonschema
@@ -28,16 +27,16 @@ class EpisodeValidator:
     # Public API
     # ------------------------------------------------------------------
 
-    def validate_file(self, path: Path) -> list[str]:
+    def validate_file(self, path: Path, strict: bool = False) -> list[str]:
         """Return a list of error strings. Empty list means valid."""
         try:
             with open(path) as f:
                 data = json.load(f)
         except (OSError, json.JSONDecodeError) as exc:
             return [f"Cannot parse JSON: {exc}"]
-        return self.validate(data)
+        return self.validate(data, strict=strict)
 
-    def validate(self, data: dict[str, Any]) -> list[str]:
+    def validate(self, data: dict[str, Any], strict: bool = False) -> list[str]:
         errors: list[str] = []
 
         schema_version = data.get("schema_version")
@@ -52,7 +51,7 @@ class EpisodeValidator:
         else:
             errors.extend(self._structural_validate(data))
 
-        # Business-rule checks
+        # Business-rule checks (always run — strict mode is for future use)
         errors.extend(self._check_scene_environment_refs(data))
         errors.extend(self._check_scene_character_refs(data))
         errors.extend(self._check_beat_ids_unique(data))
@@ -91,9 +90,15 @@ class EpisodeValidator:
             for beat_idx, beat in enumerate(scene.get("beats", [])):
                 for key in ("beat_id", "kind"):
                     if key not in beat:
-                        errors.append(f"Scene[{scene_idx}].beat[{beat_idx}] missing required field: '{key}'")
+                        errors.append(
+                            f"Scene[{scene_idx}].beat[{beat_idx}]"
+                            f" missing required field: '{key}'"
+                        )
                 if beat.get("kind") not in ("speech", "silent", None):
-                    errors.append(f"Scene[{scene_idx}].beat[{beat_idx}] kind must be 'speech' or 'silent'")
+                    errors.append(
+                        f"Scene[{scene_idx}].beat[{beat_idx}]"
+                        f" kind must be 'speech' or 'silent'"
+                    )
         return errors
 
     # ------------------------------------------------------------------
@@ -179,7 +184,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for raw_path in args.paths:
         path = Path(raw_path)
-        errors = validator.validate_file(path)
+        errors = validator.validate_file(path, strict=args.strict)
         if errors:
             any_failed = True
             print(f"FAIL  {path}")

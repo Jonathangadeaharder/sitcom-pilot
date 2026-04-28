@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated
 
 try:
     from pydantic import Field
@@ -11,7 +10,6 @@ except ImportError:
     _PYDANTIC_AVAILABLE = False
 
 import os
-
 
 if _PYDANTIC_AVAILABLE:
     class PipelineConfig(BaseSettings):
@@ -81,7 +79,7 @@ else:
                 setattr(self, k, v)
 
         @classmethod
-        def from_env(cls) -> "PipelineConfig":
+        def from_env(cls) -> PipelineConfig:
             return cls(
                 comfyui_url=os.environ.get("SITCOM_COMFYUI_URL", "http://127.0.0.1:8188"),
                 output_dir=Path(os.environ.get("SITCOM_OUTPUT_DIR", "output")),

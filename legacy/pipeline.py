@@ -133,6 +133,8 @@ def run_pipeline(
                 print(f"  END:   {end[:100]}...")
         return output_dir
 
+    template = json.loads(workflow_path.read_text())
+
     client = ComfyUIClient(base_url=comfy_url)
     if not crash_recovery and not client.is_server_running():
         logger.error("ComfyUI is not running")

@@ -3,8 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
-
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Beat-based v2.0 data model
@@ -26,8 +25,8 @@ class CharacterData:
     # v2 fields
     name: str = ""
     visual: str = ""
-    lora: Optional[str] = None
-    voice: Optional[VoiceConfig] = None
+    lora: str | None = None
+    voice: VoiceConfig | None = None
     reference_images: tuple[str, ...] = field(default_factory=tuple)
     # v1 legacy fields (kept for backward compat with existing tests/templates)
     profile: str = ""
@@ -67,7 +66,7 @@ class ShotData:
     action_end: str
     seed: int
     audio_path: str = ""
-    dialogue: Optional[list[dict]] = None
+    dialogue: list[dict] | None = None
 
     def __post_init__(self):
         if self.dialogue is None:
