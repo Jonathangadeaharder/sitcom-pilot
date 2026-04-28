@@ -31,12 +31,12 @@ def test_load_valid_episode_returns_episode_data(tmp_path):
     assert episode.scenes[0].shots[0].shot_id == "S01_SH01"
 
 
-def test_load_missing_title_raises(tmp_path):
+def test_load_missing_title_defaults_empty(tmp_path):
     episode_json = tmp_path / "bad.json"
     episode_json.write_text(json.dumps({"cast": {}, "environments": {}, "scenes": []}))
     loader = EpisodeLoader()
-    with pytest.raises(KeyError):
-        loader.load(episode_json)
+    episode = loader.load(episode_json)
+    assert episode.title == ""
 
 
 def test_load_empty_scenes_returns_empty_list(tmp_path):

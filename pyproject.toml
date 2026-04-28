@@ -1,9 +1,26 @@
 [project]
 name = "sitcom-pilot"
 version = "0.1.0"
-description = "Add your description here"
-requires-python = ">=3.14"
-dependencies = []
+description = "Beat-based AI sitcom pilot pipeline (Buffering S01)"
+requires-python = ">=3.11"
+dependencies = [
+    # CLI
+    "typer>=0.12.0",
+    # Data modelling & config
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    # Structured logging
+    "structlog>=24.0.0",
+    # Episode schema validation
+    "jsonschema>=4.21.0",
+    # AIServices integration (local path — swap for PyPI release when published)
+    "aiservices-core",
+    # Legacy audio pipeline deps
+    "ormsgpack>=1.12.2",
+]
+
+[tool.uv.sources]
+aiservices-core = { path = "../AIServices/packages/aiservices_core", editable = true }
 
 [dependency-groups]
 dev = [
@@ -11,3 +28,17 @@ dev = [
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
 ]
+
+[project.scripts]
+validate-episode = "orchestrator.validator:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = []

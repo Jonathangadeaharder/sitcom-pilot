@@ -13,12 +13,15 @@ from orchestrator.renderer import ShotRenderer
 def episode():
     return EpisodeData(
         title="Test",
-        cast={"Jerry": CharacterData("jerry_v2", "jry_guy")},
-        environments={"Apt": EnvironmentData("apt_v1", "apartment")},
-        scenes=[SceneData("S01", "Apt", ["Jerry"], [
-            ShotData("S01_SH01", "wide shot", "standing", "sitting", "a.wav", 42),
-            ShotData("S01_SH02", "close up", "smiling", "frowning", "b.wav", 99),
-        ])],
+        cast={"Jerry": CharacterData(profile="jerry_v2", trigger_word="jry_guy")},
+        environments={"Apt": EnvironmentData(profile="apt_v1", trigger_word="apartment")},
+        scenes=[SceneData(
+            scene_id="S01", environment="Apt", characters_present=["Jerry"],
+            shots=[
+                ShotData("S01_SH01", "wide shot", "standing", "sitting", 42, "a.wav"),
+                ShotData("S01_SH02", "close up", "smiling", "frowning", 99, "b.wav"),
+            ],
+        )],
     )
 
 
@@ -112,14 +115,15 @@ def multi_char_episode():
     return EpisodeData(
         title="Multi",
         cast={
-            "A": CharacterData("a_v1", "aaa"),
-            "B": CharacterData("b_v1", "bbb"),
-            "C": CharacterData("c_v1", "ccc"),
+            "A": CharacterData(profile="a_v1", trigger_word="aaa"),
+            "B": CharacterData(profile="b_v1", trigger_word="bbb"),
+            "C": CharacterData(profile="c_v1", trigger_word="ccc"),
         },
-        environments={"Room": EnvironmentData("room_v1", "room")},
-        scenes=[SceneData("S01", "Room", ["A", "B", "C"], [
-            ShotData("S01_SH01", "wide", "standing", "sitting", "a.wav", 1),
-        ])],
+        environments={"Room": EnvironmentData(profile="room_v1", trigger_word="room")},
+        scenes=[SceneData(
+            scene_id="S01", environment="Room", characters_present=["A", "B", "C"],
+            shots=[ShotData("S01_SH01", "wide", "standing", "sitting", 1, "a.wav")],
+        )],
     )
 
 
@@ -214,11 +218,12 @@ def test_render_shot_char_profiles_overflow(mock_client):
     single_char_map = NodeMap(char_profiles=["41"])
     multi_ep = EpisodeData(
         title="Overflow",
-        cast={"A": CharacterData("a_v1", "aaa"), "B": CharacterData("b_v1", "bbb")},
-        environments={"Room": EnvironmentData("room_v1", "room")},
-        scenes=[SceneData("S01", "Room", ["A", "B"], [
-            ShotData("S01_SH01", "wide", "a", "b", "a.wav", 1),
-        ])],
+        cast={"A": CharacterData(profile="a_v1", trigger_word="aaa"), "B": CharacterData(profile="b_v1", trigger_word="bbb")},
+        environments={"Room": EnvironmentData(profile="room_v1", trigger_word="room")},
+        scenes=[SceneData(
+            scene_id="S01", environment="Room", characters_present=["A", "B"],
+            shots=[ShotData("S01_SH01", "wide", "a", "b", 1, "a.wav")],
+        )],
     )
     mock_client.queue_prompt.return_value = "pid"
     mock_client.wait_for_completion.return_value = True
@@ -257,11 +262,12 @@ def test_render_scene_with_cooldown(episode, mock_client, workflow_template):
 def test_render_shot_no_env_data(mock_client):
     ep = EpisodeData(
         title="NoEnv",
-        cast={"X": CharacterData("x_v1", "xxx")},
+        cast={"X": CharacterData(profile="x_v1", trigger_word="xxx")},
         environments={},
-        scenes=[SceneData("S01", "NonExistent", ["X"], [
-            ShotData("S01_SH01", "wide", "a", "b", "a.wav", 1),
-        ])],
+        scenes=[SceneData(
+            scene_id="S01", environment="NonExistent", characters_present=["X"],
+            shots=[ShotData("S01_SH01", "wide", "a", "b", 1, "a.wav")],
+        )],
     )
     mock_client.queue_prompt.return_value = "pid"
     mock_client.wait_for_completion.return_value = True
@@ -337,7 +343,7 @@ def test_render_shot_crash_recovery_raises_correct_exception(episode, mock_clien
 
 def test_inject_workflow_with_minimal_template(mock_client):
     template = {"6": {}, "12": {}, "25": {}, "3": {}, "40": {}, "41": {}}
-    ep = EpisodeData(title="T", cast={"X": CharacterData("x_v1", "xxx")}, environments={"R": EnvironmentData("r_v1", "room")}, scenes=[SceneData("S1", "R", ["X"], [ShotData("S1_SH1", "wide", "a", "b", "aud.wav", 7)])])
+    ep = EpisodeData(title="T", cast={"X": CharacterData(profile="x_v1", trigger_word="xxx")}, environments={"R": EnvironmentData(profile="r_v1", trigger_word="room")}, scenes=[SceneData(scene_id="S1", environment="R", characters_present=["X"], shots=[ShotData("S1_SH1", "wide", "a", "b", 7, "aud.wav")])])
     mock_client.queue_prompt.return_value = "pid"
     mock_client.wait_for_completion.return_value = True
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder())

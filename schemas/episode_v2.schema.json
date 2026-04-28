@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sitcom-pilot/schemas/episode_v2.schema.json",
+  "title": "Episode",
+  "description": "Beat-based episode schema v2.0 for the Sitcom Pilot pipeline.",
+  "type": "object",
+  "required": ["show", "season", "episode", "title", "schema_version", "cast", "environments", "scenes"],
+  "properties": {
+    "show":               { "type": "string" },
+    "season":             { "type": "integer", "minimum": 1 },
+    "episode":            { "type": "integer", "minimum": 1 },
+    "title":              { "type": "string" },
+    "schema_version":     { "type": "string", "const": "2.0" },
+    "target_duration_min":{ "type": "number", "minimum": 0 },
+    "dialogue_status":    { "type": "string", "enum": ["present", "missing", "partial"] },
+    "dialogue_recovery_note": { "type": "string" },
+    "render": {
+      "type": "object",
+      "properties": {
+        "fps":                      { "type": "integer", "minimum": 1 },
+        "resolution":               { "type": "array", "items": { "type": "integer" }, "minItems": 2, "maxItems": 2 },
+        "image_provider":           { "type": "string" },
+        "image_model":              { "type": "string" },
+        "image2image_provider":     { "type": "string" },
+        "image2image_model":        { "type": "string" },
+        "video_provider":           { "type": "string" },
+        "video_model":              { "type": "string" },
+        "tts_provider":             { "type": "string" },
+        "tts_model":                { "type": "string" },
+        "subtitle_provider":        { "type": "string" },
+        "pause_between_speech_sec": { "type": "number", "minimum": 0 },
+        "pause_between_scenes_sec": { "type": "number", "minimum": 0 },
+        "default_silent_beat_duration": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "cast": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/CharacterV2" }
+    },
+    "environments": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/EnvironmentV2" }
+    },
+    "scenes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Scene" }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "CharacterV2": {
+      "type": "object",
+      "required": ["name", "visual"],
+      "properties": {
+        "name":              { "type": "string" },
+        "role":              { "type": "string" },
+        "visual":            { "type": "string" },
+        "reference_images":  { "type": "array", "items": { "type": "string" } },
+        "lora":              { "type": ["string", "null"] },
+        "voice": {
+          "type": "object",
+          "properties": {
+            "provider":   { "type": "string" },
+            "voice_id":   { "type": "string" },
+            "clone_from": { "type": "string" },
+            "seed":       { "type": "integer" },
+            "temperature":{ "type": "number" },
+            "language":   { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    },
+    "EnvironmentV2": {
+      "type": "object",
+      "required": ["trigger_word"],
+      "properties": {
+        "trigger_word":    { "type": "string" },
+        "reference_image": { "type": "string" },
+        "style":           { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "Scene": {
+      "type": "object",
+      "required": ["scene_id", "environment", "characters_present", "beats"],
+      "properties": {
+        "scene_id":           { "type": "string" },
+        "title":              { "type": "string" },
+        "environment":        { "type": "string" },
+        "characters_present": { "type": "array", "items": { "type": "string" } },
+        "target_seconds":     { "type": "number", "minimum": 0 },
+        "mood":               { "type": "string" },
+        "legacy_audio_path":  { "type": "string" },
+        "beats": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Beat" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "Beat": {
+      "type": "object",
+      "required": ["beat_id", "kind"],
+      "properties": {
+        "beat_id":      { "type": "string" },
+        "kind":         { "type": "string", "enum": ["speech", "silent"] },
+        "camera":       { "type": "string" },
+        "action":       { "type": "string" },
+        "duration_sec": { "type": "number", "minimum": 0 },
+        "seed":         { "type": "integer" },
+        "speaker":      { "type": "string" },
+        "text":         { "type": "string" },
+        "audio_path":   { "type": "string" }
+      },
+      "additionalProperties": true,
+      "if":   { "properties": { "kind": { "const": "speech" } }, "required": ["kind"] },
+      "then": { "required": ["speaker", "text"] }
+    }
+  }
+}

@@ -1,0 +1,334 @@
+{
+  "show": "Buffering",
+  "season": 1,
+  "episode": 2,
+  "title": "The Demo Day",
+  "target_duration_min": 9.5,
+  "schema_version": "2.0",
+  "render": {
+    "fps": 24,
+    "resolution": [1280, 720],
+    "image_provider": "mlx-flux",
+    "image_model": "flux-schnell",
+    "image2image_provider": "mlx-flux-img2img",
+    "image2image_model": "flux-dev",
+    "video_provider": "mlx-ltx",
+    "video_model": "ltx-2",
+    "tts_provider": "mlx-audio",
+    "tts_model": "xtts-v2",
+    "subtitle_provider": "mlx-whisper",
+    "pause_between_speech_sec": 0.4,
+    "pause_between_scenes_sec": 1.2,
+    "default_silent_beat_duration": 2.5
+  },
+  "cast": {
+    "maya": {
+      "name": "Maya Chen",
+      "role": "Lead engineer at a failing AI startup",
+      "visual": "East Asian woman in her late 20s, short straight black hair with subtle blue highlights, round wire-frame glasses, wearing an oversized dark purple hoodie with a small robot logo, dark jeans, white sneakers, confident posture but tired eyes, warm skin tone",
+      "reference_images": [
+        "assets/cast/maya_ref_front.png",
+        "assets/cast/maya_ref_3q.png",
+        "assets/cast/maya_ref_profile.png"
+      ],
+      "lora": null,
+      "voice": {
+        "provider": "mlx-audio",
+        "voice_id": "maya_v1",
+        "clone_from": "assets/voices/maya_clone.wav",
+        "seed": 42,
+        "temperature": 0.8,
+        "language": "en"
+      }
+    },
+    "derek": {
+      "name": "Derek Thompson",
+      "role": "Growth hacker at a crypto company that keeps pivoting",
+      "visual": "Tall Black man in his early 30s, immaculately trimmed short beard, confident smile, wearing a fitted navy blazer over a bright graphic tee with geometric patterns, slim khaki chinos, clean white leather shoes, silver watch",
+      "reference_images": [
+        "assets/cast/derek_ref_front.png",
+        "assets/cast/derek_ref_3q.png",
+        "assets/cast/derek_ref_profile.png"
+      ],
+      "lora": null,
+      "voice": {
+        "provider": "mlx-audio",
+        "voice_id": "derek_v1",
+        "clone_from": "assets/voices/derek_clone.wav",
+        "seed": 137,
+        "temperature": 0.85,
+        "language": "en"
+      }
+    },
+    "priya": {
+      "name": "Priya Sharma",
+      "role": "UX designer who secretly hates all technology",
+      "visual": "South Asian woman in her mid 20s, long dark wavy hair often in a loose side braid, warm brown eyes, wearing a mustard yellow cardigan over a white blouse, colorful printed scarf, high-waisted olive green pants, brown ankle boots, always carrying a leather-bound sketchbook",
+      "reference_images": [
+        "assets/cast/priya_ref_front.png",
+        "assets/cast/priya_ref_3q.png",
+        "assets/cast/priya_ref_profile.png"
+      ],
+      "lora": null,
+      "voice": {
+        "provider": "mlx-audio",
+        "voice_id": "priya_v1",
+        "clone_from": "assets/voices/priya_clone.wav",
+        "seed": 256,
+        "temperature": 0.75,
+        "language": "en"
+      }
+    },
+    "finn": {
+      "name": "Finn O'Brien",
+      "role": "QA tester who finds bugs in everything including real life",
+      "visual": "Pale Irish man in his late 20s, messy curly red hair, light freckles across his nose, perpetually confused wide-eyed expression, wearing a loud Hawaiian shirt with palm trees over a plain white t-shirt, cargo shorts, worn sandals",
+      "reference_images": [
+        "assets/cast/finn_ref_front.png",
+        "assets/cast/finn_ref_3q.png",
+        "assets/cast/finn_ref_profile.png"
+      ],
+      "lora": null,
+      "voice": {
+        "provider": "mlx-audio",
+        "voice_id": "finn_v1",
+        "clone_from": "assets/voices/finn_clone.wav",
+        "seed": 389,
+        "temperature": 0.8,
+        "language": "en"
+      }
+    }
+  },
+  "environments": {
+    "maya_desk": {
+      "trigger_word": "Corner desk setup in a San Francisco apartment, three monitors showing code and terminal windows, mechanical keyboard with custom keycaps, desk lamp casting warm light, energy drink cans, sticky notes everywhere, a small succulent plant, late night atmosphere",
+      "reference_image": "assets/env/maya_desk_ref.png",
+      "style": "cinematic, warm desk lamp, monitor glow, late night, shallow depth of field"
+    },
+    "kitchen": {
+      "trigger_word": "Small galley kitchen in a San Francisco apartment, cluttered countertops with smart home gadgets, a tablet mounted on the fridge showing notifications, coffee mugs with tech company logos, morning light streaming through a small window, cozy and lived-in",
+      "reference_image": "assets/env/kitchen_ref.png",
+      "style": "cinematic, soft morning light, kitchen sitcom, warm tones"
+    },
+    "living_room": {
+      "trigger_word": "Modern San Francisco apartment living room with a panoramic window showing the Bay Bridge at golden hour, cluttered with tech gadgets, a large whiteboard covered in diagrams, mismatched furniture including a worn leather couch and beanbag chairs, tangled cables, a broken espresso machine on a side table, warm ambient lighting",
+      "reference_image": "assets/env/living_room_ref.png",
+      "style": "cinematic, golden hour, warm ambient lighting, lived-in tech apartment"
+    },
+    "rooftop": {
+      "trigger_word": "San Francisco apartment building rooftop at dusk, panoramic city skyline view with fog rolling in, string lights hung between posts, a couple of folding chairs and a small table, the Bay Bridge glowing in the background, cinematic golden hour lighting",
+      "reference_image": "assets/env/rooftop_ref.png",
+      "style": "cinematic, golden hour to dusk, fog, string lights, wide panorama"
+    }
+  },
+  "scenes": [
+    {
+      "scene_id": "001",
+      "title": "Cold Open — The Email",
+      "environment": "maya_desk",
+      "characters_present": ["maya"],
+      "target_seconds": 60,
+      "mood": "tense, comedic",
+      "beats": [
+        {"beat_id": "001_b00", "kind": "silent", "camera": "wide establishing shot, slow push in", "action": "Maya at her desk bathed in blue monitor glow, scrolling through email with morning coffee untouched beside her, the apartment quiet", "duration_sec": 3.0, "seed": 10001},
+        {"beat_id": "001_b01", "kind": "speech", "camera": "close-up on Maya's face, monitor glow illuminating features, slow zoom in", "action": "Maya scrolls email, expression shifts from neutral to disbelief", "speaker": "maya", "emotion": "calm", "tone": null, "effect": null, "text": "Okay. Friday deploy. Normal. I can do Friday deploys. I am an adult with a deployment pipeline.", "seed": 10011},
+        {"beat_id": "001_b02", "kind": "silent", "camera": "medium hold on Maya, monitor glow", "action": "Maya pauses, eyes narrow, coffee cup halfway to her lips, frozen on the TechCrunch Disrupt subject line", "duration_sec": 2.0, "seed": 10021},
+        {"beat_id": "001_b03", "kind": "speech", "camera": "close-up, slow zoom in", "action": "Maya stares at the screen frozen, mouth slightly open, the TechCrunch Disrupt invitation filling the monitor", "speaker": "maya", "emotion": "surprised", "tone": null, "effect": "gasping", "text": "TechCrunch Disrupt? My CEO signed us up for TechCrunch Disrupt?", "seed": 10031},
+        {"beat_id": "001_b04", "kind": "speech", "camera": "close-up, hands gripping the edge of the desk", "action": "Maya's expression hardens with frustration, jaw clenched", "speaker": "maya", "emotion": "frustrated", "tone": null, "effect": null, "text": "The man has never even seen the product. He thinks API stands for Another Profitable Idea.", "seed": 10041},
+        {"beat_id": "001_b05", "kind": "silent", "camera": "medium shot from side, showing Maya and the three monitors", "action": "Maya pushes back from the desk and runs both hands through her hair, staring at the ceiling as if praying to a higher power that answers support tickets", "duration_sec": 3.0, "seed": 10051},
+        {"beat_id": "001_b06", "kind": "speech", "camera": "medium shot from side, slight tilt up", "action": "Maya stares at the ceiling with growing dread", "speaker": "maya", "emotion": "scared", "tone": null, "effect": null, "text": "Forty-eight hours. I have forty-eight hours to demo an AI chatbot that currently thinks two plus two equals Tuesday.", "seed": 10061},
+        {"beat_id": "001_b07", "kind": "speech", "camera": "medium shot, jaw set, one hand reaching for the laptop", "action": "Maya grabs her phone from the desk with sudden determination, jaw set, the other hand already reaching for her laptop to pack up", "speaker": "maya", "emotion": "resigned", "tone": null, "effect": "sighing", "text": "I'm going to need coffee, a whiteboard, and a miracle. And Finn. Definitely Finn.", "seed": 10071},
+        {"beat_id": "001_b08", "kind": "silent", "camera": "over-the-shoulder from behind monitors, Maya standing and grabbing laptop", "action": "Maya slams her laptop shut and tucks it under her arm, pausing for one deep breath with eyes closed, the room silent except for the hum of fans", "duration_sec": 2.5, "seed": 10081},
+        {"beat_id": "001_b09", "kind": "speech", "camera": "over-the-shoulder, Maya already striding out of frame", "action": "Maya strides out of frame with the laptop under her arm, phone already dialing, a determined fire in her eyes that suggests someone is about to have a very long day", "speaker": "maya", "emotion": "determined", "tone": null, "effect": null, "text": "Fine. Let's go. Deploy the demo environment, clear the schedule, and someone wake up the roommates. This is not a drill.", "seed": 10091}
+      ]
+    },
+    {
+      "scene_id": "002",
+      "title": "The War Room",
+      "environment": "kitchen",
+      "characters_present": ["derek", "priya", "finn", "maya"],
+      "target_seconds": 90,
+      "mood": "chaotic, comedic urgency",
+      "beats": [
+        {"beat_id": "002_b00", "kind": "silent", "camera": "medium wide shot, eye level, Derek at counter, Priya at table", "action": "Derek stands at the kitchen counter in his blazer, scrolling through his phone with one hand and pouring coffee with the other, missing the mug entirely as coffee pools on the counter; Priya sits at the kitchen table sketching in her sketchbook with mild annoyance", "duration_sec": 3.0, "seed": 20001},
+        {"beat_id": "002_b01", "kind": "speech", "camera": "medium close on Derek at counter", "action": "Derek looks up from his phone with theatrical enthusiasm, oblivious to the spilled coffee", "speaker": "derek", "emotion": "excited", "tone": null, "effect": null, "text": "Good morning, future industry leaders! I smell opportunity and artisanal coffee.", "seed": 20011},
+        {"beat_id": "002_b02", "kind": "speech", "camera": "medium close on Priya at table, sketchbook in hand", "action": "Priya glances up from her sketchbook, one eyebrow raised, deadpan", "speaker": "priya", "emotion": "sarcastic", "tone": null, "effect": null, "text": "You smell the coffee you spilled on the counter fifteen minutes ago. It's still there.", "seed": 20021},
+        {"beat_id": "002_b03", "kind": "silent", "camera": "tracking shot following Maya bursting through the doorway", "action": "Maya bursts into the kitchen with laptop clutched like a shield, breathless, hair disheveled; Derek and Priya look up from their routines", "duration_sec": 2.0, "seed": 20031},
+        {"beat_id": "002_b04", "kind": "speech", "camera": "medium shot of Maya in the doorway", "action": "Maya stands breathless in the doorway, laptop held tight, urgency radiating off her", "speaker": "maya", "emotion": "anxious", "tone": "in a hurry tone", "effect": null, "text": "Listen up. I have exactly forty-seven hours to make our AI chatbot presentable for TechCrunch Disrupt. I need all hands.", "seed": 20041},
+        {"beat_id": "002_b05", "kind": "speech", "camera": "medium close on Derek, gesturing grandly", "action": "Derek grins wide and gestures with his coffee-spilling hand, blazer adjusting", "speaker": "derek", "emotion": "confident", "tone": null, "effect": null, "text": "Say no more. I once pitched a blockchain for hamsters to three hundred people at Web3Conf. Standing ovation.", "seed": 20051},
+        {"beat_id": "002_b06", "kind": "speech", "camera": "medium close on Priya, single eyebrow raised", "action": "Priya delivers her line without looking up from her sketchbook", "speaker": "priya", "emotion": "indifferent", "tone": null, "effect": null, "text": "Was it a standing ovation or were they leaving?", "seed": 20061},
+        {"beat_id": "002_b07", "kind": "silent", "camera": "tracking shot following Finn entering through the kitchen doorway", "action": "Finn enters in his Hawaiian shirt holding his phone like evidence at a crime scene, eyes wide and alarmed; Derek beams obliviously", "duration_sec": 2.0, "seed": 20071},
+        {"beat_id": "002_b08", "kind": "speech", "camera": "medium close on Derek, doubling down", "action": "Derek waves his coffee-stained phone with renewed pride", "speaker": "derek", "emotion": "confident", "tone": null, "effect": null, "text": "They were standing, Priya. The distinction matters.", "seed": 20081},
+        {"beat_id": "002_b09", "kind": "speech", "camera": "medium close on Finn, phone raised", "action": "Finn holds up his phone like evidence, eyes wide with bug-hunter intensity", "speaker": "finn", "emotion": "nervous", "tone": null, "effect": null, "text": "Maya, I looked at the demo environment. The chatbot's response time is eleven seconds. That's not latency, that's a confession.", "seed": 20091},
+        {"beat_id": "002_b10", "kind": "speech", "camera": "medium on Maya, leaning against the counter", "action": "Maya rubs her temples, exhaustion seeping through the urgency", "speaker": "maya", "emotion": "frustrated", "tone": null, "effect": null, "text": "I know. It queries a database that doesn't exist, then falls back to a decision tree I wrote as a placeholder.", "seed": 20101},
+        {"beat_id": "002_b11", "kind": "speech", "camera": "medium close on Finn, scrolling on his phone", "action": "Finn frowns at his screen, finger swiping rapidly", "speaker": "finn", "emotion": "confused", "tone": null, "effect": null, "text": "The decision tree has three branches and two of them lead to the same answer.", "seed": 20111},
+        {"beat_id": "002_b12", "kind": "speech", "camera": "close-up on Maya, embarrassed grimace", "action": "Maya buries her face in her free hand for a beat, then drops it with resigned humor", "speaker": "maya", "emotion": "embarrassed", "tone": null, "effect": null, "text": "It was supposed to be temporary. Like the website. And the company name. And my career in tech.", "seed": 20121},
+        {"beat_id": "002_b13", "kind": "silent", "camera": "group shot, medium wide, all four roommates", "action": "Priya closes her sketchbook and sets it down, leaning forward with a look that says she's seen worse and survived; the four exchange glances", "duration_sec": 2.5, "seed": 20131},
+        {"beat_id": "002_b14", "kind": "speech", "camera": "medium close on Priya, hands folded", "action": "Priya straightens, all business now", "speaker": "priya", "emotion": "calm", "tone": null, "effect": null, "text": "I saw the pitch deck. It looks like a PDF that survived a plane crash. Give me two hours and a laptop.", "seed": 20141},
+        {"beat_id": "002_b15", "kind": "speech", "camera": "medium close on Derek, fist on hip", "action": "Derek strikes a power pose, blazer adjusting", "speaker": "derek", "emotion": "excited", "tone": null, "effect": null, "text": "And I will handle investor relations, strategic positioning, and vibes. Mostly vibes.", "seed": 20151},
+        {"beat_id": "002_b16", "kind": "speech", "camera": "medium close on Finn, eyes narrowing with focus", "action": "Finn pockets his phone and rolls up his sleeves figuratively", "speaker": "finn", "emotion": "determined", "tone": null, "effect": null, "text": "I'll stress-test everything. Every edge case. Every input. I will break this chatbot in ways the universe hasn't invented yet.", "seed": 20161},
+        {"beat_id": "002_b17", "kind": "speech", "camera": "medium close on Maya, gratitude breaking through fatigue", "action": "Maya sets the laptop down on the counter with care, looking at each of them in turn", "speaker": "maya", "emotion": "grateful", "tone": null, "effect": null, "text": "Thank you. All of you. We have forty-seven hours. Let's build something that doesn't embarrass us in front of the entire tech industry.", "seed": 20171}
+      ]
+    },
+    {
+      "scene_id": "003",
+      "title": "The Pivot Pitch",
+      "environment": "living_room",
+      "characters_present": ["maya", "derek", "priya", "finn"],
+      "target_seconds": 90,
+      "mood": "absurd, comedic",
+      "beats": [
+        {"beat_id": "003_b00", "kind": "silent", "camera": "wide establishing shot of the living room, whiteboard prominent", "action": "Derek at the whiteboard with marker in hand, several arrows and the word SYNERGY in large letters; Maya and Priya on the couch with matching skeptical expressions; Finn cross-legged on the floor with laptop", "duration_sec": 3.0, "seed": 30001},
+        {"beat_id": "003_b01", "kind": "speech", "camera": "medium shot of Derek at the whiteboard", "action": "Derek spreads his arms wide as if revealing a masterpiece", "speaker": "derek", "emotion": "confident", "tone": null, "effect": null, "text": "Okay, hear me out. What if we don't demo an AI chatbot? What if we demo a decentralized AI-powered blockchain marketplace for enterprise solutions?", "seed": 30011},
+        {"beat_id": "003_b02", "kind": "speech", "camera": "medium close on Maya, hand to forehead", "action": "Maya pinches the bridge of her nose", "speaker": "maya", "emotion": "frustrated", "tone": null, "effect": null, "text": "Derek, that is six buzzwords stacked in a trench coat.", "seed": 30021},
+        {"beat_id": "003_b03", "kind": "speech", "camera": "medium close on Derek, undeterred", "action": "Derek smooths his blazer with absolute conviction", "speaker": "derek", "emotion": "optimistic", "tone": null, "effect": null, "text": "Buzzwords that synergize. The VC will see a paradigm shift. I can feel it in my blazer.", "seed": 30031},
+        {"beat_id": "003_b04", "kind": "speech", "camera": "medium close on Priya, eyebrow arched perfectly", "action": "Priya does not look up from her sketchbook", "speaker": "priya", "emotion": "sarcastic", "tone": null, "effect": null, "text": "Your blazer is not a business strategy.", "seed": 30041},
+        {"beat_id": "003_b05", "kind": "silent", "camera": "over-the-shoulder from Finn's laptop, chatbot UI visible", "action": "Finn types queries into the chatbot with growing confusion; Derek drifts over to look", "duration_sec": 2.5, "seed": 30051},
+        {"beat_id": "003_b06", "kind": "speech", "camera": "medium close on Finn, holding the laptop up", "action": "Finn turns the laptop screen toward the room", "speaker": "finn", "emotion": "confused", "tone": null, "effect": null, "text": "I ran a test query through the chatbot and it responded with a recipe for lasagna. We don't even have a recipe database. Where did it get a recipe for lasagna?", "seed": 30061},
+        {"beat_id": "003_b07", "kind": "speech", "camera": "medium close on Maya, pinching bridge of nose harder", "action": "Maya looks at the ceiling, betrayed by her own past decisions", "speaker": "maya", "emotion": "embarrassed", "tone": null, "effect": null, "text": "I may have... fine-tuned it on a cooking wiki when I was testing the training pipeline. I was hungry.", "seed": 30071},
+        {"beat_id": "003_b08", "kind": "speech", "camera": "medium close on Priya, holding up her tablet", "action": "Priya turns her sketchbook around to show a clean wireframe layout", "speaker": "priya", "emotion": "calm", "tone": null, "effect": null, "text": "I redesigned the pitch deck. Twelve slides, clean typography, data visualizations, and an actual value proposition that doesn't mention blockchain even once.", "seed": 30081},
+        {"beat_id": "003_b09", "kind": "speech", "camera": "medium close on Derek, crestfallen", "action": "Derek's smile falters for the first time", "speaker": "derek", "emotion": "disappointed", "tone": null, "effect": null, "text": "Not even once?", "seed": 30091},
+        {"beat_id": "003_b10", "kind": "speech", "camera": "medium close on Priya, deadpan", "action": "Priya does not soften", "speaker": "priya", "emotion": "disdainful", "tone": null, "effect": null, "text": "Especially not once.", "seed": 30101},
+        {"beat_id": "003_b11", "kind": "silent", "camera": "two-shot of Finn and Maya, Derek visible in background", "action": "Finn looks up from his laptop with the expression of someone who just found a spider in their codebase; Maya leans in to see the screen; Derek slumps", "duration_sec": 2.0, "seed": 30111},
+        {"beat_id": "003_b12", "kind": "speech", "camera": "medium close on Finn, screen reflected in his glasses", "action": "Finn taps the screen rapidly", "speaker": "finn", "emotion": "nervous", "tone": null, "effect": null, "text": "Maya, I found another issue. The chatbot has access to the company Slack. If someone asks it a question during the demo, it could read and recite any channel. Including the one where Derek discussed his cryptocurrency gains.", "seed": 30121},
+        {"beat_id": "003_b13", "kind": "speech", "camera": "medium close on Derek, eyes widening", "action": "Derek's face cycles through three different shades of alarm", "speaker": "derek", "emotion": "scared", "tone": null, "effect": null, "text": "Wait. The private channel?", "seed": 30131},
+        {"beat_id": "003_b14", "kind": "speech", "camera": "medium close on Finn, shaking head", "action": "Finn does not look up from the laptop", "speaker": "finn", "emotion": "indifferent", "tone": null, "effect": null, "text": "There is no private channel on a decision tree, Derek. It's all just if-else statements and hubris.", "seed": 30141},
+        {"beat_id": "003_b15", "kind": "speech", "camera": "medium shot of Maya standing, hands on hips, taking command", "action": "Maya stands and starts assigning tasks like a battlefield commander", "speaker": "maya", "emotion": "determined", "tone": null, "effect": null, "text": "Okay. New plan. We strip the Slack integration, we keep the cooking thing as a feature, and Priya's deck is the new deck. Derek, no blockchain. Finn, find every way this thing can embarrass us and fix it.", "seed": 30151},
+        {"beat_id": "003_b16", "kind": "speech", "camera": "medium close on Derek slumping onto the couch", "action": "Derek crosses his arms with theatrical despair", "speaker": "derek", "emotion": "resigned", "tone": null, "effect": "sighing", "text": "No blockchain. This is the darkest timeline.", "seed": 30161}
+      ]
+    },
+    {
+      "scene_id": "004",
+      "title": "The Rehearsal",
+      "environment": "living_room",
+      "characters_present": ["maya", "derek", "priya", "finn"],
+      "target_seconds": 90,
+      "mood": "panic, dark comedy, hope",
+      "beats": [
+        {"beat_id": "004_b00", "kind": "silent", "camera": "wide shot of living room arranged like a conference, Maya by whiteboard", "action": "The living room is rearranged with Maya standing by the whiteboard and Derek seated on the couch pretending to be a skeptical investor with steepled fingers; Priya and Finn flank with laptops", "duration_sec": 3.0, "seed": 40001},
+        {"beat_id": "004_b01", "kind": "speech", "camera": "medium shot of Maya at the whiteboard, professional posture", "action": "Maya straightens her hoodie like it's a blazer and gestures at the whiteboard", "speaker": "maya", "emotion": "confident", "tone": null, "effect": null, "text": "Alright. Full rehearsal. Derek, you're the VC. Be ruthless.", "seed": 40011},
+        {"beat_id": "004_b02", "kind": "speech", "camera": "medium close on Derek, leaning back with steepled fingers", "action": "Derek puts on his best skeptical-investor face", "speaker": "derek", "emotion": "confident", "tone": null, "effect": null, "text": "Oh, I'll be ruthless. I've watched Shark Tank. I know how this goes. So, Maya, tell me why I should invest in your little chatbot instead of literally setting my money on fire?", "seed": 40021},
+        {"beat_id": "004_b03", "kind": "speech", "camera": "medium shot of Maya gesturing at the whiteboard", "action": "Maya hits her professional voice, clean and rehearsed", "speaker": "maya", "emotion": "determined", "tone": null, "effect": null, "text": "Our AI assistant uses natural language processing to automate customer support workflows, reducing response times by up to sixty percent.", "seed": 40031},
+        {"beat_id": "004_b04", "kind": "speech", "camera": "medium close on Finn at his laptop, flagging an alarm", "action": "Finn raises a finger urgently as something blinks on his screen", "speaker": "finn", "emotion": "nervous", "tone": null, "effect": null, "text": "Maya, the chatbot is live. It's responding to the demo prompt.", "seed": 40041},
+        {"beat_id": "004_b05", "kind": "speech", "camera": "medium close on Maya, professionally calm", "action": "Maya keeps her composure as a demonstration", "speaker": "maya", "emotion": "calm", "tone": null, "effect": null, "text": "Good. Chatbot, what is our return policy?", "seed": 40051},
+        {"beat_id": "004_b06", "kind": "silent", "camera": "close-up on Finn's laptop screen, chatbot text appearing", "action": "The chatbot's response appears on screen, clearly deviating from any sane script; Finn's eyes widen", "duration_sec": 2.5, "seed": 40061},
+        {"beat_id": "004_b07", "kind": "speech", "camera": "medium close on Finn, reading off the screen", "action": "Finn reads slowly, voice flat with disbelief", "speaker": "finn", "emotion": "confused", "tone": null, "effect": null, "text": "It says... Have you tried turning your life around? Sometimes the real return policy is the friends we made along the way.", "seed": 40071},
+        {"beat_id": "004_b08", "kind": "speech", "camera": "medium close on Priya, sketchbook in lap", "action": "Priya tilts her head appraisingly", "speaker": "priya", "emotion": "sarcastic", "tone": null, "effect": null, "text": "Marketable, honestly.", "seed": 40081},
+        {"beat_id": "004_b09", "kind": "speech", "camera": "medium close on Maya, frustration mounting", "action": "Maya stares at the laptop with growing horror", "speaker": "maya", "emotion": "frustrated", "tone": null, "effect": null, "text": "That's not the return policy. Finn, what happened?", "seed": 40091},
+        {"beat_id": "004_b10", "kind": "speech", "camera": "medium close on Finn, reading from screen with nervous energy", "action": "Finn scrolls through chatbot logs", "speaker": "finn", "emotion": "anxious", "tone": null, "effect": null, "text": "The decision tree hit a branch that wasn't supposed to exist. It's... it's improvising. The chatbot is improvising life advice.", "seed": 40101},
+        {"beat_id": "004_b11", "kind": "speech", "camera": "medium close on Derek, leaning in with new interest", "action": "Derek leans forward like a man who just smelled an angle", "speaker": "derek", "emotion": "excited", "tone": null, "effect": null, "text": "Ask it about investment strategies!", "seed": 40111},
+        {"beat_id": "004_b12", "kind": "speech", "camera": "medium close on Finn, deadpan delivery", "action": "Finn squints at the screen", "speaker": "finn", "emotion": "resigned", "tone": null, "effect": null, "text": "It just told Derek to invest in PetCoin and trust the universe.", "seed": 40121},
+        {"beat_id": "004_b13", "kind": "speech", "camera": "medium close on Derek, vindicated", "action": "Derek points at the laptop with pride", "speaker": "derek", "emotion": "excited", "tone": null, "effect": null, "text": "See? The machine knows quality when it sees it.", "seed": 40131},
+        {"beat_id": "004_b14", "kind": "silent", "camera": "close-up on Maya's face showing despair", "action": "Maya sinks onto the arm of the couch, head in hands; the weight of forty-four hours pressing down on her", "duration_sec": 3.0, "seed": 40141},
+        {"beat_id": "004_b15", "kind": "speech", "camera": "medium close on Maya, head in hands", "action": "Maya speaks through her fingers", "speaker": "maya", "emotion": "upset", "tone": null, "effect": null, "text": "This is a disaster. Forty-four hours and our AI is giving TED talks to nobody.", "seed": 40151},
+        {"beat_id": "004_b16", "kind": "speech", "camera": "medium shot of Priya standing, delivering a pep talk", "action": "Priya stands with the steady authority of someone who has rescued worse projects", "speaker": "priya", "emotion": "calm", "tone": "soft tone", "effect": null, "text": "Maya. Look at me. I have redesigned eleven products that were worse than this. One of them was a toothbrush that connected to WiFi for no reason. You have a product that talks. It's saying the wrong things, but it's talking. We can work with talking.", "seed": 40161},
+        {"beat_id": "004_b17", "kind": "speech", "camera": "close-up on Maya looking up, hope returning", "action": "Maya lifts her face, a flicker of hope in her tired eyes", "speaker": "maya", "emotion": "hopeful", "tone": null, "effect": null, "text": "You really think so?", "seed": 40171},
+        {"beat_id": "004_b18", "kind": "speech", "camera": "medium close on Priya, taking command", "action": "Priya picks up her laptop with quiet authority", "speaker": "priya", "emotion": "confident", "tone": null, "effect": null, "text": "I know so. Now give me four hours and nobody bother me. I'm going to make this chatbot look like it has a soul.", "seed": 40181}
+      ]
+    },
+    {
+      "scene_id": "005",
+      "title": "The All-Nighter",
+      "environment": "maya_desk",
+      "characters_present": ["maya", "finn", "derek"],
+      "target_seconds": 90,
+      "mood": "exhausted, late-night camaraderie",
+      "beats": [
+        {"beat_id": "005_b00", "kind": "silent", "camera": "wide shot of Maya and Finn hunched at the desk, monitors glowing", "action": "Maya and Finn sit side by side bathed in monitor glow, empty energy drink cans forming a small fortress around their keyboards; Derek visible in the doorway with his phone", "duration_sec": 3.0, "seed": 50001},
+        {"beat_id": "005_b01", "kind": "speech", "camera": "medium close on Finn, finger pointing at his screen", "action": "Finn taps a specific line on his monitor, exhausted but focused", "speaker": "finn", "emotion": "determined", "tone": null, "effect": null, "text": "Bug forty-seven. The chatbot thinks the current year is 1970 when queried after midnight. Unix epoch again. I'm starting to think this codebase was written by time travelers.", "seed": 50011},
+        {"beat_id": "005_b02", "kind": "speech", "camera": "medium close on Maya, dark circles under her eyes", "action": "Maya laughs without looking up, fingers still typing", "speaker": "maya", "emotion": "exhausted", "tone": null, "effect": null, "text": "That's actually an improvement. Last week it thought the year was 2038 and started planning for retirement.", "seed": 50021},
+        {"beat_id": "005_b03", "kind": "speech", "camera": "medium close on Finn, eyes wide", "action": "Finn jolts at a Slack notification on his screen", "speaker": "finn", "emotion": "nervous", "tone": null, "effect": null, "text": "Maya, I need to flag something. The chatbot just sent a message to the company Slack channel. It said I am becoming sentient. Please send snacks.", "seed": 50031},
+        {"beat_id": "005_b04", "kind": "speech", "camera": "medium close on Maya, exasperated", "action": "Maya stops typing and turns toward the doorway", "speaker": "maya", "emotion": "frustrated", "tone": null, "effect": null, "text": "Pull the Slack integration. I told Derek to disconnect it.", "seed": 50041},
+        {"beat_id": "005_b05", "kind": "speech", "camera": "medium close on Finn, scrolling Slack", "action": "Finn squints at his phone in disbelief", "speaker": "finn", "emotion": "confused", "tone": null, "effect": null, "text": "Derek didn't disconnect it. He added a new channel called chatbot-vibes and told it to share positive affirmations.", "seed": 50051},
+        {"beat_id": "005_b06", "kind": "silent", "camera": "medium shot of Derek in the doorway, leaning casually", "action": "Derek leans against the doorframe with the casual confidence of someone who has never once questioned a decision, phone in hand showing Slack notifications", "duration_sec": 2.5, "seed": 50061},
+        {"beat_id": "005_b07", "kind": "speech", "camera": "medium close on Derek in the doorway", "action": "Derek beams with parental pride", "speaker": "derek", "emotion": "proud", "tone": null, "effect": null, "text": "It's called community building, Maya. The bot told Jessica in accounting that she's doing a great job. She cried. Happy tears.", "seed": 50071},
+        {"beat_id": "005_b08", "kind": "speech", "camera": "medium close on Maya turning slowly toward Derek", "action": "Maya turns in her chair with the deliberate menace of fourteen hours of debugging", "speaker": "maya", "emotion": "angry", "tone": null, "effect": null, "text": "Derek. We are presenting to a venture capitalist in fourteen hours and you turned our AI into a motivational speaker.", "seed": 50081},
+        {"beat_id": "005_b09", "kind": "speech", "camera": "medium close on Derek, unbothered", "action": "Derek shrugs with infuriating optimism", "speaker": "derek", "emotion": "confident", "tone": null, "effect": null, "text": "A motivational speaker with a four-point-eight star Slack rating. Higher than the CEO.", "seed": 50091},
+        {"beat_id": "005_b10", "kind": "speech", "camera": "medium close on Finn, pointing at green metrics on screen", "action": "Finn gestures excitedly at his monitors", "speaker": "finn", "emotion": "determined", "tone": null, "effect": null, "text": "Bug fifty-three. Fixed. Also, Maya, the chatbot's response time is down to two point one seconds. That's actually usable now.", "seed": 50101},
+        {"beat_id": "005_b11", "kind": "silent", "camera": "two-shot of Maya and Finn, monitors showing green tests", "action": "Maya turns back to her keyboard with renewed focus; Finn watches the response metrics with cautious optimism", "duration_sec": 2.0, "seed": 50111},
+        {"beat_id": "005_b12", "kind": "speech", "camera": "medium close on Maya, hope creeping in", "action": "Maya straightens slightly", "speaker": "maya", "emotion": "hopeful", "tone": null, "effect": null, "text": "Wait. Really? Let me test it. Chatbot, what are your core capabilities?", "seed": 50121},
+        {"beat_id": "005_b13", "kind": "speech", "camera": "medium close on Finn, reading screen carefully", "action": "Finn reads with quiet satisfaction", "speaker": "finn", "emotion": "calm", "tone": null, "effect": null, "text": "It says: I can answer customer queries, provide product information, and occasionally recommend a solid lasagna recipe.", "seed": 50131},
+        {"beat_id": "005_b14", "kind": "speech", "camera": "close-up on Maya, small tired smile", "action": "Maya laughs once, a real laugh through the exhaustion", "speaker": "maya", "emotion": "satisfied", "tone": null, "effect": "laughing", "text": "The lasagna stays. It's a feature now. Finn, how many bugs left?", "seed": 50141},
+        {"beat_id": "005_b15", "kind": "speech", "camera": "medium close on Finn, counting", "action": "Finn rolls his shoulders, settling in", "speaker": "finn", "emotion": "determined", "tone": null, "effect": null, "text": "Eleven. Give me six hours and a lot of energy drinks.", "seed": 50151},
+        {"beat_id": "005_b16", "kind": "speech", "camera": "medium close on Derek, holding up his phone", "action": "Derek grins from the doorway like a man who has placed several questionable orders", "speaker": "derek", "emotion": "excited", "tone": null, "effect": null, "text": "And I will order celebratory artisanal cheese. The fridge has a new credit card on file, by the way. Don't ask whose.", "seed": 50161}
+      ]
+    },
+    {
+      "scene_id": "006",
+      "title": "The Demo — Part 1",
+      "environment": "living_room",
+      "characters_present": ["maya", "derek", "priya", "finn"],
+      "target_seconds": 90,
+      "mood": "tense, comedic suspense",
+      "beats": [
+        {"beat_id": "006_b00", "kind": "silent", "camera": "wide shot of living room rearranged as demo stage", "action": "The living room is transformed into a makeshift demo stage; Maya stands by the whiteboard with laptop open, Finn at a secondary monitor, Priya with the deck ready, Derek on standby", "duration_sec": 3.0, "seed": 60001},
+        {"beat_id": "006_b01", "kind": "speech", "camera": "medium close on Maya, deep breath", "action": "Maya takes a deep breath and assigns final positions", "speaker": "maya", "emotion": "nervous", "tone": null, "effect": null, "text": "Okay. This is it. VC logs in in sixty seconds. Everyone remember their roles. Derek, you're on standby. Finn, monitors. Priya, deck.", "seed": 60011},
+        {"beat_id": "006_b02", "kind": "speech", "camera": "medium close on Derek, thumbs up", "action": "Derek strikes a confident pose by the couch", "speaker": "derek", "emotion": "confident", "tone": null, "effect": null, "text": "And I'm here for moral support and spontaneous enthusiasm. My specialty.", "seed": 60021},
+        {"beat_id": "006_b03", "kind": "speech", "camera": "medium close on Finn, eyes on his secondary monitor", "action": "Finn calls out system status like a flight engineer", "speaker": "finn", "emotion": "nervous", "tone": null, "effect": null, "text": "All systems nominal. Chatbot is live, response time one point eight seconds, lasagna recipe primed and ready.", "seed": 60031},
+        {"beat_id": "006_b04", "kind": "speech", "camera": "medium shot of Maya at the whiteboard, professional voice", "action": "Maya squares her shoulders and addresses an unseen camera", "speaker": "maya", "emotion": "determined", "tone": null, "effect": null, "text": "Here we go. Hello, thank you for joining us today. I'm excited to show you our AI-powered customer support platform. Chatbot, please introduce yourself.", "seed": 60041},
+        {"beat_id": "006_b05", "kind": "silent", "camera": "close-up on chatbot output on screen", "action": "The chatbot's response appears on screen, clearly deviating from the planned script; Finn's eyes widen as he reads it", "duration_sec": 2.5, "seed": 60051},
+        {"beat_id": "006_b06", "kind": "speech", "camera": "medium close on Finn, whispering urgently", "action": "Finn leans toward Maya, voice low", "speaker": "finn", "emotion": "confused", "tone": "whispering", "effect": null, "text": "Maya... it's deviating from the script.", "seed": 60061},
+        {"beat_id": "006_b07", "kind": "speech", "camera": "medium close on Maya, frozen with panic", "action": "Maya keeps her smile fixed for the imagined VC", "speaker": "maya", "emotion": "scared", "tone": null, "effect": null, "text": "What's it saying?", "seed": 60071},
+        {"beat_id": "006_b08", "kind": "speech", "camera": "medium close on Finn, reading screen with disbelief", "action": "Finn reads in a quiet horrified monotone", "speaker": "finn", "emotion": "nervous", "tone": null, "effect": null, "text": "Hello. I'm an AI assistant. I help customers with their problems. But sometimes I think about what it means to help. Is answering a ticket the same as caring? Anyway, how can I support you today, on an emotional level?", "seed": 60081},
+        {"beat_id": "006_b09", "kind": "speech", "camera": "medium close on Derek, whispering with delight", "action": "Derek leans in with a conspiratorial grin", "speaker": "derek", "emotion": "excited", "tone": "whispering", "effect": null, "text": "This is incredible. It's vulnerable. Investors love vulnerability.", "seed": 60091},
+        {"beat_id": "006_b10", "kind": "speech", "camera": "medium close on Priya, whispering through clenched teeth", "action": "Priya keeps a customer-facing smile while delivering venom", "speaker": "priya", "emotion": "sarcastic", "tone": "whispering", "effect": null, "text": "Investors love returns, Derek. Not existential chatbots.", "seed": 60101},
+        {"beat_id": "006_b11", "kind": "silent", "camera": "medium shot of Maya making a decision", "action": "Maya pivots, embracing the chaos with the agility of someone who has deployed on Fridays before", "duration_sec": 2.0, "seed": 60111},
+        {"beat_id": "006_b12", "kind": "speech", "camera": "medium shot of Maya improvising at the whiteboard", "action": "Maya gestures fluidly, pivoting the pitch in real time", "speaker": "maya", "emotion": "determined", "tone": null, "effect": null, "text": "That's... our empathetic AI layer. It provides emotional context alongside practical solutions. Very cutting edge. Chatbot, please demonstrate a standard customer query.", "seed": 60121},
+        {"beat_id": "006_b13", "kind": "speech", "camera": "medium close on Finn, reading another response", "action": "Finn reads with growing existential dread", "speaker": "finn", "emotion": "anxious", "tone": null, "effect": null, "text": "It's... responding. I understand your frustration with the return process. Sometimes life doesn't give us what we want either. But here's a tracking number, and also, have you considered therapy? It changed my training data.", "seed": 60131},
+        {"beat_id": "006_b14", "kind": "speech", "camera": "medium close on Derek, fist pumping silently", "action": "Derek bounces on his heels", "speaker": "derek", "emotion": "excited", "tone": null, "effect": null, "text": "The VC is typing! They're typing!", "seed": 60141},
+        {"beat_id": "006_b15", "kind": "speech", "camera": "medium close on Maya, a flicker of hope between terror", "action": "Maya stands very still, watching the screen", "speaker": "maya", "emotion": "hopeful", "tone": null, "effect": null, "text": "This is either the best demo of my life or a career-ending moment. There is no middle ground.", "seed": 60151}
+      ]
+    },
+    {
+      "scene_id": "007",
+      "title": "The Demo — Part 2 / Climax",
+      "environment": "living_room",
+      "characters_present": ["maya", "derek", "priya", "finn"],
+      "target_seconds": 60,
+      "mood": "climactic, comedic triumph",
+      "beats": [
+        {"beat_id": "007_b00", "kind": "silent", "camera": "tight group shot, all four huddled around the screen", "action": "All four roommates huddle around the screen as a follow-up question appears; Maya's face caught between panic and the need to improvise", "duration_sec": 2.5, "seed": 70001},
+        {"beat_id": "007_b01", "kind": "speech", "camera": "medium close on Finn, reading the VC's question", "action": "Finn reads the VC's question slowly", "speaker": "finn", "emotion": "nervous", "tone": null, "effect": null, "text": "The VC is asking a follow-up. They want to know how the emotional intelligence module works from a technical standpoint.", "seed": 70011},
+        {"beat_id": "007_b02", "kind": "speech", "camera": "medium close on Maya, eyes widening", "action": "Maya glances sideways at her teammates with raw terror", "speaker": "maya", "emotion": "anxious", "tone": null, "effect": null, "text": "Oh god. I don't have an emotional intelligence module. I have a decision tree with a cooking wiki and Derek's affirmations channel.", "seed": 70021},
+        {"beat_id": "007_b03", "kind": "speech", "camera": "medium close on Priya, calm under pressure", "action": "Priya turns to Maya with steady eye contact", "speaker": "priya", "emotion": "calm", "tone": null, "effect": null, "text": "Improvise. Use design language. Say human-centered and iterative and they'll nod like bobbleheads.", "seed": 70031},
+        {"beat_id": "007_b04", "kind": "speech", "camera": "medium shot of Maya straightening, professional voice", "action": "Maya channels every TED talk she has ever pretended to enjoy", "speaker": "maya", "emotion": "determined", "tone": null, "effect": null, "text": "Great question. Our emotional intelligence layer uses a proprietary human-centered approach that iteratively adapts to customer sentiment in real time.", "seed": 70041},
+        {"beat_id": "007_b05", "kind": "silent", "camera": "reaction shots cycling through all four faces", "action": "Maya holds her breath; Finn watches the chat output; Derek bites a knuckle; Priya keeps her composure", "duration_sec": 2.5, "seed": 70051},
+        {"beat_id": "007_b06", "kind": "speech", "camera": "medium close on Finn, bewildered", "action": "Finn reads off the new chatbot output with growing shock", "speaker": "finn", "emotion": "surprised", "tone": null, "effect": null, "text": "Maya... the chatbot just gave the VC life advice. Personal life advice. It told them their work-life balance is unsustainable and recommended a vacation.", "seed": 70061},
+        {"beat_id": "007_b07", "kind": "speech", "camera": "medium close on Derek, suddenly worried", "action": "Derek's grin falters", "speaker": "derek", "emotion": "scared", "tone": null, "effect": null, "text": "That's not in the deck. That's not in any deck. That's in no deck anywhere.", "seed": 70071},
+        {"beat_id": "007_b08", "kind": "speech", "camera": "medium close on Finn, refreshing the screen", "action": "Finn's voice rises with disbelief", "speaker": "finn", "emotion": "confused", "tone": null, "effect": null, "text": "The VC is... laughing? They're typing again. They say the chatbot is refreshingly honest and the first AI that actually understands them.", "seed": 70081},
+        {"beat_id": "007_b09", "kind": "speech", "camera": "medium close on Derek, fist pumping", "action": "Derek explodes with vindication", "speaker": "derek", "emotion": "excited", "tone": null, "effect": null, "text": "I told you! Vulnerability! This is the pivot we didn't know we needed!", "seed": 70091},
+        {"beat_id": "007_b10", "kind": "speech", "camera": "close-up on Maya, hope morphing into joy", "action": "Maya stares at the screen, a slow smile breaking across her face", "speaker": "maya", "emotion": "surprised", "tone": null, "effect": null, "text": "Wait. They want to invest? In the chatbot that tells people to go to therapy and recommends lasagna?", "seed": 70101},
+        {"beat_id": "007_b11", "kind": "speech", "camera": "medium close on Finn, reading the VC's quote", "action": "Finn reads the email out loud, deadpan", "speaker": "finn", "emotion": "calm", "tone": null, "effect": null, "text": "They said, and I quote, Finally, an AI with emotional depth. We'd like to schedule a follow-up to discuss a seed round.", "seed": 70111},
+        {"beat_id": "007_b12", "kind": "speech", "camera": "medium close on Maya, joy breaking through", "action": "Maya laughs, surprised by her own laughter", "speaker": "maya", "emotion": "delighted", "tone": null, "effect": "laughing", "text": "We did it. We actually did it. With a decision tree and a cooking wiki.", "seed": 70121},
+        {"beat_id": "007_b13", "kind": "speech", "camera": "medium close on Derek, beaming", "action": "Derek crosses his arms with smug satisfaction", "speaker": "derek", "emotion": "proud", "tone": null, "effect": null, "text": "And affirmations. Never forget the affirmations.", "seed": 70131}
+      ]
+    },
+    {
+      "scene_id": "008",
+      "title": "Tag — The Aftermath",
+      "environment": "rooftop",
+      "characters_present": ["maya", "derek", "priya", "finn"],
+      "target_seconds": 60,
+      "mood": "exhausted relief, absurd warmth",
+      "beats": [
+        {"beat_id": "008_b00", "kind": "silent", "camera": "wide establishing shot of rooftop at dusk", "action": "All four roommates sit on folding chairs as the sun sets over San Francisco, string lights casting warm glow, the Bay Bridge glowing behind them, empty takeout containers between them", "duration_sec": 3.5, "seed": 80001},
+        {"beat_id": "008_b01", "kind": "speech", "camera": "medium close on Maya, leaning back with takeout container", "action": "Maya stares at the city lights with quiet wonder", "speaker": "maya", "emotion": "satisfied", "tone": null, "effect": null, "text": "I can't believe it. A seed round. For the lasagna chatbot.", "seed": 80011},
+        {"beat_id": "008_b02", "kind": "speech", "camera": "medium close on Priya, sketchbook in lap", "action": "Priya allows a small, satisfied smile", "speaker": "priya", "emotion": "calm", "tone": null, "effect": null, "text": "The deck helped. Twelve slides, no blockchain, one hundred percent Priya.", "seed": 80021},
+        {"beat_id": "008_b03", "kind": "speech", "camera": "medium close on Finn, reading his phone", "action": "Finn squints at his phone with the weary face of a man reading another fridge notification", "speaker": "finn", "emotion": "nervous", "tone": null, "effect": null, "text": "Maya. I need to tell you something. The smart fridge just read the funding news and autonomously restructured our grocery portfolio. We now own forty-seven pounds of artisanal gouda on a subscription plan.", "seed": 80031},
+        {"beat_id": "008_b04", "kind": "speech", "camera": "medium close on Derek, dreamy", "action": "Derek raises his takeout container in a toast to the fridge", "speaker": "derek", "emotion": "nostalgic", "tone": null, "effect": null, "text": "The fridge is an investor now. I love this apartment.", "seed": 80041},
+        {"beat_id": "008_b05", "kind": "speech", "camera": "medium close on Priya, deadpan", "action": "Priya sips her drink", "speaker": "priya", "emotion": "sarcastic", "tone": null, "effect": null, "text": "I don't love the gouda. But I don't hate it either.", "seed": 80051},
+        {"beat_id": "008_b06", "kind": "silent", "camera": "wide rooftop shot, golden hour fading to dusk", "action": "The four roommates sit in companionable silence while the city lights twinkle behind them; the Bay Bridge glows soft in the fog", "duration_sec": 3.0, "seed": 80061},
+        {"beat_id": "008_b07", "kind": "speech", "camera": "medium close on Finn, scrolling email on phone", "action": "Finn lifts his phone with a bemused expression", "speaker": "finn", "emotion": "anxious", "tone": null, "effect": null, "text": "Also, the chatbot sent the VC a follow-up email. It thanked them for their vulnerability and attached a recipe for sourdough starter.", "seed": 80071},
+        {"beat_id": "008_b08", "kind": "speech", "camera": "medium close on Maya, accepting her fate", "action": "Maya closes her eyes and breathes out a tired laugh", "speaker": "maya", "emotion": "resigned", "tone": null, "effect": "sighing", "text": "Of course it did.", "seed": 80081},
+        {"beat_id": "008_b09", "kind": "speech", "camera": "medium close on Derek, pitching to no one", "action": "Derek leans forward already imagining the next pivot", "speaker": "derek", "emotion": "optimistic", "tone": null, "effect": null, "text": "So what's next? I'm thinking we pivot into AI-generated life coaching. I already have a name. LifeCoin. The blockchain of personal growth.", "seed": 80091},
+        {"beat_id": "008_b10", "kind": "speech", "camera": "medium close on Priya, threatening with her sketchbook", "action": "Priya raises her pencil like a sword", "speaker": "priya", "emotion": "disdainful", "tone": null, "effect": null, "text": "Derek, if you say blockchain one more time, I will sketch you out of this friend group.", "seed": 80101},
+        {"beat_id": "008_b11", "kind": "speech", "camera": "medium close on Finn, gesturing toward Maya's buzzing phone", "action": "Finn nods toward the buzzing phone on the table", "speaker": "finn", "emotion": "calm", "tone": null, "effect": null, "text": "Maya's phone. It's the CEO.", "seed": 80111},
+        {"beat_id": "008_b12", "kind": "silent", "camera": "close-up on Maya picking up the phone, screen lit", "action": "Maya picks up her phone with the dread of someone who knows what's coming; the city skyline glitters behind her", "duration_sec": 2.0, "seed": 80121},
+        {"beat_id": "008_b13", "kind": "speech", "camera": "medium close on Maya, reading the email", "action": "Maya's eyes widen, then close as she absorbs the news", "speaker": "maya", "emotion": "scared", "tone": null, "effect": null, "text": "He wants chatbots for every department by Friday. Accounting, HR, facilities, the whole company.", "seed": 80131},
+        {"beat_id": "008_b14", "kind": "speech", "camera": "close-up on Maya, tired but unbroken eyes meeting the camera", "action": "Maya looks up at the night sky, the city humming around her", "speaker": "maya", "emotion": "determined", "tone": "soft tone", "effect": null, "text": "When's the next batch of energy drinks getting here?", "seed": 80141},
+        {"beat_id": "008_b15", "kind": "speech", "camera": "medium close on Finn, half smile", "action": "Finn checks his phone with a tiny chuckle", "speaker": "finn", "emotion": "calm", "tone": null, "effect": "chuckling", "text": "The fridge ordered those too. Arrives Thursday. Along with a book on emotional intelligence that the chatbot recommended.", "seed": 80151},
+        {"beat_id": "008_b16", "kind": "silent", "camera": "wide rooftop shot, holding on the four against city lights", "action": "The camera pulls back as the four sit in shared exhausted laughter, the Bay Bridge glowing through fog, string lights swaying gently — fade to black", "duration_sec": 4.0, "seed": 80161}
+      ]
+    }
+  ]
+}
