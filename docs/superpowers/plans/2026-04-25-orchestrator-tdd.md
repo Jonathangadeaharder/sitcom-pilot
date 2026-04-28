@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a decoupled, testable orchestrator that drives ComfyUI via API to render video shots from a JSON cut-sheet, with crash recovery and Apple Silicon MPS optimization.
+**Goal:** Build a decoupled, testable sitcom_pilot that drives ComfyUI via API to render video shots from a JSON cut-sheet, with crash recovery and Apple Silicon MPS optimization.
 
 **Architecture:** Pipeline is split into 5 units with clear interfaces: (1) `EpisodeLoader` parses the JSON cut-sheet, (2) `PromptBuilder` constructs ComfyUI-ready prompts from shot data, (3) `ComfyUIClient` handles API communication with retry/crash recovery, (4) `ShotRenderer` orchestrates per-shot rendering, (5) `EpisodeAssembler` concatenates outputs. Each unit is independently testable.
 
@@ -13,14 +13,16 @@
 ## File Structure
 
 ```
-sitcom_pilot/
-├── orchestrator/
-│   ├── __init__.py          # Package init, exports public API
-│   ├── loader.py            # EpisodeLoader — parses episode JSON
-│   ├── prompts.py           # PromptBuilder — builds ComfyUI text prompts
-│   ├── comfyui_client.py    # ComfyUIClient — API communication + retry
-│   ├── renderer.py          # ShotRenderer — drives per-shot render pipeline
-│   └── assembler.py         # EpisodeAssembler — FFmpeg concat
+├── src/
+│   └── sitcom_pilot/
+│       ├── __init__.py          # Package init, exports public API
+│       ├── loader.py            # EpisodeLoader — parses episode JSON
+│       ├── prompts.py           # PromptBuilder — builds ComfyUI text prompts
+│       ├── comfyui_client.py    # ComfyUIClient — API communication + retry
+│       ├── renderer.py          # ShotRenderer — drives per-shot render pipeline
+│       ├── assembler.py         # EpisodeAssembler — FFmpeg concat
+│       └── cli/
+│           └── main.py          # CLI entry point (thin wrapper)
 ├── tests/
 │   ├── __init__.py
 │   ├── test_loader.py       # Unit tests for EpisodeLoader
@@ -30,8 +32,7 @@ sitcom_pilot/
 │   ├── test_assembler.py    # Unit tests for EpisodeAssembler (mocked subprocess)
 │   ├── test_integration.py  # Integration tests between pairs of units
 │   └── conftest.py          # Shared fixtures (sample episode JSON, etc.)
-├── episode_01.json          # The Buffering S01E01 cut-sheet
-└── orchestrator.py          # CLI entry point (thin wrapper)
+└── episode_01.json          # The Buffering S01E01 cut-sheet
 ```
 
 ## Test Pyramid
@@ -50,7 +51,7 @@ sitcom_pilot/
 ## Task 1: EpisodeLoader — Parse Episode JSON
 
 **Files:**
-- Create: `orchestrator/loader.py`
+- Create: `src/sitcom_pilot/loader.py`
 - Create: `tests/conftest.py`
 - Create: `tests/test_loader.py`
 
@@ -63,7 +64,7 @@ sitcom_pilot/
 import json
 import pytest
 from pathlib import Path
-from orchestrator.loader import EpisodeLoader
+from sitcom_pilot.loader import EpisodeLoader
 
 
 def test_load_valid_episode_returns_episode_data(tmp_path):
@@ -110,22 +111,22 @@ def test_load_valid_episode_returns_episode_data(tmp_path):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `python3 -m pytest tests/test_loader.py -v`
-Expected: FAIL — `ModuleNotFoundError: No module named 'orchestrator'`
+Expected: FAIL — `ModuleNotFoundError: No module named 'sitcom_pilot'`
 
 ### GREEN
 
 - [ ] **Step 3: Create package init and minimal loader**
 
 ```python
-# orchestrator/__init__.py
+# src/sitcom_pilot/__init__.py
 
-from orchestrator.loader import EpisodeLoader
+from sitcom_pilot.loader import EpisodeLoader
 
 __all__ = ["EpisodeLoader"]
 ```
 
 ```python
-# orchestrator/loader.py
+# src/sitcom_pilot/loader.py
 from __future__ import annotations
 
 import json
@@ -273,7 +274,7 @@ Expected: All PASS
 - [ ] **Step 9: Commit**
 
 ```bash
-git add orchestrator/__init__.py orchestrator/loader.py tests/conftest.py tests/test_loader.py
+git add src/sitcom_pilot/__init__.py src/sitcom_pilot/loader.py tests/conftest.py tests/test_loader.py
 git commit -m "feat: add EpisodeLoader with full test coverage"
 ```
 
@@ -282,7 +283,7 @@ git commit -m "feat: add EpisodeLoader with full test coverage"
 ## Task 2: PromptBuilder — Construct ComfyUI Prompts
 
 **Files:**
-- Create: `orchestrator/prompts.py`
+- Create: `src/sitcom_pilot/prompts.py`
 - Create: `tests/test_prompts.py`
 
 ### RED
@@ -292,10 +293,10 @@ git commit -m "feat: add EpisodeLoader with full test coverage"
 ```python
 # tests/test_prompts.py
 import pytest
-from orchestrator.loader import (
+from sitcom_pilot.loader import (
     CharacterData, EnvironmentData, SceneData, ShotData, EpisodeData,
 )
-from orchestrator.prompts import PromptBuilder
+from sitcom_pilot.prompts import PromptBuilder
 
 
 @pytest.fixture
@@ -369,17 +370,17 @@ def test_build_start_prompt_no_characters():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `python3 -m pytest tests/test_prompts.py -v`
-Expected: FAIL — `ModuleNotFoundError: No module named 'orchestrator.prompts'`
+Expected: FAIL — `ModuleNotFoundError: No module named 'sitcom_pilot.prompts'`
 
 ### GREEN
 
 - [ ] **Step 3: Implement PromptBuilder**
 
 ```python
-# orchestrator/prompts.py
+# src/sitcom_pilot/prompts.py
 from __future__ import annotations
 
-from orchestrator.loader import EpisodeData, SceneData, ShotData
+from sitcom_pilot.loader import EpisodeData, SceneData, ShotData
 
 
 class PromptBuilder:
@@ -416,7 +417,7 @@ Expected: All PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add orchestrator/prompts.py tests/test_prompts.py
+git add src/sitcom_pilot/prompts.py tests/test_prompts.py
 git commit -m "feat: add PromptBuilder with full test coverage"
 ```
 
@@ -425,7 +426,7 @@ git commit -m "feat: add PromptBuilder with full test coverage"
 ## Task 3: ComfyUIClient — API Communication with Crash Recovery
 
 **Files:**
-- Create: `orchestrator/comfyui_client.py`
+- Create: `src/sitcom_pilot/comfyui_client.py`
 - Create: `tests/test_comfyui_client.py`
 
 ### RED
@@ -437,7 +438,7 @@ git commit -m "feat: add PromptBuilder with full test coverage"
 import json
 import pytest
 from unittest.mock import patch, MagicMock
-from orchestrator.comfyui_client import ComfyUIClient
+from sitcom_pilot.comfyui_client import ComfyUIClient
 
 
 @pytest.fixture
@@ -530,7 +531,7 @@ Expected: FAIL — `ModuleNotFoundError`
 - [ ] **Step 3: Implement ComfyUIClient**
 
 ```python
-# orchestrator/comfyui_client.py
+# src/sitcom_pilot/comfyui_client.py
 from __future__ import annotations
 
 import json
@@ -608,7 +609,7 @@ Expected: All PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add orchestrator/comfyui_client.py tests/test_comfyui_client.py
+git add src/sitcom_pilot/comfyui_client.py tests/test_comfyui_client.py
 git commit -m "feat: add ComfyUIClient with retry and crash recovery tests"
 ```
 
@@ -617,7 +618,7 @@ git commit -m "feat: add ComfyUIClient with retry and crash recovery tests"
 ## Task 4: ShotRenderer — Drive Per-Shot Rendering
 
 **Files:**
-- Create: `orchestrator/renderer.py`
+- Create: `src/sitcom_pilot/renderer.py`
 - Create: `tests/test_renderer.py`
 
 ### RED
@@ -629,12 +630,12 @@ git commit -m "feat: add ComfyUIClient with retry and crash recovery tests"
 import json
 import pytest
 from unittest.mock import MagicMock, call, patch
-from orchestrator.renderer import ShotRenderer
-from orchestrator.loader import (
+from sitcom_pilot.renderer import ShotRenderer
+from sitcom_pilot.loader import (
     CharacterData, EnvironmentData, SceneData, ShotData, EpisodeData,
 )
-from orchestrator.comfyui_client import ComfyUIClient
-from orchestrator.prompts import PromptBuilder
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.prompts import PromptBuilder
 
 
 @pytest.fixture
@@ -758,7 +759,7 @@ Expected: FAIL — `ModuleNotFoundError`
 - [ ] **Step 3: Implement ShotRenderer**
 
 ```python
-# orchestrator/renderer.py
+# src/sitcom_pilot/renderer.py
 from __future__ import annotations
 
 import copy
@@ -766,9 +767,9 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from orchestrator.comfyui_client import ComfyUIClient
-from orchestrator.loader import EpisodeData, SceneData, ShotData
-from orchestrator.prompts import PromptBuilder
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.loader import EpisodeData, SceneData, ShotData
+from sitcom_pilot.prompts import PromptBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -876,7 +877,7 @@ Expected: All PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add orchestrator/renderer.py tests/test_renderer.py
+git add src/sitcom_pilot/renderer.py tests/test_renderer.py
 git commit -m "feat: add ShotRenderer with full test coverage"
 ```
 
@@ -885,7 +886,7 @@ git commit -m "feat: add ShotRenderer with full test coverage"
 ## Task 5: EpisodeAssembler — FFmpeg Concatenation
 
 **Files:**
-- Create: `orchestrator/assembler.py`
+- Create: `src/sitcom_pilot/assembler.py`
 - Create: `tests/test_assembler.py`
 
 ### RED
@@ -897,7 +898,7 @@ git commit -m "feat: add ShotRenderer with full test coverage"
 import pytest
 from unittest.mock import patch, MagicMock, call
 from pathlib import Path
-from orchestrator.assembler import EpisodeAssembler
+from sitcom_pilot.assembler import EpisodeAssembler
 
 
 @pytest.fixture
@@ -972,7 +973,7 @@ Expected: FAIL
 - [ ] **Step 3: Implement EpisodeAssembler**
 
 ```python
-# orchestrator/assembler.py
+# src/sitcom_pilot/assembler.py
 from __future__ import annotations
 
 import logging
@@ -1034,7 +1035,7 @@ Expected: All PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add orchestrator/assembler.py tests/test_assembler.py
+git add src/sitcom_pilot/assembler.py tests/test_assembler.py
 git commit -m "feat: add EpisodeAssembler with VideoToolbox detection and tests"
 ```
 
@@ -1055,11 +1056,11 @@ import json
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-from orchestrator.loader import EpisodeLoader
-from orchestrator.prompts import PromptBuilder
-from orchestrator.renderer import ShotRenderer
-from orchestrator.comfyui_client import ComfyUIClient
-from orchestrator.assembler import EpisodeAssembler
+from sitcom_pilot.loader import EpisodeLoader
+from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.renderer import ShotRenderer
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.assembler import EpisodeAssembler
 
 
 EPISODE_JSON = {
@@ -1267,7 +1268,7 @@ Convert the existing `script.py` data into the new JSON format with 6 scenes, 4 
 ```python
 # tests/test_episode_01.py
 from pathlib import Path
-from orchestrator.loader import EpisodeLoader
+from sitcom_pilot.loader import EpisodeLoader
 
 
 def test_episode_01_loads():
@@ -1294,12 +1295,12 @@ git commit -m "feat: add Buffering S01E01 episode cut-sheet in JSON format"
 ## Task 8: CLI Entry Point
 
 **Files:**
-- Create: `orchestrator.py` (at project root)
+- Create: `src/sitcom_pilot/cli/main.py`
 
 - [ ] **Step 1: Create thin CLI wrapper**
 
 ```python
-# orchestrator.py
+# src/sitcom_pilot/cli/main.py
 #!/usr/bin/env python3
 import argparse
 import json
@@ -1307,19 +1308,17 @@ import logging
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
-
-from orchestrator.loader import EpisodeLoader
-from orchestrator.prompts import PromptBuilder
-from orchestrator.comfyui_client import ComfyUIClient
-from orchestrator.renderer import ShotRenderer
-from orchestrator.assembler import EpisodeAssembler
+from sitcom_pilot.loader import EpisodeLoader
+from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.renderer import ShotRenderer
+from sitcom_pilot.assembler import EpisodeAssembler
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="AI Showrunner Orchestrator")
+    parser = argparse.ArgumentParser(description="Sitcom Pilot CLI")
     parser.add_argument("episode", help="Path to episode JSON cut-sheet")
     parser.add_argument("--workflow", default="workflow_api.json", help="ComfyUI workflow template")
     parser.add_argument("--comfy-url", default="http://127.0.0.1:8188")
@@ -1362,8 +1361,8 @@ if __name__ == "__main__":
 - [ ] **Step 2: Commit**
 
 ```bash
-git add orchestrator.py
-git commit -m "feat: add CLI entry point for orchestrator"
+git add src/sitcom_pilot/cli/main.py
+git commit -m "feat: add CLI entry point for sitcom-pilot"
 ```
 
 ---

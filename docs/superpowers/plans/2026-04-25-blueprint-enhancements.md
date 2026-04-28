@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Enhance the existing orchestrator to match the master blueprint — add crash recovery, multi-character LoRA injection, configurable node mapping, output retrieval, VRAM cooldown, and full render→assemble pipeline.
+**Goal:** Enhance the existing sitcom_pilot to match the master blueprint — add crash recovery, multi-character LoRA injection, configurable node mapping, output retrieval, VRAM cooldown, and full render→assemble pipeline.
 
 **Architecture:** The existing 5-unit pipeline (EpisodeLoader → PromptBuilder → ShotRenderer → ComfyUIClient → EpisodeAssembler) is preserved. We add a `NodeMap` config layer to decouple hardcoded node IDs, extend `ComfyUIClient` with server management and output retrieval, enhance `ShotRenderer` with crash recovery and multi-character support, and wire the CLI for full end-to-end execution.
 
@@ -13,12 +13,12 @@
 ## Current State
 
 36 tests passing across 7 test files. All units implemented:
-- `orchestrator/loader.py` — EpisodeLoader + dataclasses
-- `orchestrator/prompts.py` — PromptBuilder
-- `orchestrator/comfyui_client.py` — ComfyUIClient (queue, wait, retry)
-- `orchestrator/renderer.py` — ShotRenderer + RenderResult
-- `orchestrator/assembler.py` — EpisodeAssembler (FFmpeg concat, VideoToolbox)
-- `orchestrator.py` — CLI entry point
+- `src/sitcom_pilot/loader.py` — EpisodeLoader + dataclasses
+- `src/sitcom_pilot/prompts.py` — PromptBuilder
+- `src/sitcom_pilot/comfyui_client.py` — ComfyUIClient (queue, wait, retry)
+- `src/sitcom_pilot/renderer.py` — ShotRenderer + RenderResult
+- `src/sitcom_pilot/assembler.py` — EpisodeAssembler (FFmpeg concat, VideoToolbox)
+- `src/sitcom_pilot/cli/main.py` — CLI entry point
 - `episode_01.json` — Buffering S01E01 cut-sheet
 
 ## Gap Analysis (Blueprint vs Current)
@@ -39,20 +39,22 @@
 
 ```
 sitcom_pilot/
-├── orchestrator/
-│   ├── __init__.py              # MODIFY: export new public API
-│   ├── loader.py                # KEEP AS-IS
-│   ├── prompts.py               # KEEP AS-IS
-│   ├── comfyui_client.py        # MODIFY: add get_output_paths(), start_server()
-│   ├── renderer.py              # MODIFY: multi-char LoRA, crash recovery, cooldown
-│   ├── assembler.py             # KEEP AS-IS
-│   └── node_map.py              # CREATE: configurable node ID mapping
+├── src/
+│   └── sitcom_pilot/
+│       ├── __init__.py              # MODIFY: export new public API
+│       ├── loader.py                # KEEP AS-IS
+│       ├── prompts.py               # KEEP AS-IS
+│       ├── comfyui_client.py        # MODIFY: add get_output_paths(), start_server()
+│       ├── renderer.py              # MODIFY: multi-char LoRA, crash recovery, cooldown
+│       ├── assembler.py             # KEEP AS-IS
+│       ├── node_map.py              # CREATE: configurable node ID mapping
+│       └── cli/
+│           └── main.py              # MODIFY: full pipeline with assembly
 ├── tests/
 │   ├── test_node_map.py         # CREATE
 │   ├── test_renderer.py         # MODIFY: add multi-char tests, update existing
 │   ├── test_comfyui_client.py   # MODIFY: add output retrieval + server mgmt tests
 │   └── ... (existing tests unchanged)
-├── orchestrator.py              # MODIFY: full pipeline with assembly
 └── episode_01.json              # KEEP AS-IS
 ```
 
@@ -61,7 +63,7 @@ sitcom_pilot/
 ## Task 1: NodeMap — Configurable Node ID Mapping
 
 **Files:**
-- Create: `orchestrator/node_map.py`
+- Create: `src/sitcom_pilot/node_map.py`
 - Create: `tests/test_node_map.py`
 
 ### Why
@@ -75,7 +77,7 @@ The blueprint uses named constants (`NODE_START_PROMPT`, `NODE_AUDIO_LOADER`, et
 ```python
 # tests/test_node_map.py
 import pytest
-from orchestrator.node_map import NodeMap
+from sitcom_pilot.node_map import NodeMap
 
 
 def test_default_node_map_has_required_fields():
@@ -127,7 +129,7 @@ Expected: FAIL (module not found)
 - [ ] **Step 3: Implement NodeMap**
 
 ```python
-# orchestrator/node_map.py
+# src/sitcom_pilot/node_map.py
 from __future__ import annotations
 from dataclasses import dataclass, field
 
@@ -161,7 +163,7 @@ Expected: All 5 PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add orchestrator/node_map.py tests/test_node_map.py
+git add src/sitcom_pilot/node_map.py tests/test_node_map.py
 git commit -m "feat: add NodeMap for configurable ComfyUI node ID mapping"
 ```
 
@@ -170,7 +172,7 @@ git commit -m "feat: add NodeMap for configurable ComfyUI node ID mapping"
 ## Task 2: ShotRenderer — Multi-Character LoRA + NodeMap
 
 **Files:**
-- Modify: `orchestrator/renderer.py`
+- Modify: `src/sitcom_pilot/renderer.py`
 - Modify: `tests/test_renderer.py`
 
 ### Why
@@ -185,7 +187,7 @@ Add these tests to `tests/test_renderer.py`. Also update existing fixtures to us
 
 ```python
 # Add to top of tests/test_renderer.py
-from orchestrator.node_map import NodeMap
+from sitcom_pilot.node_map import NodeMap
 
 
 # Add new fixtures and tests after existing ones:
@@ -265,19 +267,19 @@ Expected: FAIL
 
 - [ ] **Step 3: Update ShotRenderer to use NodeMap and inject multiple character LoRAs**
 
-Replace the entire contents of `orchestrator/renderer.py`:
+Replace the entire contents of `src/sitcom_pilot/renderer.py`:
 
 ```python
-# orchestrator/renderer.py
+# src/sitcom_pilot/renderer.py
 from __future__ import annotations
 import copy
 import logging
 from dataclasses import dataclass
 from typing import Any
-from orchestrator.comfyui_client import ComfyUIClient
-from orchestrator.loader import EpisodeData, SceneData, ShotData
-from orchestrator.node_map import NodeMap
-from orchestrator.prompts import PromptBuilder
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.loader import EpisodeData, SceneData, ShotData
+from sitcom_pilot.node_map import NodeMap
+from sitcom_pilot.prompts import PromptBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -364,7 +366,7 @@ Expected: All 9 PASS (7 existing + 2 new)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add orchestrator/renderer.py tests/test_renderer.py
+git add src/sitcom_pilot/renderer.py tests/test_renderer.py
 git commit -m "feat: add multi-character LoRA injection and NodeMap support to ShotRenderer"
 ```
 
@@ -373,7 +375,7 @@ git commit -m "feat: add multi-character LoRA injection and NodeMap support to S
 ## Task 3: ComfyUIClient — Output Retrieval + Server Management
 
 **Files:**
-- Modify: `orchestrator/comfyui_client.py`
+- Modify: `src/sitcom_pilot/comfyui_client.py`
 - Modify: `tests/test_comfyui_client.py`
 
 ### Why
@@ -461,10 +463,10 @@ Expected: FAIL
 
 - [ ] **Step 3: Add `get_output_paths()`, `start_server()`, and `ensure_server_running()` to ComfyUIClient**
 
-Replace `orchestrator/comfyui_client.py`:
+Replace `src/sitcom_pilot/comfyui_client.py`:
 
 ```python
-# orchestrator/comfyui_client.py
+# src/sitcom_pilot/comfyui_client.py
 from __future__ import annotations
 import json
 import logging
@@ -561,7 +563,7 @@ Expected: All 13 PASS (7 existing + 6 new)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add orchestrator/comfyui_client.py tests/test_comfyui_client.py
+git add src/sitcom_pilot/comfyui_client.py tests/test_comfyui_client.py
 git commit -m "feat: add output retrieval and server management to ComfyUIClient"
 ```
 
@@ -570,7 +572,7 @@ git commit -m "feat: add output retrieval and server management to ComfyUIClient
 ## Task 4: ShotRenderer — Crash Recovery Loop
 
 **Files:**
-- Modify: `orchestrator/renderer.py`
+- Modify: `src/sitcom_pilot/renderer.py`
 - Modify: `tests/test_renderer.py`
 
 ### Why
@@ -631,20 +633,20 @@ Expected: FAIL
 
 - [ ] **Step 3: Add crash recovery to ShotRenderer.render_shot**
 
-Replace `orchestrator/renderer.py`:
+Replace `src/sitcom_pilot/renderer.py`:
 
 ```python
-# orchestrator/renderer.py
+# src/sitcom_pilot/renderer.py
 from __future__ import annotations
 import copy
 import logging
 import time
 from dataclasses import dataclass
 from typing import Any
-from orchestrator.comfyui_client import ComfyUIClient
-from orchestrator.loader import EpisodeData, SceneData, ShotData
-from orchestrator.node_map import NodeMap
-from orchestrator.prompts import PromptBuilder
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.loader import EpisodeData, SceneData, ShotData
+from sitcom_pilot.node_map import NodeMap
+from sitcom_pilot.prompts import PromptBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -754,7 +756,7 @@ Expected: All 11 PASS (9 previous + 2 new)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add orchestrator/renderer.py tests/test_renderer.py
+git add src/sitcom_pilot/renderer.py tests/test_renderer.py
 git commit -m "feat: add crash recovery loop with server restart to ShotRenderer"
 ```
 
@@ -763,12 +765,12 @@ git commit -m "feat: add crash recovery loop with server restart to ShotRenderer
 ## Task 5: Progress Tracking — Crash Resume
 
 **Files:**
-- Create: `orchestrator/progress.py`
+- Create: `src/sitcom_pilot/progress.py`
 - Create: `tests/test_progress.py`
 
 ### Why
 
-Long render sessions (2-12 hours per the blueprint) need crash resume. A `ProgressTracker` records completed shots to disk so the orchestrator can skip them on restart.
+Long render sessions (2-12 hours per the blueprint) need crash resume. A `ProgressTracker` records completed shots to disk so the pipeline can skip them on restart.
 
 ### RED
 
@@ -778,7 +780,7 @@ Long render sessions (2-12 hours per the blueprint) need crash resume. A `Progre
 # tests/test_progress.py
 import pytest
 from pathlib import Path
-from orchestrator.progress import ProgressTracker
+from sitcom_pilot.progress import ProgressTracker
 
 
 def test_mark_done_creates_entry(tmp_path):
@@ -829,7 +831,7 @@ Expected: FAIL
 - [ ] **Step 3: Implement ProgressTracker**
 
 ```python
-# orchestrator/progress.py
+# src/sitcom_pilot/progress.py
 from __future__ import annotations
 import json
 from pathlib import Path
@@ -876,7 +878,7 @@ Expected: All 5 PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add orchestrator/progress.py tests/test_progress.py
+git add src/sitcom_pilot/progress.py tests/test_progress.py
 git commit -m "feat: add ProgressTracker for crash-resume state persistence"
 ```
 
@@ -885,8 +887,8 @@ git commit -m "feat: add ProgressTracker for crash-resume state persistence"
 ## Task 6: CLI — Full Pipeline (Render → Assemble)
 
 **Files:**
-- Modify: `orchestrator.py`
-- Modify: `orchestrator/__init__.py`
+- Modify: `src/sitcom_pilot/cli/main.py`
+- Modify: `src/sitcom_pilot/__init__.py`
 
 ### Why
 
@@ -904,7 +906,7 @@ import json
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
-from orchestrator.node_map import NodeMap
+from sitcom_pilot.node_map import NodeMap
 
 
 EPISODE_JSON = {
@@ -931,8 +933,8 @@ def test_dry_run_prints_prompts(tmp_path, capsys):
     wf = tmp_path / "workflow.json"
     wf.write_text(json.dumps({"6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}}, "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}}, "40": {"inputs": {"lora_name": ""}}, "41": {"inputs": {"lora_name": ""}}}))
     import sys
-    with patch.object(sys, "argv", ["orchestrator.py", str(ep), "--workflow", str(wf), "--dry-run"]):
-        from orchestrator import main
+    with patch.object(sys, "argv", ["sitcom-pilot", str(ep), "--workflow", str(wf), "--dry-run"]):
+        from sitcom_pilot.cli.main import main
         main()
     output = capsys.readouterr().out
     assert "S01_SH01" in output
@@ -954,11 +956,11 @@ def test_render_and_assemble(tmp_path):
     mock_client.wait_for_completion.return_value = True
     mock_client.get_output_paths.side_effect = [["shot1.mp4"], ["shot2.mp4"]]
 
-    with patch("orchestrator.ComfyUIClient", return_value=mock_client):
+    with patch("sitcom_pilot.ComfyUIClient", return_value=mock_client):
         with patch("subprocess.run", return_value=MagicMock(returncode=0)) as mock_ffmpeg:
             import sys
-            with patch.object(sys, "argv", ["orchestrator.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)]):
-                from orchestrator import main
+            with patch.object(sys, "argv", ["sitcom-pilot", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)]):
+                from sitcom_pilot.cli.main import main
                 main()
 
     assert mock_client.queue_prompt.call_count == 2
@@ -973,7 +975,7 @@ Expected: FAIL
 
 - [ ] **Step 3: Update CLI with full pipeline**
 
-Replace `orchestrator.py`:
+Replace `src/sitcom_pilot/cli/main.py`:
 
 ```python
 #!/usr/bin/env python3
@@ -985,13 +987,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from orchestrator.loader import EpisodeLoader
-from orchestrator.node_map import NodeMap
-from orchestrator.progress import ProgressTracker
-from orchestrator.prompts import PromptBuilder
-from orchestrator.comfyui_client import ComfyUIClient
-from orchestrator.renderer import ShotRenderer, RenderResult
-from orchestrator.assembler import EpisodeAssembler
+from sitcom_pilot.loader import EpisodeLoader
+from sitcom_pilot.node_map import NodeMap
+from sitcom_pilot.progress import ProgressTracker
+from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.renderer import ShotRenderer, RenderResult
+from sitcom_pilot.assembler import EpisodeAssembler
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
@@ -1092,17 +1094,17 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 4: Update `orchestrator/__init__.py`**
+- [ ] **Step 4: Update `src/sitcom_pilot/__init__.py`**
 
 ```python
-# orchestrator/__init__.py
-from orchestrator.loader import EpisodeLoader
-from orchestrator.node_map import NodeMap
-from orchestrator.progress import ProgressTracker
-from orchestrator.prompts import PromptBuilder
-from orchestrator.comfyui_client import ComfyUIClient
-from orchestrator.renderer import ShotRenderer
-from orchestrator.assembler import EpisodeAssembler
+# src/sitcom_pilot/__init__.py
+from sitcom_pilot.loader import EpisodeLoader
+from sitcom_pilot.node_map import NodeMap
+from sitcom_pilot.progress import ProgressTracker
+from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.renderer import ShotRenderer
+from sitcom_pilot.assembler import EpisodeAssembler
 
 __all__ = [
     "EpisodeLoader", "NodeMap", "ProgressTracker", "PromptBuilder",
@@ -1118,7 +1120,7 @@ Expected: All tests PASS
 - [ ] **Step 6: Commit**
 
 ```bash
-git add orchestrator.py orchestrator/__init__.py tests/test_cli.py
+git add src/sitcom_pilot/cli/main.py src/sitcom_pilot/__init__.py tests/test_cli.py
 git commit -m "feat: full pipeline CLI with crash recovery, cooldown, resume, and assembly"
 ```
 
@@ -1146,13 +1148,13 @@ import json
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-from orchestrator.loader import EpisodeLoader
-from orchestrator.node_map import NodeMap
-from orchestrator.prompts import PromptBuilder
-from orchestrator.renderer import ShotRenderer
-from orchestrator.comfyui_client import ComfyUIClient
-from orchestrator.assembler import EpisodeAssembler
-from orchestrator.progress import ProgressTracker
+from sitcom_pilot.loader import EpisodeLoader
+from sitcom_pilot.node_map import NodeMap
+from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.renderer import ShotRenderer
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.assembler import EpisodeAssembler
+from sitcom_pilot.progress import ProgressTracker
 
 
 EPISODE_JSON = {
@@ -1366,7 +1368,7 @@ Expected: All PASS
 
 - [ ] **Step 2: Run dry-run on real episode**
 
-Run: `python3 orchestrator.py episode_01.json --dry-run`
+Run: `python3 -m sitcom_pilot.cli.main episode_01.json --dry-run`
 Expected: Prints all 16 shot prompts with START and END text
 
 - [ ] **Step 3: Verify test count**
