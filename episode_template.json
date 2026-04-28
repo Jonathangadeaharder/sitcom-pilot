@@ -1,0 +1,111 @@
+{
+  "show": "Buffering",
+  "season": 1,
+  "episode": 1,
+  "title": "The Pilot",
+  "schema_version": "2.0",
+  "target_duration_min": 8.0,
+  "dialogue_status": "present",
+  "dialogue_recovery_note": "",
+  "render": {
+    "fps": 24,
+    "resolution": [1280, 720],
+    "pause_between_speech_sec": 0.4,
+    "pause_between_scenes_sec": 1.2,
+    "default_silent_beat_duration": 3.0
+  },
+  "cast": {
+    "maya": {
+      "name": "Maya Chen",
+      "role": "Lead engineer at a failing AI startup",
+      "visual": "East Asian woman in her late 20s, short straight black hair with subtle blue highlights, round wire-frame glasses, wearing an oversized dark purple hoodie with a small robot logo, dark jeans, white sneakers, confident posture but tired eyes, warm skin tone",
+      "reference_images": [
+        "assets/cast/maya_ref_front.png",
+        "assets/cast/maya_ref_3q.png",
+        "assets/cast/maya_ref_profile.png"
+      ],
+      "lora": null,
+      "voice": {
+        "provider": "text2speech",
+        "voice_id": "maya_v1",
+        "clone_from": "assets/voices/maya_clone.wav",
+        "seed": 42,
+        "temperature": 0.8,
+        "language": "en"
+      }
+    },
+    "derek": {
+      "name": "Derek Thompson",
+      "role": "Growth hacker at a crypto company that keeps pivoting",
+      "visual": "Tall Black man in his early 30s, immaculately trimmed short beard, confident smile, wearing a fitted navy blazer over a bright graphic tee with geometric patterns, slim khaki chinos, clean white leather shoes, silver watch",
+      "reference_images": [
+        "assets/cast/derek_ref_front.png",
+        "assets/cast/derek_ref_3q.png",
+        "assets/cast/derek_ref_profile.png"
+      ],
+      "lora": null,
+      "voice": {
+        "provider": "text2speech",
+        "voice_id": "derek_v1",
+        "clone_from": "assets/voices/derek_clone.wav",
+        "seed": 137,
+        "temperature": 0.85,
+        "language": "en"
+      }
+    }
+  },
+  "environments": {
+    "living_room": {
+      "trigger_word": "Modern San Francisco apartment living room with a panoramic window showing the Bay Bridge at golden hour, cluttered with tech gadgets, a large whiteboard covered in diagrams, mismatched furniture including a worn leather couch and beanbag chairs, tangled cables, a broken espresso machine on a side table, warm ambient lighting",
+      "reference_image": "assets/env/living_room_ref.png",
+      "style": "cinematic, golden hour, warm ambient lighting, lived-in tech apartment"
+    },
+    "kitchen": {
+      "trigger_word": "Small galley kitchen in a San Francisco apartment, cluttered countertops with smart home gadgets, a tablet mounted on the fridge showing notifications, coffee mugs with tech company logos, morning light streaming through a small window, cozy and lived-in",
+      "reference_image": "assets/env/kitchen_ref.png",
+      "style": "cinematic, soft morning light, kitchen sitcom, warm tones"
+    }
+  },
+  "scenes": [
+    {
+      "scene_id": "001",
+      "title": "The Bug Discovered",
+      "environment": "living_room",
+      "characters_present": ["maya", "derek"],
+      "target_seconds": 70,
+      "mood": "tense, late-night",
+      "beats": [
+        {
+          "beat_id": "001_b00",
+          "kind": "silent",
+          "camera": "wide establishing shot of the living room",
+          "action": "The living room is lit by the glow of multiple monitors; Maya is hunched over her laptop, Derek is on the couch scrolling his phone",
+          "duration_sec": 4.0,
+          "seed": 110001
+        },
+        {
+          "beat_id": "001_b01",
+          "kind": "speech",
+          "camera": "close-up on Maya's face",
+          "action": "Maya stares at her screen in disbelief",
+          "duration_sec": 3.0,
+          "seed": 110002,
+          "speaker": "maya",
+          "text": "This can't be right. All fourteen tests are failing.",
+          "audio_path": ""
+        },
+        {
+          "beat_id": "001_b02",
+          "kind": "speech",
+          "camera": "two-shot of Maya and Derek",
+          "action": "Derek looks up from his phone with concern",
+          "duration_sec": 3.5,
+          "seed": 110003,
+          "speaker": "derek",
+          "text": "Wait, all of them? What did you push?",
+          "audio_path": ""
+        }
+      ]
+    }
+  ]
+}
