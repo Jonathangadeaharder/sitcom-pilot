@@ -10,14 +10,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from orchestrator.loader import EpisodeData, EpisodeLoader, SceneData, ShotData
-from orchestrator.audio_builder import build_shot_audio
-from orchestrator.prompts import PromptBuilder
-from orchestrator.comfyui_client import ComfyUIClient
-from orchestrator.renderer import ShotRenderer
-from orchestrator.assembler import EpisodeAssembler
-from orchestrator.node_map import NodeMap
-from orchestrator.progress import ProgressTracker
+from sitcom_pilot.loader import EpisodeData, EpisodeLoader, SceneData, ShotData
+from sitcom_pilot.audio_builder import build_shot_audio
+from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.renderer import ShotRenderer
+from sitcom_pilot.assembler import EpisodeAssembler
+from sitcom_pilot.node_map import NodeMap
+from sitcom_pilot.progress import ProgressTracker
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger(__name__)

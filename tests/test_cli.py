@@ -26,7 +26,7 @@ def _load_main_module():
     import importlib.util
     spec = importlib.util.spec_from_file_location(
         "_orchestrator_main",
-        str(Path(__file__).resolve().parent.parent / "legacy" / "sitcom_pilot.py"),
+        str(Path(__file__).resolve().parent.parent / "legacy" / "orchestrator.py"),
     )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)

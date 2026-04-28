@@ -13,7 +13,7 @@ except ImportError:
     _JSONSCHEMA_AVAILABLE = False
 
 
-_SCHEMA_PATH = Path(__file__).resolve().parent.parent / "schemas" / "episode_v2.schema.json"
+_SCHEMA_PATH = Path(__file__).resolve().parent.parent.parent / "schemas" / "episode_v2.schema.json"
 
 
 class ValidationError(Exception):

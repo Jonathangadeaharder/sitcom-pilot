@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from orchestrator.loader import EpisodeLoader
-from orchestrator.prompts import PromptBuilder
+from sitcom_pilot.loader import EpisodeLoader
+from sitcom_pilot.prompts import PromptBuilder
 
 PROJECT_ROOT = Path(__file__).parent
 OUTPUT_DIR = PROJECT_ROOT / "output" / "s01e02"
