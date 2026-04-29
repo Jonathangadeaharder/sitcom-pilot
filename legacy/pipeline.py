@@ -4,7 +4,7 @@ import json
 import logging
 import subprocess
 import sys
-import time
+
 from dataclasses import replace
 from pathlib import Path
 
@@ -12,20 +12,22 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from sitcom_pilot.loader import EpisodeData, EpisodeLoader, SceneData, ShotData
-from sitcom_pilot.audio_builder import build_shot_audio
-from sitcom_pilot.prompts import PromptBuilder
-from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.renderer import ShotRenderer
-from sitcom_pilot.assembler import EpisodeAssembler
-from sitcom_pilot.node_map import NodeMap
-from sitcom_pilot.progress import ProgressTracker
+from sitcom_pilot.loader import EpisodeData, EpisodeLoader  # noqa: E402
+from sitcom_pilot.audio_builder import build_shot_audio  # noqa: E402
+from sitcom_pilot.prompts import PromptBuilder  # noqa: E402
+from sitcom_pilot.comfyui_client import ComfyUIClient  # noqa: E402
+from sitcom_pilot.renderer import ShotRenderer  # noqa: E402
+from sitcom_pilot.assembler import EpisodeAssembler  # noqa: E402
+from sitcom_pilot.node_map import NodeMap  # noqa: E402
+from sitcom_pilot.progress import ProgressTracker  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
-def generate_audio_for_episode(episode: EpisodeData, output_dir: Path, cast: dict) -> dict[str, Path]:
+def generate_audio_for_episode(
+    episode: EpisodeData, output_dir: Path, cast: dict
+) -> dict[str, Path]:
     audio_dir = output_dir / "audio"
     audio_dir.mkdir(parents=True, exist_ok=True)
     shot_audio_map: dict[str, Path] = {}
@@ -109,13 +111,21 @@ def run_pipeline(
     raw = json.loads(episode_path.read_text())
     cast = raw.get("cast", {})
     episode = EpisodeLoader().load(episode_path)
+    if episode.schema_version == "2.0":
+        raise SystemExit(
+            "This legacy pipeline only supports v1 (shot-based) episode files. "
+            "For v2 beat-based episodes, use the src/sitcom_pilot pipeline."
+        )
     output_dir.mkdir(parents=True, exist_ok=True)
 
     audio_map: dict[str, Path] = {}
     if not video_only and not skip_audio:
         logger.info("Phase 1: Generating audio from dialogue...")
         audio_map = generate_audio_for_episode(episode, output_dir, cast)
-        logger.info(f"Audio generated for {len(audio_map)}/{sum(len(s.shots) for s in episode.scenes)} shots")
+        total = sum(len(s.shots) for s in episode.scenes)
+        logger.info(
+            f"Audio generated for {len(audio_map)}/{total} shots"
+        )
 
     if audio_only:
         logger.info("Audio-only mode, skipping video")

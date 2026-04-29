@@ -1,12 +1,19 @@
 from __future__ import annotations
 
 import logging
+import re
 import subprocess
 import urllib.error
 import urllib.request
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+_SAFE_NAME_RE = re.compile(r"[^a-zA-Z0-9_-]")
+
+
+def _safe_filename(name: str) -> str:
+    return _SAFE_NAME_RE.sub("_", name)
 
 FISH_API_URL = "http://127.0.0.1:8090"
 TTS_TIMEOUT_SEC = 300
@@ -102,7 +109,11 @@ def synthesize_dialogue_line(
         with open(output_path, "wb") as f:
             f.write(audio_data)
         return True
-    except (urllib.error.HTTPError, Exception):
+    except urllib.error.HTTPError as exc:
+        logger.error("TTS request failed for '%s': HTTP %s", character_id, exc.code)
+        return False
+    except urllib.error.URLError as exc:
+        logger.error("TTS request failed for '%s': %s", character_id, exc.reason)
         return False
 
 
@@ -138,7 +149,8 @@ def concatenate_wavs(wav_files: list[Path], output_path: Path, pause_sec: float 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         return result.returncode == 0 and output_path.exists()
-    except Exception:
+    except (subprocess.SubprocessError, OSError) as exc:
+        logger.error("ffmpeg concat failed: %s", exc)
         return False
 
 
@@ -156,7 +168,11 @@ def build_shot_audio(
     line_files: list[Path] = []
     for i, line in enumerate(dialogue):
         fish_text = build_fish_text_from_dialogue(line)
-        line_file = output_path.parent / f"{output_path.stem}_line_{i:03d}_{line['speaker']}.wav"
+        safe_spk = _safe_filename(line["speaker"])
+        line_file = (
+            output_path.parent
+            / f"{output_path.stem}_line_{i:03d}_{safe_spk}.wav"
+        )
         success = synthesize_dialogue_line(
             fish_text=fish_text,
             character_id=line["speaker"],

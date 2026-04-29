@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -9,12 +9,11 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from sitcom_pilot.loader import EpisodeLoader
-from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.loader import EpisodeLoader  # noqa: E402
+from sitcom_pilot.prompts import PromptBuilder  # noqa: E402
 
 PROJECT_ROOT = Path(__file__).parent
 OUTPUT_DIR = PROJECT_ROOT / "output" / "s01e02"
-import os
 
 LTX_ROOT = Path(os.environ.get("LTX_ROOT", "/Users/jonathangadeaharder/Documents/projects/LTX-2"))
 LTX_PYTHON = str(LTX_ROOT / ".venv" / "bin" / "python")
@@ -67,7 +66,11 @@ def generate_clip(
     if image_path and image_path.exists():
         cmd.extend(["--image", str(image_path), "0", "0.95"])
 
-    print(f"  [LTX] Generating {output_path.name} ({num_frames} frames, {num_frames / FRAME_RATE:.1f}s)...")
+    dur = num_frames / FRAME_RATE
+    print(
+        f"  [LTX] Generating {output_path.name} "
+        f"({num_frames} frames, {dur:.1f}s)..."
+    )
     try:
         result = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=900)
         if result.returncode == 0 and output_path.exists():
@@ -79,7 +82,7 @@ def generate_clip(
             print(f"  [LTX] FAIL: {stderr}")
             return False
     except subprocess.TimeoutExpired:
-        print(f"  [LTX] TIMEOUT (900s)")
+        print("  [LTX] TIMEOUT (900s)")
         return False
     except Exception as e:
         print(f"  [LTX] ERROR: {e}")
@@ -112,10 +115,10 @@ def get_audio_duration(audio_path: Path) -> float:
 
 def calc_frames_for_duration(duration_sec: float) -> int:
     target = int(duration_sec * FRAME_RATE)
-    remainder = target % 8
-    if remainder > 0:
-        target += 8 - remainder
-    return max(17, min(target, 161))
+    base = 8 * ((target - 1) // 8) + 1
+    if base < target:
+        base += 8
+    return max(17, min(base, 161))
 
 
 def generate_video_for_episode(episode_path: Path, output_dir: Path) -> dict[str, Path]:

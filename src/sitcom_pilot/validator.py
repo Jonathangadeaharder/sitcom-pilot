@@ -188,6 +188,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="Path(s) to episode JSON file(s)")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Only print errors, not OK messages")
+    parser.add_argument("--strict", action="store_true",
+                        help="Enable strict business-rule checks (speaker refs, etc.)")
     args = parser.parse_args(argv)
 
     validator = EpisodeValidator()
@@ -195,7 +197,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for raw_path in args.paths:
         path = Path(raw_path)
-        errors = validator.validate_file(path)
+        errors = validator.validate_file(path, strict=args.strict)
         if errors:
             any_failed = True
             print(f"FAIL  {path}")

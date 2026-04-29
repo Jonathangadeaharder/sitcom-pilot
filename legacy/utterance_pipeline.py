@@ -14,8 +14,7 @@ Pipeline:
 import json
 import subprocess
 import sys
-import urllib.error
-import urllib.request
+
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -23,7 +22,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from voice_generator_v3 import (
+from voice_generator_v3 import (  # noqa: E402
     build_fish_text,
     check_fish_api,
     synthesize_line,
@@ -45,6 +44,10 @@ WIDTH = 768
 HEIGHT = 512
 PAUSE_BETWEEN_LINES = 0.5
 PAUSE_BETWEEN_SHOTS = 1.0
+
+import platform as _platform  # noqa: E402
+
+_VIDEO_ENCODER = "h264_videotoolbox" if _platform.system() == "Darwin" else "libx264"
 
 
 @dataclass
@@ -73,7 +76,11 @@ def load_scene(episode_path: Path, scene_id: str) -> dict:
         raise SystemExit(V2_EPISODE_GUARD)
     for scene in episode["scenes"]:
         if scene["scene_id"] == scene_id:
-            return {"scene": scene, "cast": episode["cast"], "environments": episode["environments"]}
+            return {
+                "scene": scene,
+                "cast": episode["cast"],
+                "environments": episode["environments"],
+            }
     raise ValueError(f"Scene {scene_id} not found")
 
 
@@ -120,7 +127,11 @@ def generate_audio(
         if success:
             utt.audio_path = wav_path
             wav_paths.append(wav_path)
-            print(f"  [TTS] utt_{utt.line_idx:03d} ({utt.speaker}): OK ({wav_path.stat().st_size / 1024:.0f}KB)")
+            size_kb = wav_path.stat().st_size / 1024
+            print(
+                f"  [TTS] utt_{utt.line_idx:03d} "
+                f"({utt.speaker}): OK ({size_kb:.0f}KB)"
+            )
         else:
             print(f"  [TTS] utt_{utt.line_idx:03d} ({utt.speaker}): FAILED")
 
@@ -272,7 +283,7 @@ def build_utterance_prompt(
     return (
         f"{env_visual}, {char_visual}, "
         f"{utt.emotion} expression, speaking, looking slightly off-camera, "
-        f"medium close-up, cinematic lighting, 8k resolution"
+        "medium close-up, cinematic lighting, 8k resolution"
     )
 
 
@@ -305,7 +316,10 @@ def generate_utterance_clips(
             continue
 
         prompt = build_utterance_prompt(utt, cast, environments, scene)
-        print(f"  [LTX] utt_{utt.line_idx:03d} ({duration:.1f}s, {num_frames}f): {utt.text[:50]}...")
+        print(
+            f"  [LTX] utt_{utt.line_idx:03d} "
+            f"({duration:.1f}s, {num_frames}f): {utt.text[:50]}..."
+        )
 
         cmd = [
             LTX_CLI, "generate",
@@ -330,7 +344,7 @@ def generate_utterance_clips(
                 print(f"  [LTX] FAIL: {stderr}")
                 clips.append(clip_path if clip_path.exists() else Path())
         except subprocess.TimeoutExpired:
-            print(f"  [LTX] TIMEOUT")
+            print("  [LTX] TIMEOUT")
             clips.append(Path())
         except Exception as e:
             print(f"  [LTX] ERROR: {e}")
@@ -341,10 +355,10 @@ def generate_utterance_clips(
 
 def calc_frames(duration_sec: float) -> int:
     target = int(duration_sec * FRAME_RATE)
-    remainder = target % 8
-    if remainder > 0:
-        target += 8 - remainder
-    return max(17, min(target, 161))
+    base = 8 * ((target - 1) // 8) + 1
+    if base < target:
+        base += 8
+    return max(17, min(base, 161))
 
 
 def get_audio_duration(audio_path: Path) -> float:
@@ -421,7 +435,7 @@ def stitch_scene(
 
     if current_time < total_duration:
         gap_dur = total_duration - current_time
-        gap_path = concat_dir / f"gap_end.ts"
+        gap_path = concat_dir / "gap_end.ts"
         _make_black_segment(gap_dur, gap_path)
         segment_list.append(gap_path)
 
@@ -434,7 +448,7 @@ def stitch_scene(
     cmd = [
         "ffmpeg", "-y", "-f", "concat", "-safe", "0",
         "-i", str(concat_file),
-        "-c:v", "h264_videotoolbox",
+        "-c:v", _VIDEO_ENCODER,
         "-b:v", "8M",
         "-r", str(FRAME_RATE),
         str(temp_video),
@@ -465,7 +479,7 @@ def _make_black_segment(duration: float, output: Path) -> bool:
     cmd = [
         "ffmpeg", "-y",
         "-f", "lavfi", "-i", f"color=c=black:s={WIDTH}x{HEIGHT}:d={duration}:r={FRAME_RATE}",
-        "-c:v", "h264_videotoolbox",
+        "-c:v", _VIDEO_ENCODER,
         "-b:v", "2M",
         "-bsf:v", "h264_mp4toannexb",
         "-f", "mpegts",
@@ -479,7 +493,7 @@ def _reencode_clip(clip: Path, target_dur: float, output: Path) -> bool:
     cmd = [
         "ffmpeg", "-y", "-i", str(clip),
         "-t", str(target_dur),
-        "-c:v", "h264_videotoolbox",
+        "-c:v", _VIDEO_ENCODER,
         "-b:v", "8M",
         "-vf", f"scale={WIDTH}:{HEIGHT}",
         "-r", str(FRAME_RATE),
@@ -496,8 +510,13 @@ def burn_subtitles(video_path: Path, srt_path: Path, output_path: Path) -> Path 
     cmd = [
         "ffmpeg", "-y",
         "-i", str(video_path),
-        "-vf", f"subtitles={srt_path}:force_style='FontSize=24,PrimaryColour=&Hffffff,OutlineColour=&H000000,Outline=2,Alignment=2'",
-        "-c:v", "h264_videotoolbox",
+        "-vf",
+        (
+            f"subtitles={srt_path}:force_style="
+            "'FontSize=24,PrimaryColour=&Hffffff,"
+            "OutlineColour=&H000000,Outline=2,Alignment=2'"
+        ),
+        "-c:v", _VIDEO_ENCODER,
         "-b:v", "8M",
         "-c:a", "copy",
         str(output_path),
@@ -523,13 +542,13 @@ def run_scene(episode_path: Path, scene_id: str, output_dir: Path) -> Path | Non
     final_dir = output_dir / "final"
     final_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"\n--- Step 1: Extract utterances ---")
+    print("\n--- Step 1: Extract utterances ---")
     utterances = extract_utterances(scene_data)
     print(f"  {len(utterances)} utterances extracted")
     for u in utterances:
         print(f"    utt_{u.line_idx:03d} [{u.shot_id}] {u.speaker}/{u.emotion}: {u.text[:50]}...")
 
-    print(f"\n--- Step 2: Generate audio ---")
+    print("\n--- Step 2: Generate audio ---")
     if not check_fish_api():
         print("ERROR: Fish-Speech not running at", FISH_API_URL)
         print("Start: cd fish-speech && .venv/bin/python tools/api_server.py ...")
@@ -541,7 +560,7 @@ def run_scene(episode_path: Path, scene_id: str, output_dir: Path) -> Path | Non
         return None
     print(f"  {len(wav_paths)}/{len(utterances)} lines synthesized")
 
-    print(f"\n--- Step 3: Build full scene audio ---")
+    print("\n--- Step 3: Build full scene audio ---")
     full_audio = audio_dir / f"scene_{scene_id}_full.wav"
     concat_result = concatenate_scene_audio(utterances, full_audio)
     if not concat_result:
@@ -550,14 +569,14 @@ def run_scene(episode_path: Path, scene_id: str, output_dir: Path) -> Path | Non
     full_dur = get_audio_duration(full_audio)
     print(f"  Full audio: {full_dur:.1f}s")
 
-    print(f"\n--- Step 4: Build timing map ---")
+    print("\n--- Step 4: Build timing map ---")
     timing_map = build_timing_map(utterances, scene, audio_dir)
     timing_map.full_audio_path = full_audio
     for u in timing_map.utterances:
         dur = u.end_sec - u.start_sec
         print(f"    utt_{u.line_idx:03d}: {u.start_sec:.2f}-{u.end_sec:.2f} ({dur:.1f}s)")
 
-    print(f"\n--- Step 5: Whisper alignment ---")
+    print("\n--- Step 5: Whisper alignment ---")
     whisper_segs = run_whisper(full_audio, audio_dir)
     if whisper_segs:
         utterances = align_whisper_to_utterances(whisper_segs, timing_map)
@@ -568,17 +587,17 @@ def run_scene(episode_path: Path, scene_id: str, output_dir: Path) -> Path | Non
     else:
         print("  No Whisper segments, using timing map as-is")
 
-    print(f"\n--- Step 6: Generate utterance video clips ---")
+    print("\n--- Step 6: Generate utterance video clips ---")
     clips = generate_utterance_clips(utterances, cast, envs, scene, video_dir)
     valid = [c for c in clips if c and c.exists()]
     print(f"  {len(valid)}/{len(utterances)} clips generated")
 
-    print(f"\n--- Step 7: Generate subtitles ---")
+    print("\n--- Step 7: Generate subtitles ---")
     srt_path = final_dir / f"scene_{scene_id}.srt"
     generate_srt(utterances, srt_path)
     print(f"  Subtitles: {srt_path}")
 
-    print(f"\n--- Step 8: Stitch video ---")
+    print("\n--- Step 8: Stitch video ---")
     stitched_path = final_dir / f"scene_{scene_id}_stitched.mp4"
     result = stitch_scene(
         utterances, video_dir, full_audio, srt_path,
@@ -591,7 +610,7 @@ def run_scene(episode_path: Path, scene_id: str, output_dir: Path) -> Path | Non
     dur = get_audio_duration(result)
     print(f"  Stitched: {result.name} ({size_mb:.1f}MB, {dur:.1f}s)")
 
-    print(f"\n--- Step 9: Burn subtitles ---")
+    print("\n--- Step 9: Burn subtitles ---")
     final_path = final_dir / f"scene_{scene_id}_final.mp4"
     sub_result = burn_subtitles(stitched_path, srt_path, final_path)
     if sub_result:
@@ -615,5 +634,5 @@ if __name__ == "__main__":
     if result:
         print(f"\nDone! Output: {result}")
     else:
-        print(f"\nPipeline failed!")
+        print("\nPipeline failed!")
         sys.exit(1)

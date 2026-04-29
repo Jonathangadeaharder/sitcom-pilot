@@ -24,7 +24,6 @@ The episode template is a canonical JSON file that defines the structure for cre
 | `episode` | integer | Yes | Episode number within the season (minimum: 1) |
 | `title` | string | Yes | Episode title |
 | `schema_version` | string | Yes | Schema version (must be "2.0") |
-| `target_duration_min` | number | No | Target episode duration in minutes |
 | `dialogue_status` | string | No | Status of dialogue: "present", "missing", or "partial" |
 | `dialogue_recovery_note` | string | No | Notes about dialogue recovery process |
 
@@ -87,7 +86,6 @@ The `scenes` section defines scenes. Each scene contains beats.
 | `title` | string | No | Scene title |
 | `environment` | string | Yes | Environment ID where the scene takes place |
 | `characters_present` | array | Yes | List of character IDs present in the scene |
-| `target_seconds` | number | No | Target duration for the scene in seconds |
 | `mood` | string | No | Mood or atmosphere of the scene |
 | `legacy_audio_path` | string | No | Path to legacy audio file (for migration) |
 | `beats` | array | Yes | List of beats in the scene |
@@ -104,7 +102,6 @@ Each beat is either a "speech" or "silent" beat.
 | `kind` | string | Yes | Type of beat: "speech" or "silent" |
 | `camera` | string | No | Camera angle or shot description |
 | `action` | string | No | Action or description of what happens in the beat |
-| `duration_sec` | number | No | Duration of the beat in seconds |
 | `seed` | integer | No | Random seed for generation |
 | `speaker` | string | Yes (speech) | Character ID of the speaker |
 | `text` | string | Yes (speech) | Dialogue text |

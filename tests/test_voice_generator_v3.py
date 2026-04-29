@@ -413,7 +413,9 @@ class TestSynthesizeLine:
 class TestGenerateEpisodeAudio:
     @patch("voice_generator_v3.synthesize_line")
     @patch("voice_generator_v3.concatenate_audio")
-    def test_generates_all_lines_and_scenes(self, mock_concat, mock_synth, sample_episode, tmp_path):
+    def test_generates_all_lines_and_scenes(
+        self, mock_concat, mock_synth, sample_episode, tmp_path
+    ):
         from voice_generator_v3 import generate_episode_audio, load_episode
 
         mock_synth.return_value = True
@@ -444,7 +446,9 @@ class TestGenerateEpisodeAudio:
 
     @patch("voice_generator_v3.synthesize_line")
     @patch("voice_generator_v3.concatenate_audio")
-    def test_builds_fish_text_for_each_line(self, mock_concat, mock_synth, sample_episode, tmp_path):
+    def test_builds_fish_text_for_each_line(
+        self, mock_concat, mock_synth, sample_episode, tmp_path
+    ):
         from voice_generator_v3 import generate_episode_audio, load_episode
 
         mock_synth.return_value = True
@@ -584,7 +588,9 @@ class TestSynthesizeLineEdgeCases:
 class TestGenerateEpisodeAudioEdgeCases:
     @patch("voice_generator_v3.synthesize_line")
     @patch("voice_generator_v3.concatenate_audio")
-    def test_failed_synthesis_not_in_line_files(self, mock_concat, mock_synth, sample_episode, tmp_path):
+    def test_failed_synthesis_not_in_line_files(
+        self, mock_concat, mock_synth, sample_episode, tmp_path
+    ):
         from voice_generator_v3 import generate_episode_audio, load_episode
 
         mock_synth.return_value = False
@@ -604,14 +610,40 @@ class TestGenerateEpisodeAudioEdgeCases:
         mock_concat.return_value = True
 
         ep = {
-            "cast": {"unknown_char": {"name": "Unknown", "voice_seed": 99, "voice_temp": 0.5, "visual": "v", "trigger_word": "t", "profile": "p"}},
+            "cast": {
+                "known_char": {
+                    "name": "Known",
+                    "voice_seed": 42,
+                    "voice_temp": 0.8,
+                    "visual": "v",
+                    "trigger_word": "t",
+                    "profile": "p",
+                }
+            },
             "environments": {"env1": {"profile": "e1", "trigger_word": "t"}},
-            "scenes": [{"scene_id": "099", "shots": [{"dialogue": [{"speaker": "unknown_char", "emotion": "calm", "tone": None, "effect": None, "text": "Hello."}]}]}],
+            "scenes": [
+                {
+                    "scene_id": "099",
+                    "shots": [
+                        {
+                            "dialogue": [
+                                {
+                                    "speaker": "totally_unknown",
+                                    "emotion": "calm",
+                                    "tone": None,
+                                    "effect": None,
+                                    "text": "Hello.",
+                                }
+                            ]
+                        }
+                    ],
+                }
+            ],
         }
-        results = generate_episode_audio(ep, tmp_path)
+        generate_episode_audio(ep, tmp_path)
         call = mock_synth.call_args_list[0]
-        assert call.kwargs["seed"] == 99
-        assert call.kwargs["temperature"] == 0.5
+        assert call.kwargs["seed"] == 42
+        assert call.kwargs["temperature"] == 0.8
 
 
 class TestMain:
