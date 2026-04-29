@@ -12,6 +12,8 @@ Pipeline:
 """
 
 import json
+import os
+import re
 import subprocess
 import sys
 
@@ -34,7 +36,8 @@ V2_EPISODE_GUARD = (
 )
 
 FISH_API_URL = "http://127.0.0.1:8090"
-LTX_ROOT = Path("/Users/jonathangadeaharder/Documents/projects/ltx-2-mlx")
+_LTX_DEFAULT = "/Users/jonathangadeaharder/Documents/projects/ltx-2-mlx"
+LTX_ROOT = Path(os.environ.get("LTX_ROOT", _LTX_DEFAULT))
 LTX_CLI = str(LTX_ROOT / ".venv" / "bin" / "ltx-2-mlx")
 MODEL_DIR = LTX_ROOT / "weights" / "q8"
 GEMMA_DIR = LTX_ROOT / "weights" / "gemma-3-12b-it-4bit"
@@ -48,6 +51,12 @@ PAUSE_BETWEEN_SHOTS = 1.0
 import platform as _platform  # noqa: E402
 
 _VIDEO_ENCODER = "h264_videotoolbox" if _platform.system() == "Darwin" else "libx264"
+
+_SAFE_NAME_RE = re.compile(r"[^a-zA-Z0-9_-]")
+
+
+def _safe_filename(name: str) -> str:
+    return _SAFE_NAME_RE.sub("_", name)
 
 
 @dataclass
@@ -116,7 +125,7 @@ def generate_audio(
             "emotion": utt.emotion,
             "text": utt.text,
         })
-        wav_path = audio_dir / f"utt_{utt.line_idx:03d}_{utt.speaker}.wav"
+        wav_path = audio_dir / f"utt_{utt.line_idx:03d}_{_safe_filename(utt.speaker)}.wav"
         success = synthesize_line(
             fish_text=fish_text,
             character_id=utt.speaker,
@@ -135,6 +144,10 @@ def generate_audio(
         else:
             print(f"  [TTS] utt_{utt.line_idx:03d} ({utt.speaker}): FAILED")
 
+    if len(wav_paths) != len(utterances):
+        failed = len(utterances) - len(wav_paths)
+        print(f"  [TTS] {failed} line(s) failed; aborting to prevent timing drift")
+        return []
     return wav_paths
 
 
@@ -193,9 +206,11 @@ def concatenate_scene_audio(
 
     n = len(valid)
     filter_parts = []
-    for i in range(n):
+    for i, utt in enumerate(valid):
         if i < n - 1:
             pad = PAUSE_BETWEEN_LINES
+            if valid[i + 1].shot_id != utt.shot_id:
+                pad += PAUSE_BETWEEN_SHOTS
         else:
             pad = 0.0
         filter_parts.append(f"[{i}:a]apad=pad_dur={pad}[p{i}];")
@@ -365,7 +380,7 @@ def get_audio_duration(audio_path: Path) -> float:
     r = subprocess.run(
         ["ffprobe", "-hide_banner", "-show_entries", "format=duration",
          "-of", "csv=p=0", str(audio_path)],
-        capture_output=True, text=True,
+        capture_output=True, text=True, timeout=30,
     )
     try:
         return float(r.stdout.strip())

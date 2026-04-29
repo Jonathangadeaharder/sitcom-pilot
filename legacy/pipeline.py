@@ -175,6 +175,9 @@ def run_pipeline(
         for shot in scene.shots:
             if tracker and tracker.is_done(shot.shot_id):
                 logger.info(f"Skipping {shot.shot_id} (already done)")
+                existing = rendered_dir / f"{shot.shot_id}.mp4"
+                if existing.exists():
+                    video_outputs[shot.shot_id] = existing
                 continue
             result = renderer.render_shot(shot, scene, episode, template)
             if result.success:

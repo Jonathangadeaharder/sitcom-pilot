@@ -106,7 +106,7 @@ def get_audio_duration(audio_path: Path) -> float:
         r = subprocess.run(
             ["ffprobe", "-hide_banner", "-show_entries", "format=duration",
              "-of", "csv=p=0", str(audio_path)],
-            capture_output=True, text=True,
+            capture_output=True, text=True, timeout=30,
         )
         return float(r.stdout.strip())
     except Exception:

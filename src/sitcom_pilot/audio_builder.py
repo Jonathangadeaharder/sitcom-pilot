@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 import subprocess
 import urllib.error
@@ -106,8 +107,17 @@ def synthesize_dialogue_line(
         resp = urllib.request.urlopen(req, timeout=TTS_TIMEOUT_SEC)
         audio_data = resp.read()
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, "wb") as f:
-            f.write(audio_data)
+        import tempfile
+        fd, tmp_path = tempfile.mkstemp(
+            dir=output_path.parent, suffix=".wav"
+        )
+        try:
+            with os.fdopen(fd, "wb") as f:
+                f.write(audio_data)
+            os.replace(tmp_path, output_path)
+        except BaseException:
+            os.unlink(tmp_path)
+            raise
         return True
     except urllib.error.HTTPError as exc:
         logger.error("TTS request failed for '%s': HTTP %s", character_id, exc.code)

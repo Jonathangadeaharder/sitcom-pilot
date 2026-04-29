@@ -51,11 +51,15 @@ class EpisodeValidator:
         else:
             errors.extend(self._structural_validate(data))
 
+        if errors:
+            return errors
+
         errors.extend(self._check_scene_environment_refs(data))
         errors.extend(self._check_scene_character_refs(data))
         errors.extend(self._check_beat_ids_unique(data))
-        errors.extend(self._check_beat_speaker_refs(data))
-        errors.extend(self._check_speech_beats_have_text(data))
+        if strict:
+            errors.extend(self._check_beat_speaker_refs(data))
+            errors.extend(self._check_speech_beats_have_text(data))
 
         return errors
 
@@ -83,11 +87,31 @@ class EpisodeValidator:
         for key in ("show", "title", "cast", "environments", "scenes"):
             if key not in data:
                 errors.append(f"Missing required top-level field: '{key}'")
+
+        if not isinstance(data.get("scenes"), list):
+            errors.append("'scenes' must be a list")
+            return errors
+        if not isinstance(data.get("cast"), dict):
+            errors.append("'cast' must be an object")
+        if not isinstance(data.get("environments"), dict):
+            errors.append("'environments' must be an object")
+
         for scene_idx, scene in enumerate(data.get("scenes", [])):
+            if not isinstance(scene, dict):
+                errors.append(f"Scene[{scene_idx}] must be an object")
+                continue
             for key in ("scene_id", "environment", "characters_present", "beats"):
                 if key not in scene:
                     errors.append(f"Scene[{scene_idx}] missing required field: '{key}'")
+            if not isinstance(scene.get("beats"), list):
+                errors.append(f"Scene[{scene_idx}] 'beats' must be a list")
+                continue
             for beat_idx, beat in enumerate(scene.get("beats", [])):
+                if not isinstance(beat, dict):
+                    errors.append(
+                        f"Scene[{scene_idx}].beat[{beat_idx}] must be an object"
+                    )
+                    continue
                 for key in ("beat_id", "kind"):
                     if key not in beat:
                         errors.append(
