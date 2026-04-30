@@ -52,7 +52,7 @@ def build_beat_prompt(
     episode_id: str = "",
 ) -> str:
     scene_prompt = build_scene_prompt(scene, episode, manifest, episode_id=episode_id)
-    action = beat.action or beat.dialogue or ""
+    action = beat.action or beat.text or ""
     quality = "RAW photo, 8k resolution, cinematic lighting"
     parts = [p for p in [scene_prompt, action, quality] if p]
     return ", ".join(parts)
