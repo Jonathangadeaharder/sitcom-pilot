@@ -30,7 +30,7 @@ The pipeline is **beat-based**: each scene contains ordered beats (speech or sil
 Requires **Python 3.11+**, [uv](https://docs.astral.sh/uv/), and [ffmpeg](https://ffmpeg.org/).
 
 ```bash
-git clone <repo-url> && cd sitcom_pilot
+git clone <repo-url> && cd sitcom-pilot
 uv sync
 ```
 

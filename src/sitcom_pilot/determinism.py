@@ -41,5 +41,5 @@ def compute_run_fingerprint(run_paths: list[Path]) -> str:
             continue
         h.update(str(p.resolve()).encode())
         h.update(str(p.stat().st_size).encode())
-        h.update(hex(p.stat().st_mtime_ns).encode())
+        h.update(hashlib.sha256(p.read_bytes()).hexdigest().encode())
     return h.hexdigest()
