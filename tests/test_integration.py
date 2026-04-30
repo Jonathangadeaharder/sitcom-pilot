@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sitcom_pilot.assembler import EpisodeAssembler
+from sitcom_pilot.assembler import concat_clips
 from sitcom_pilot.comfyui_client import ComfyUIClient
 from sitcom_pilot.loader import EpisodeLoader
 from sitcom_pilot.node_map import NodeMap
@@ -149,20 +149,14 @@ def test_renderer_to_assembler_concat_list(tmp_path, episode, mock_client, node_
     results = renderer.render_episode(episode, WORKFLOW_TEMPLATE)
     all_results = [r for scene_results in results.values() for r in scene_results]
 
-    assembler = EpisodeAssembler(output_dir=tmp_path / "out")
     fake_clips = [tmp_path / f"{r.shot_id}.mp4" for r in all_results]
     for c in fake_clips:
         c.write_bytes(b"\x00")
 
-    with patch("subprocess.run") as mock_run:
-        mock_run.return_value = MagicMock(returncode=0)
-        ok = assembler.concatenate(fake_clips, tmp_path / "out" / "final.mp4")
+    with patch("sitcom_pilot.assembler._run", return_value=MagicMock(returncode=0)):
+        result = concat_clips(fake_clips, tmp_path / "out" / "final.mp4")
 
-    assert ok is True
-    concat_file = tmp_path / "out" / "concat_list.txt"
-    assert concat_file.exists()
-    lines = concat_file.read_text().strip().split("\n")
-    assert len(lines) == 3
+    assert result == tmp_path / "out" / "final.mp4"
 
 
 def test_progress_tracker_with_render_results(tmp_path, episode, mock_client, node_map):

@@ -17,7 +17,7 @@ from sitcom_pilot.audio_builder import build_shot_audio  # noqa: E402
 from sitcom_pilot.prompts import PromptBuilder  # noqa: E402
 from sitcom_pilot.comfyui_client import ComfyUIClient  # noqa: E402
 from sitcom_pilot.renderer import ShotRenderer  # noqa: E402
-from sitcom_pilot.assembler import EpisodeAssembler  # noqa: E402
+from sitcom_pilot.assembler import concat_clips  # noqa: E402
 from sitcom_pilot.node_map import NodeMap  # noqa: E402
 from sitcom_pilot.progress import ProgressTracker  # noqa: E402
 
@@ -216,8 +216,11 @@ def run_pipeline(
 
     logger.info("Phase 4: Assembling final episode...")
     final_path = output_dir / "final" / f"{episode.title.replace(' ', '_')}.mp4"
-    assembler = EpisodeAssembler(output_dir=output_dir / "final")
-    ok = assembler.concatenate(merged_clips, final_path)
+    try:
+        concat_clips(merged_clips, final_path)
+        ok = True
+    except Exception:
+        ok = False
 
     if ok:
         size_mb = final_path.stat().st_size / (1024 * 1024)

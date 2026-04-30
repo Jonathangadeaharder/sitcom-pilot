@@ -13,7 +13,7 @@ from sitcom_pilot.loader import EpisodeLoader
 from sitcom_pilot.prompts import PromptBuilder
 from sitcom_pilot.comfyui_client import ComfyUIClient
 from sitcom_pilot.renderer import ShotRenderer
-from sitcom_pilot.assembler import EpisodeAssembler
+from sitcom_pilot.assembler import concat_clips
 from sitcom_pilot.node_map import NodeMap
 from sitcom_pilot.progress import ProgressTracker
 
@@ -97,14 +97,13 @@ def main():
             else:
                 logging.warning(f"Failed to render {shot.shot_id}")
 
-    assembler = EpisodeAssembler(output_dir=output_dir)
     if all_outputs:
         clip_paths = [Path(p) for p in all_outputs]
         output_path = output_dir / f"{episode.title.replace(' ', '_')}.mp4"
-        ok = assembler.concatenate(clip_paths, output_path)
-        if ok:
+        try:
+            concat_clips(clip_paths, output_path)
             print(f"\nAssembled episode to {output_path}")
-        else:
+        except Exception:
             print("\nAssembly failed.")
             sys.exit(1)
     else:
