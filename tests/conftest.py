@@ -8,7 +8,7 @@ from sitcom_pilot.loader import EpisodeLoader
 
 sys.path  # ensure imported before use below
 
-_LEGACY_DIR = str(Path(__file__).resolve().parent.parent / "legacy")
+_LEGACY_DIR = str(Path(__file__).resolve().parent.parent / "legacy" / "retired")
 if _LEGACY_DIR not in sys.path:
     sys.path.insert(0, _LEGACY_DIR)
 

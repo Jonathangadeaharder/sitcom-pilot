@@ -22,11 +22,19 @@ EPISODE_JSON = {
 }
 
 
+_LEGACY_ORCHESTRATOR = (
+    Path(__file__).resolve().parent.parent / "legacy" / "retired" / "orchestrator.py"
+)
+
+
 def _load_main_module():
     import importlib.util
+
+    if not _LEGACY_ORCHESTRATOR.exists():
+        pytest.skip("legacy orchestrator retired")
     spec = importlib.util.spec_from_file_location(
         "_orchestrator_main",
-        str(Path(__file__).resolve().parent.parent / "legacy" / "orchestrator.py"),
+        str(_LEGACY_ORCHESTRATOR),
     )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)

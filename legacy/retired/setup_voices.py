@@ -6,7 +6,6 @@ Generates distinctive voice samples per character and registers them
 as reference voices in the Fish-Speech server's references/ directory.
 """
 
-import os
 import sys
 import time
 from pathlib import Path
@@ -52,7 +51,7 @@ def generate_reference_audio(char_id: str, config: dict, output_path: Path) -> b
         import urllib.request
         import urllib.error
     except ImportError:
-        print(f"  [ERROR] ormsgpack not installed")
+        print("  [ERROR] ormsgpack not installed")
         return False
 
     payload = {

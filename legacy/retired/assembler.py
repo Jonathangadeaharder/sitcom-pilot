@@ -214,9 +214,9 @@ def assemble_pilot() -> Path | None:
 
         # Normalize video resolution
         norm_clip = norm_dir / f"scene_{sid}_norm.mp4"
-        print(f"    Normalizing video...")
+        print("    Normalizing video...")
         if not normalize_clip(scene_video, norm_clip):
-            print(f"    ✗ Normalization failed")
+            print("    ✗ Normalization failed")
             continue
 
         # Find scene audio (from Fish-Speech)
@@ -233,10 +233,10 @@ def assemble_pilot() -> Path | None:
                 print(f"    ✓ Mixed clip: {final_dur:.1f}s")
                 clip_paths.append(mixed_clip)
             else:
-                print(f"    ⚠ Mix failed, using video-only")
+                print("    ⚠ Mix failed, using video-only")
                 clip_paths.append(norm_clip)
         else:
-            print(f"    No dialogue audio, using video-only")
+            print("    No dialogue audio, using video-only")
             clip_paths.append(norm_clip)
 
     # Step 3: Credits
@@ -272,14 +272,14 @@ def assemble_pilot() -> Path | None:
     if result.returncode == 0 and final_output.exists():
         duration = get_video_duration(final_output)
         size_mb = final_output.stat().st_size / (1024 * 1024)
-        print(f"\n╔══════════════════════════════════════════╗")
-        print(f"║  ✓ V2 PILOT ASSEMBLED SUCCESSFULLY       ║")
-        print(f"╠══════════════════════════════════════════╣")
+        print("\n╔══════════════════════════════════════════╗")
+        print("║  ✓ V2 PILOT ASSEMBLED SUCCESSFULLY       ║")
+        print("╠══════════════════════════════════════════╣")
         print(f"║  Output: {final_output.name:<30} ║")
         print(f"║  Duration: {duration:.1f}s ({duration/60:.1f} min){' '*(17-len(f'{duration:.1f}s ({duration/60:.1f} min)'))} ║")
         print(f"║  Size: {size_mb:.1f} MB{' '*(26-len(f'{size_mb:.1f} MB'))} ║")
         print(f"║  Clips: {len(clip_paths)}{' '*(30-len(str(len(clip_paths))))} ║")
-        print(f"╚══════════════════════════════════════════╝")
+        print("╚══════════════════════════════════════════╝")
         return final_output
     else:
         print(f"✗ Assembly failed: {result.stderr[:300]}")

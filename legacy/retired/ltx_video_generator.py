@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from script import CHARACTERS, LOCATIONS, SCENES, get_video_prompt
+from script import SCENES, get_video_prompt
 
 PROJECT_ROOT = Path(__file__).parent
 OUTPUT_DIR = PROJECT_ROOT / "output"
@@ -100,7 +100,7 @@ def generate_clip(
             print(f"  [LTX] ✗ Failed: {stderr}")
             return False
     except subprocess.TimeoutExpired:
-        print(f"  [LTX] ✗ Timeout (900s)")
+        print("  [LTX] ✗ Timeout (900s)")
         return False
     except Exception as e:
         print(f"  [LTX] ✗ Error: {e}")
@@ -179,7 +179,7 @@ def generate_scene_video(
                     image_strength=0.95,
                 )
             else:
-                print(f"  [EXT] ✗ Failed to extract last frame, generating without conditioning")
+                print("  [EXT] ✗ Failed to extract last frame, generating without conditioning")
                 success = generate_clip(
                     prompt=prompt,
                     output_path=seg_file,
@@ -255,7 +255,7 @@ def generate_all_videos() -> dict[str, Path]:
         if scene_img.exists():
             print(f"  Using scene image: {scene_img.name}")
         else:
-            print(f"  No scene image found, generating without conditioning")
+            print("  No scene image found, generating without conditioning")
             scene_img = None
 
         segments = generate_scene_video(scene, scene_img)
@@ -267,11 +267,11 @@ def generate_all_videos() -> dict[str, Path]:
                 print(f"  [✓] Scene {sid}: {len(segments)} segments → {scene_video.name}")
             else:
                 results[sid] = segments[0]
-                print(f"  [WARN] Concat failed, using first segment")
+                print("  [WARN] Concat failed, using first segment")
         else:
             print(f"  [✗] No segments generated for scene {sid}")
 
-    print(f"\n═══ Video Generation Summary ═══")
+    print("\n═══ Video Generation Summary ═══")
     for sid, path in results.items():
         if path.exists():
             size = path.stat().st_size / (1024 * 1024)

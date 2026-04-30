@@ -354,7 +354,7 @@ def get_dialogue_text(scene: dict) -> str:
 
 
 if __name__ == "__main__":
-    print(f"Show: Buffering — V2")
+    print("Show: Buffering — V2")
     print(f"Characters: {len(CHARACTERS)}")
     print(f"Locations: {len(LOCATIONS)}")
     print(f"Scenes: {len(SCENES)}")

@@ -254,7 +254,7 @@ def run_all():
     scenes = generate_scene_backgrounds()
     shots = generate_shot_images(scenes)
 
-    print(f"\n═══ Summary ═══")
+    print("\n═══ Summary ═══")
     print(f"  Characters: {len(chars)}")
     print(f"  Scenes: {len(scenes)}")
     print(f"  Shots: {len(shots)}")
