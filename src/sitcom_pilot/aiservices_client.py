@@ -24,8 +24,8 @@ class AIServicesClient:
         image_provider: str = "text2image.mlx",
         image_edit_provider: str = "image2image.mlx",
         video_provider: str = "image2video.mlx",
-        tts_provider: str = "text2speech.mlx_audio",
-        asr_provider: str | None = None,
+        tts_provider: str = "text2speech.fish_mlx",
+        asr_provider: str | None = "audio2subtitle.mlx",
         subprocess_fallback: bool = True,
     ):
         self._image_provider = image_provider
@@ -35,6 +35,12 @@ class AIServicesClient:
         self._asr_provider = asr_provider
         self._subprocess_fallback = subprocess_fallback
         self._providers: dict[str, Any] = {}
+        self._ensure_registered()
+
+    def _ensure_registered(self) -> None:
+        from sitcom_pilot.providers import ensure_registered
+
+        ensure_registered()
 
     def _get_provider(self, registry_name: str) -> Any:
         if registry_name in self._providers:
@@ -225,7 +231,7 @@ class AIServicesClient:
             from text2speech.models import Text2SpeechRequest
 
             req = Text2SpeechRequest(
-                text=tagged_text,
+                text=text,
                 voice_id=voice.voice_id if voice else None,
                 emotion=emotion,
                 tone=tone,
@@ -255,15 +261,27 @@ class AIServicesClient:
         self,
         audio_path: str | Path,
         output_path: str | Path,
+        *,
+        language: str | None = None,
+        output_format: str = "srt",
     ) -> Path:
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
 
         try:
+            from audio2subtitle.models import Audio2SubtitleRequest
+
+            req = Audio2SubtitleRequest(
+                audio_path=str(audio_path),
+                language=language,
+                output_format=output_format,
+            )
             provider = self._get_provider(self._asr_provider)
-            resp = provider.generate(str(audio_path), output_path=str(output))
+            resp = provider.generate(req, output_path=str(output))
             return Path(resp.output_path if hasattr(resp, "output_path") else resp)
-        except (ImportError, Exception) as exc:
+        except ImportError:
+            pass
+        except Exception as exc:
             logger.warning("audio2subtitle Python API failed: %s", exc)
 
         if self._subprocess_fallback:

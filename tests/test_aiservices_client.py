@@ -7,6 +7,11 @@ import pytest
 
 from sitcom_pilot.aiservices_client import AIServicesClient, _build_speech_tags, _div8
 from sitcom_pilot.loader import VoiceConfig
+from sitcom_pilot.providers import (
+    auto_configure,
+    ensure_registered,
+    provider_name,
+)
 
 
 def _make_t2i_models():
@@ -41,7 +46,7 @@ def client():
         image_provider="text2image.mlx",
         image_edit_provider="image2image.mlx",
         video_provider="image2video.mlx",
-        tts_provider="text2speech.mlx_audio",
+        tts_provider="text2speech.fish_mlx",
         subprocess_fallback=True,
     )
 
@@ -243,3 +248,75 @@ class TestOutputDirCreation:
         ):
             client.text2image("test", deep)
             assert deep.parent.exists()
+
+
+class TestProvidersModule:
+    def test_provider_name_known(self):
+        assert provider_name("text2image") == "text2image.mlx"
+        assert provider_name("text2speech") == "text2speech.fish_mlx"
+        assert provider_name("audio2subtitle") == "audio2subtitle.mlx"
+
+    def test_provider_name_unknown(self):
+        assert provider_name("nonexistent") == ""
+
+    @patch("platform.system", return_value="Darwin")
+    @patch("platform.machine", return_value="arm64")
+    def test_auto_configure_macos_arm64(self, mock_mach, mock_sys):
+        cfg = auto_configure()
+        assert cfg["preferred_backend"] == "mlx"
+        assert cfg["text2image"] == "text2image.mlx"
+        assert cfg["text2speech"] == "text2speech.fish_mlx"
+
+    @patch("platform.system", return_value="Linux")
+    @patch("platform.machine", return_value="x86_64")
+    def test_auto_configure_linux(self, mock_mach, mock_sys):
+        cfg = auto_configure()
+        assert cfg["preferred_backend"] == "cli"
+
+    def test_ensure_registered_returns_availability(self):
+        with patch("sitcom_pilot.providers._try_import", return_value=False):
+            avail = ensure_registered()
+            assert not avail.all_available
+            assert "text2image" in avail.missing
+
+    def test_ensure_registered_all_available(self):
+        with patch("sitcom_pilot.providers._try_import", return_value=True):
+            avail = ensure_registered()
+            assert avail.all_available
+            assert "text2image" in avail.available
+
+
+class TestAudio2Subtitle:
+    @patch("sitcom_pilot.aiservices_client._run_cli")
+    def test_subprocess_fallback(self, mock_cli, client, tmp_path):
+        client._providers.clear()
+        with patch(
+            "sitcom_pilot.aiservices_client.AIServicesClient._get_provider", side_effect=ImportError
+        ):
+            result = client.audio2subtitle(tmp_path / "audio.wav", tmp_path / "out.srt")
+            assert isinstance(result, Path)
+            mock_cli.assert_called_once()
+
+    def test_no_fallback_raises(self, client_no_fallback, tmp_path):
+        client_no_fallback._providers.clear()
+        with patch(
+            "sitcom_pilot.aiservices_client.AIServicesClient._get_provider", side_effect=ImportError
+        ):
+            with pytest.raises(RuntimeError, match="no provider"):
+                client_no_fallback.audio2subtitle(tmp_path / "audio.wav", tmp_path / "out.srt")
+
+
+class TestDefaultProviders:
+    def test_tts_default_is_fish_mlx(self):
+        c = AIServicesClient()
+        assert c._tts_provider == "text2speech.fish_mlx"
+
+    def test_asr_default_is_mlx(self):
+        c = AIServicesClient()
+        assert c._asr_provider == "audio2subtitle.mlx"
+
+    def test_discover_capabilities_includes_asr(self):
+        c = AIServicesClient()
+        caps = c.discover_capabilities()
+        assert "audio2subtitle" in caps
+        assert caps["audio2subtitle"] == ["audio2subtitle.mlx"]
