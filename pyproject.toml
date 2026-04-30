@@ -17,19 +17,14 @@ dependencies = [
     "typer>=0.24.2",
 ]
 
-[project.optional-dependencies]
-aiservices = ["aiservices-core"]
-
 [tool.uv]
 dev-dependencies = [
     "mutmut>=3.5.0",
+    "pillow>=12.2.0",
     "pygments<2.19",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
 ]
-
-[tool.uv.sources]
-aiservices-core = { path = "../AIServices/packages/aiservices_core", editable = true }
 
 [project.scripts]
 sitcom-pilot = "sitcom_pilot.cli.main:app"
