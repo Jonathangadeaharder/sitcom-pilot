@@ -18,7 +18,10 @@ EPISODE_JSON = {
         "Derek": {"profile": "derek_v1", "trigger_word": "drk_man, navy blazer"},
     },
     "environments": {
-        "LivingRoom": {"profile": "living_room_v2", "trigger_word": "SF apartment living room, bay bridge view"},
+        "LivingRoom": {
+            "profile": "living_room_v2",
+            "trigger_word": "SF apartment living room, bay bridge view",
+        },
     },
     "scenes": [
         {
@@ -129,9 +132,7 @@ def test_prompt_builder_to_renderer_injects_both_prompts(episode, mock_client, n
     mock_client.wait_for_completion.return_value = True
 
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), node_map=node_map)
-    renderer.render_shot(
-        episode.scenes[0].shots[0], episode.scenes[0], episode, WORKFLOW_TEMPLATE
-    )
+    renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, WORKFLOW_TEMPLATE)
 
     workflow = mock_client.queue_prompt.call_args[0][0]
     start_text = workflow["6"]["inputs"]["text"]
@@ -179,8 +180,12 @@ def test_progress_tracker_with_render_results(tmp_path, episode, mock_client, no
 
 def test_node_map_custom_ids_used_in_renderer(episode, mock_client):
     custom_map = NodeMap(
-        start_prompt="100", end_prompt="200", audio="300",
-        seed="400", env_profile="500", char_profiles=["600", "601"],
+        start_prompt="100",
+        end_prompt="200",
+        audio="300",
+        seed="400",
+        env_profile="500",
+        char_profiles=["600", "601"],
     )
     mock_client.queue_prompt.return_value = "pid"
     mock_client.wait_for_completion.return_value = True
@@ -196,9 +201,7 @@ def test_node_map_custom_ids_used_in_renderer(episode, mock_client):
     }
 
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), node_map=custom_map)
-    renderer.render_shot(
-        episode.scenes[0].shots[0], episode.scenes[0], episode, custom_template
-    )
+    renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, custom_template)
 
     workflow = mock_client.queue_prompt.call_args[0][0]
     assert workflow["100"]["inputs"]["text"] != ""

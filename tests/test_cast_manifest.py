@@ -59,9 +59,7 @@ class TestCastManifest:
                         three_quarter="assets/cast/maya_ref_3q.png",
                     ),
                     voice=VoiceConfig(provider="mlx-audio", voice_id="maya_v1"),
-                    wardrobe=(
-                        WardrobeEntry(episode="s01e01", description="purple hoodie"),
-                    ),
+                    wardrobe=(WardrobeEntry(episode="s01e01", description="purple hoodie"),),
                 ),
                 "derek": CharacterProfile(
                     name="Derek Okafor",
@@ -99,9 +97,7 @@ class TestCastManifest:
     def test_validate_refs_exist(self, tmp_path):
         m = CastManifest(
             characters={
-                "x": CharacterProfile(
-                    slug="x", refs=CharacterRef(front="ref.png")
-                ),
+                "x": CharacterProfile(slug="x", refs=CharacterRef(front="ref.png")),
             },
         )
         (tmp_path / "ref.png").write_bytes(b"fake")

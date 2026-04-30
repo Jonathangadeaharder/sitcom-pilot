@@ -11,13 +11,14 @@ dependencies = [
     "structlog>=24.0.0",
     # Episode schema validation
     "jsonschema>=4.21.0",
-    # AIServices integration (local path — swap for PyPI release when published)
-    "aiservices-core",
     # Legacy audio pipeline deps
     "ormsgpack>=1.12.2",
     "rich>=15.0.0",
     "typer>=0.24.2",
 ]
+
+[project.optional-dependencies]
+aiservices = ["aiservices-core"]
 
 [tool.uv]
 dev-dependencies = [

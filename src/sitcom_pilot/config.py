@@ -5,6 +5,7 @@ from pathlib import Path
 try:
     from pydantic import Field
     from pydantic_settings import BaseSettings, SettingsConfigDict
+
     _PYDANTIC_AVAILABLE = True
 except ImportError:
     _PYDANTIC_AVAILABLE = False
@@ -12,6 +13,7 @@ except ImportError:
 import os
 
 if _PYDANTIC_AVAILABLE:
+
     class PipelineConfig(BaseSettings):
         """Runtime configuration for the Sitcom Pilot pipeline.
 

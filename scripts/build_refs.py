@@ -41,6 +41,7 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     client = AIServicesClient()
 
+    failed = 0
     for i, (slug, char) in enumerate(manifest.characters.items()):
         views = ["front", "three_quarter", "profile"]
         for j, view in enumerate(views):
@@ -63,7 +64,10 @@ def main() -> None:
                 logger.info("Saved: %s", out_path)
             except Exception as exc:
                 logger.error("Failed for %s %s: %s", slug, view, exc)
+                failed += 1
 
+    if failed:
+        raise SystemExit(f"{failed} reference images failed to generate")
     logger.info("Done. Reference images in %s", output_dir)
 
 

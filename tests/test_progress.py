@@ -60,6 +60,7 @@ def test_save_writes_sorted_json(tmp_path):
     tracker.mark_done("A")
     tracker.mark_done("B")
     import json
+
     data = json.loads(state.read_text())
     assert data["completed"] == ["A", "B", "C"]
 

@@ -1,4 +1,5 @@
 """Tests for sitcom_pilot.config — PipelineConfig."""
+
 from __future__ import annotations
 
 import os

@@ -55,7 +55,8 @@ def concat_clips(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
         for p in clip_paths:
-            f.write(f"file '{p}'\n")
+            escaped = str(p).replace("\\", "\\\\").replace("'", "'\\''")
+            f.write(f"file '{escaped}'\n")
         list_path = f.name
     try:
         cmd = [
@@ -144,11 +145,12 @@ def generate_srt(
             lines.append(str(idx))
             lines.append(f"{start} --> {end}")
             speaker = f"{beat.speaker}: " if beat.speaker else ""
-            lines.append(f"{speaker}{beat.text}")
+            sanitized_text = beat.text.replace("\n", " ").replace("\r", " ")
+            lines.append(f"{speaker}{sanitized_text}")
             lines.append("")
             idx += 1
         current_time += duration
-    output_path.write_text("\n".join(lines))
+    output_path.write_text("\n".join(lines), encoding="utf-8")
     return output_path
 
 
@@ -214,7 +216,9 @@ def mix_beat_audio(
     *,
     music_volume: float = 0.1,
 ) -> Path:
-    output_path = output_path or video_path
+    if output_path is None:
+        suffix = video_path.suffix
+        output_path = video_path.with_suffix(f".mixed{suffix}")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     if music_path and music_path.exists():
         cmd = [

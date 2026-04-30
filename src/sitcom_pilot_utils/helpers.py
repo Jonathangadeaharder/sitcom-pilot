@@ -15,6 +15,7 @@ def ensure_dir(path: Path) -> Path:
 def load_json(path: Path) -> dict[str, Any]:
     """Load and return JSON file."""
     import json
+
     with open(path) as f:
         return json.load(f)
 
@@ -22,6 +23,7 @@ def load_json(path: Path) -> dict[str, Any]:
 def save_json(data: dict[str, Any], path: Path) -> None:
     """Save data to JSON file."""
     import json
+
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w") as f:
         json.dump(data, f, indent=2)

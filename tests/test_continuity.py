@@ -3,7 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from sitcom_pilot.continuity import SimilarityResult, batch_check, check_continuity
+from sitcom_pilot.continuity import (
+    SimilarityResult,
+    _ssim_fallback,
+    batch_check,
+    check_continuity,
+)
 
 
 class TestSimilarityResult:
@@ -30,6 +35,20 @@ class TestCheckContinuity:
         assert not result.passed
 
 
+class TestSsimFallback:
+    def test_identical_images(self):
+        img = MagicMock()
+        img.tobytes.return_value = b"\x00\x01\x02"
+        assert _ssim_fallback(img, img) == 1.0
+
+    def test_different_images(self):
+        img_a = MagicMock()
+        img_a.tobytes.return_value = b"\x00\x01\x02"
+        img_b = MagicMock()
+        img_b.tobytes.return_value = b"\x03\x04\x05"
+        assert _ssim_fallback(img_a, img_b) == 0.0
+
+
 class TestBatchCheck:
     @patch("sitcom_pilot.continuity.check_continuity")
     def test_batch(self, mock_check):
@@ -37,3 +56,44 @@ class TestBatchCheck:
         results = batch_check([(Path("a"), Path("b"))])
         assert len(results) == 1
         assert results[0].passed
+
+    @patch("sitcom_pilot.continuity._load_image_gray", side_effect=OSError("missing"))
+    def test_oserror_caught(self, mock_load):
+        results = batch_check([(Path("a"), Path("b"))])
+        assert results == []
+
+    @patch("sitcom_pilot.continuity._load_image_gray", side_effect=ValueError("bad"))
+    def test_valueerror_caught(self, mock_load):
+        results = batch_check([(Path("a"), Path("b"))])
+        assert results == []
+
+    @patch("sitcom_pilot.continuity._load_image_gray", side_effect=ImportError("nope"))
+    def test_importerror_caught(self, mock_load):
+        results = batch_check([(Path("a"), Path("b"))])
+        assert results == []
+
+    @patch("sitcom_pilot.continuity._load_image_gray", side_effect=RuntimeError("boom"))
+    def test_runtimeerror_propagates(self, mock_load):
+        import pytest
+
+        with pytest.raises(RuntimeError, match="boom"):
+            batch_check([(Path("a"), Path("b"))])
+
+
+class TestLoadImageGray:
+    def test_context_manager_usage(self, tmp_path):
+        pytest = __import__("pytest")
+        try:
+            from PIL import Image
+        except ImportError:
+            pytest.skip("Pillow not installed")
+
+        img_path = tmp_path / "test.png"
+        Image.new("RGB", (10, 10), "red").save(img_path)
+
+        from sitcom_pilot.continuity import _load_image_gray
+
+        result = _load_image_gray(img_path)
+        assert result.mode == "L"
+        assert result.size == (10, 10)
+        assert result.tobytes() is not None

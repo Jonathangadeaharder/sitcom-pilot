@@ -20,8 +20,8 @@ def _load_image_gray(path: Path):
         from PIL import Image
     except ImportError:
         raise ImportError("Pillow required for SSIM: uv add Pillow")
-    img = Image.open(path).convert("L")
-    return img
+    with Image.open(path) as img:
+        return img.convert("L").copy()
 
 
 def _compute_ssim(img_a, img_b) -> float:
@@ -41,11 +41,7 @@ def _compute_ssim(img_a, img_b) -> float:
 
 
 def _ssim_fallback(img_a, img_b) -> float:
-    import hashlib
-
-    h1 = hashlib.md5(img_a.tobytes()).hexdigest()
-    h2 = hashlib.md5(img_b.tobytes()).hexdigest()
-    return 1.0 if h1 == h2 else 0.0
+    return 1.0 if img_a.tobytes() == img_b.tobytes() else 0.0
 
 
 def check_continuity(
@@ -72,6 +68,6 @@ def batch_check(
     for ref, gen in pairs:
         try:
             results.append(check_continuity(ref, gen, threshold))
-        except Exception as exc:
+        except (OSError, ValueError, ImportError) as exc:
             logger.warning("SSIM check failed for %s vs %s: %s", ref, gen, exc)
     return results

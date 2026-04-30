@@ -230,12 +230,9 @@ class TestDiscoverCapabilities:
 class TestProviderCaching:
     def test_provider_cached(self, client):
         mock_prov = MagicMock()
-        with patch(
-            "sitcom_pilot.aiservices_client.AIServicesClient._get_provider", return_value=mock_prov
-        ):
-            pass
         client._providers["text2image.mlx"] = mock_prov
-        assert client._providers["text2image.mlx"] is mock_prov
+        result = client._get_provider("text2image.mlx")
+        assert result is mock_prov
 
 
 class TestOutputDirCreation:

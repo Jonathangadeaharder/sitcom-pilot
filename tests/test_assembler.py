@@ -54,6 +54,23 @@ class TestConcatClips:
         with pytest.raises(ValueError, match="No clips"):
             concat_clips([], tmp_path / "out.mp4")
 
+    def test_escapes_special_chars_in_paths(self, tmp_path):
+        tricky = [Path("/path/with'quote/file.mp4"), Path("/path\\back/file.mp4")]
+        out = tmp_path / "out.mp4"
+        captured = {}
+
+        def grab_list_path(cmd, **kwargs):
+            list_path = cmd[7]
+            captured["content"] = Path(list_path).read_text()
+            return MagicMock(returncode=0)
+
+        with patch("sitcom_pilot.assembler._run", side_effect=grab_list_path):
+            concat_clips(tricky, out)
+
+        content = captured["content"]
+        assert "\\\\" in content
+        assert "'\\''" in content
+
 
 class TestMuxAudio:
     def test_muxes(self, mock_ffmpeg, tmp_path):
@@ -109,6 +126,43 @@ class TestGenerateSrt:
         assert "00:00:00,000 --> 00:00:03,000" in content
         assert "00:00:03,000 --> 00:00:05,000" in content
 
+    def test_srt_newlines_sanitized(self, tmp_path):
+        beats = [
+            (
+                BeatData(
+                    beat_id="1",
+                    kind="speech",
+                    speaker="Maya",
+                    text="Line one\nLine two\r\nLine three",
+                    duration_sec=3.0,
+                ),
+                3.0,
+            ),
+        ]
+        out = tmp_path / "subs.srt"
+        generate_srt(beats, out)
+        content = out.read_text(encoding="utf-8")
+        assert "\nLine" not in content.split("Maya:")[1].split("\n\n")[0]
+        assert "Line one" in content
+        assert "Line three" in content
+
+    def test_srt_utf8_encoding(self, tmp_path):
+        beats = [
+            (
+                BeatData(
+                    beat_id="1",
+                    kind="speech",
+                    text="Ünïcödé: ça va?",
+                    duration_sec=2.0,
+                ),
+                2.0,
+            ),
+        ]
+        out = tmp_path / "subs.srt"
+        generate_srt(beats, out)
+        content = out.read_text(encoding="utf-8")
+        assert "Ünïcödé: ça va?" in content
+
 
 class TestBurnInCaptions:
     def test_burns(self, mock_ffmpeg, tmp_path):
@@ -145,3 +199,18 @@ class TestMixBeatAudio:
         )
         cmd = " ".join(mock_ffmpeg.call_args[0][0])
         assert "amix" in cmd
+
+    def test_default_output_does_not_overwrite_input(self, mock_ffmpeg, tmp_path):
+        video = tmp_path / "v.mp4"
+        result = mix_beat_audio(video, tmp_path / "voice.wav")
+        assert result != video
+        assert result.suffix == ".mp4"
+        assert ".mixed" in result.name
+
+    def test_default_output_with_music(self, mock_ffmpeg, tmp_path):
+        video = tmp_path / "v.mp4"
+        music = tmp_path / "music.mp3"
+        music.write_bytes(b"f")
+        result = mix_beat_audio(video, tmp_path / "voice.wav", music_path=music)
+        assert result != video
+        assert ".mixed" in result.name

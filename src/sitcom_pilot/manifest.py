@@ -12,8 +12,8 @@ from typing import Any
 class BeatRecord:
     beat_id: str
     scene_id: str
-    kind: str           # "speech" | "silent"
-    status: str         # "pending" | "rendered" | "failed" | "skipped"
+    kind: str  # "speech" | "silent"
+    status: str  # "pending" | "rendered" | "failed" | "skipped"
     prompt_id: str = ""
     image_path: str = ""
     video_path: str = ""
@@ -58,7 +58,7 @@ class RunManifest:
     schema_version: str
     started_at: str = ""
     finished_at: str = ""
-    status: str = "running"   # "running" | "completed" | "failed" | "partial"
+    status: str = "running"  # "running" | "completed" | "failed" | "partial"
     scenes: list[SceneRecord] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -160,6 +160,9 @@ class RunManifest:
         skipped = sum(s.skipped for s in self.scenes)
         pending = total - rendered - failed - skipped
         return {
-            "total": total, "rendered": rendered,
-            "failed": failed, "skipped": skipped, "pending": pending,
+            "total": total,
+            "rendered": rendered,
+            "failed": failed,
+            "skipped": skipped,
+            "pending": pending,
         }

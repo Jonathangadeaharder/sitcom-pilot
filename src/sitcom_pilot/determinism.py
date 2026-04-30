@@ -39,7 +39,7 @@ def compute_run_fingerprint(run_paths: list[Path]) -> str:
         p = Path(path)
         if not p.exists():
             continue
-        h.update(p.name.encode())
+        h.update(str(p.resolve()).encode())
         h.update(str(p.stat().st_size).encode())
         h.update(hex(p.stat().st_mtime_ns).encode())
     return h.hexdigest()

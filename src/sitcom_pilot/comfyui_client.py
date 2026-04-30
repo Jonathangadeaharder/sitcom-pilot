@@ -39,7 +39,8 @@ class ComfyUIClient:
     def queue_prompt(self, workflow: dict[str, Any], max_retries: int = 3) -> str:
         data = json.dumps({"prompt": workflow}).encode("utf-8")
         req = urllib.request.Request(
-            f"{self._base_url}/prompt", data=data,
+            f"{self._base_url}/prompt",
+            data=data,
             headers={"Content-Type": "application/json"},
         )
         last_error = None
@@ -51,11 +52,14 @@ class ComfyUIClient:
             except (urllib.error.URLError, ConnectionError) as e:
                 last_error = e
                 logger.warning(f"Queue attempt {attempt + 1}/{max_retries} failed: {e}")
-                time.sleep(2 ** attempt)
+                time.sleep(2**attempt)
         raise last_error
 
     def wait_for_completion(
-        self, prompt_id: str, timeout: int = 600, poll_interval: float = 3.0,
+        self,
+        prompt_id: str,
+        timeout: int = 600,
+        poll_interval: float = 3.0,
     ) -> bool:
         start = time.time()
         while time.time() - start < timeout:

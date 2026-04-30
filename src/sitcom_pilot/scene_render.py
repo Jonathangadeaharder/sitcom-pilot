@@ -112,8 +112,6 @@ def _render_beat(
     manifest: CastManifest,
     episode: EpisodeData,
     scene: SceneData,
-    *,
-    max_retries: int = 1,
 ) -> BeatJob:
     job.status = BeatStatus.RUNNING
     try:
@@ -126,7 +124,7 @@ def _render_beat(
                 seed=job.seed,
             )
 
-        if job.needs_audio and job.text:
+        if job.needs_audio and job.text and not job.audio_path.exists():
             voice = None
             char = manifest.get(job.speaker)
             if char and char.voice:
@@ -138,12 +136,13 @@ def _render_beat(
                 character=episode.cast.get(job.speaker),
             )
 
-        if job.needs_audio and job.audio_path.exists() and job.image_path.exists():
+        if job.image_path.exists():
+            audio_arg = job.audio_path if job.audio_path.exists() else None
             client.image2video(
                 job.image_path,
                 job.prompt,
                 job.video_path,
-                audio_path=job.audio_path,
+                audio_path=audio_arg,
                 seed=job.seed,
             )
 

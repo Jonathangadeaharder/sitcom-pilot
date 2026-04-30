@@ -38,6 +38,7 @@ def main() -> None:
 
     template = args.sample_text or SAMPLE_TEXT
 
+    failed = 0
     for slug, char in manifest.characters.items():
         if not char.voice:
             logger.warning("No voice config for %s, skipping", slug)
@@ -57,7 +58,10 @@ def main() -> None:
             logger.info("Saved: %s", out_path)
         except Exception as exc:
             logger.error("Failed for %s: %s", slug, exc)
+            failed += 1
 
+    if failed:
+        raise SystemExit(f"{failed} voice samples failed to generate")
     logger.info("Done. Voice samples in %s", output_dir)
 
 

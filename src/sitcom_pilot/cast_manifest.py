@@ -133,9 +133,9 @@ def _manifest_from_dict(data: dict) -> CastManifest:
             )
             for w in cdata.get("wardrobe", [])
         )
-        manifest.characters[slug] = CharacterProfile(
+        profile = CharacterProfile(
             name=cdata.get("name", ""),
-            slug=cdata.get("slug", slug),
+            slug=cdata.get("slug") or slug,
             visual=cdata.get("visual", ""),
             role=cdata.get("role", ""),
             refs=refs,
@@ -144,6 +144,7 @@ def _manifest_from_dict(data: dict) -> CastManifest:
             wardrobe=wardrobe,
             consistency_notes=cdata.get("consistency_notes", ""),
         )
+        manifest.characters[profile.slug] = profile
     return manifest
 
 

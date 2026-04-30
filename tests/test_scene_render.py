@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -188,6 +189,62 @@ class TestRenderEpisode:
         assert data[0]["scene_id"] == "001"
 
 
+class TestSilentBeatVideo:
+    def test_silent_beat_generates_video(self, episode, manifest, tmp_path):
+        paths = RunPaths(tmp_path, "test-run")
+        jobs = plan_beats(episode, manifest, paths)
+        silent_job = [j for j in jobs if not j.needs_audio][0]
+        silent_job.image_path.parent.mkdir(parents=True, exist_ok=True)
+        client = MagicMock()
+
+        def fake_text2image(prompt, path, **kw):
+            Path(path).write_bytes(b"img")
+            return path
+
+        client.text2image.side_effect = fake_text2image
+        client.image2video.return_value = tmp_path / "vid.mp4"
+
+        render_scene(episode.scenes[0], jobs, client, manifest, episode)
+
+        client.image2video.assert_any_call(
+            silent_job.image_path,
+            silent_job.prompt,
+            silent_job.video_path,
+            audio_path=None,
+            seed=silent_job.seed,
+        )
+
+    def test_speech_beat_passes_audio_to_video(self, episode, manifest, tmp_path):
+        paths = RunPaths(tmp_path, "test-run")
+        jobs = plan_beats(episode, manifest, paths)
+        speech_job = [j for j in jobs if j.needs_audio][0]
+        speech_job.image_path.parent.mkdir(parents=True, exist_ok=True)
+        speech_job.audio_path.parent.mkdir(parents=True, exist_ok=True)
+        client = MagicMock()
+
+        def fake_text2image(prompt, path, **kw):
+            Path(path).write_bytes(b"img")
+            return path
+
+        def fake_text2speech(text, path, **kw):
+            Path(path).write_bytes(b"aud")
+            return path
+
+        client.text2image.side_effect = fake_text2image
+        client.text2speech.side_effect = fake_text2speech
+        client.image2video.return_value = tmp_path / "vid.mp4"
+
+        render_scene(episode.scenes[0], jobs, client, manifest, episode)
+
+        client.image2video.assert_any_call(
+            speech_job.image_path,
+            speech_job.prompt,
+            speech_job.video_path,
+            audio_path=speech_job.audio_path,
+            seed=speech_job.seed,
+        )
+
+
 class TestCacheResume:
     def test_skips_existing_image(self, episode, manifest, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
@@ -198,3 +255,19 @@ class TestCacheResume:
 
         render_scene(episode.scenes[0], jobs, client, manifest, episode)
         client.text2image.assert_called_once()
+
+    def test_skips_existing_audio(self, episode, manifest, tmp_path):
+        paths = RunPaths(tmp_path, "test-run")
+        jobs = plan_beats(episode, manifest, paths)
+        speech_job = [j for j in jobs if j.needs_audio][0]
+        speech_job.image_path.parent.mkdir(parents=True, exist_ok=True)
+        speech_job.audio_path.parent.mkdir(parents=True, exist_ok=True)
+        speech_job.image_path.write_bytes(b"fake")
+        speech_job.audio_path.write_bytes(b"fake")
+        client = MagicMock()
+        client.image2video.return_value = tmp_path / "vid.mp4"
+
+        render_scene(episode.scenes[0], jobs, client, manifest, episode)
+
+        client.text2speech.assert_not_called()
+        assert speech_job.status.value == "done"

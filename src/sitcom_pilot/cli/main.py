@@ -254,7 +254,6 @@ def render_beat(
         None, "--scene", "-s", help="Scene ID (auto-detected if omitted)"
     ),
     output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
-    max_retries: int = typer.Option(1, "--retries", help="Max retries on failure"),
 ) -> None:
     """Render a single beat."""
     _setup_logging()
@@ -292,7 +291,7 @@ def render_beat(
         console=console,
     ) as progress:
         progress.add_task(f"Rendering beat {beat_id}...", total=None)
-        _render_beat(target, client, manifest, episode, scene=scene, max_retries=max_retries)
+        _render_beat(target, client, manifest, episode, scene=scene)
 
     if target.status.value == "done":
         console.print(f"[green]Beat {beat_id} rendered:[/green] {target.video_path}")

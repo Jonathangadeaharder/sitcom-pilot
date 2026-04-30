@@ -29,7 +29,7 @@ def build_scene_prompt(
     episode_id: str = "",
 ) -> str:
     env = episode.environments.get(scene.environment)
-    env_desc = env.trigger_word if env else scene.environment
+    env_desc = (env.trigger_word if env and env.trigger_word else None) or scene.environment
     char_parts = []
     for name in scene.characters_present:
         char = manifest.get(name)
