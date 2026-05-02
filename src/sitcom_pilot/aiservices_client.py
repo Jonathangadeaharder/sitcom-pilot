@@ -248,20 +248,21 @@ class AIServicesClient:
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
 
-        try:
-            from audio2subtitle.client import generate
+        if self._asr_provider:
+            try:
+                from audio2subtitle.client import generate
 
-            return generate(
-                audio_path,
-                output,
-                language=language,
-                output_format=output_format,
-                provider_name=self._asr_provider or "audio2subtitle.mlx",
-            )
-        except ImportError:
-            pass
-        except Exception as exc:
-            logger.warning("audio2subtitle Python API failed: %s", exc)
+                return generate(
+                    audio_path,
+                    output,
+                    language=language,
+                    output_format=output_format,
+                    provider_name=self._asr_provider,
+                )
+            except ImportError:
+                pass
+            except Exception as exc:
+                logger.warning("audio2subtitle Python API failed: %s", exc)
 
         if self._subprocess_fallback:
             return self._cli_audio2subtitle(
@@ -463,13 +464,18 @@ def _mux_audio(video_path: Path, audio_path: str | Path, output_path: Path) -> P
 
 
 def _run_cli(cmd: list[str]) -> subprocess.CompletedProcess:
-    logger.debug("CLI fallback: %s", " ".join(cmd))
+    logger.debug("CLI fallback command: %s", cmd[0] if cmd else "<empty>")
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if result.returncode != 0:
-        raise RuntimeError(
-            f"CLI command failed (rc={result.returncode}): {' '.join(cmd)}\n"
-            f"stderr: {result.stderr[:500]}"
+        stderr_preview = (result.stderr or "")[:500]
+        stdout_preview = (result.stdout or "")[:500]
+        error_msg = (
+            f"CLI command failed (rc={result.returncode}) for `{cmd[0] if cmd else '<empty>'}`\n"
+            f"stderr: {stderr_preview}"
         )
+        if stdout_preview.strip():
+            error_msg += f"\nstdout: {stdout_preview}"
+        raise RuntimeError(error_msg)
     return result
 
 
