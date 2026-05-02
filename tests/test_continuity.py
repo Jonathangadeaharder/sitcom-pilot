@@ -44,11 +44,13 @@ class TestCheckContinuity:
 
     def test_invalid_threshold_raises(self):
         import pytest
+
         with pytest.raises(ValueError, match="threshold"):
             check_continuity(Path("a.png"), Path("b.png"), threshold=1.5)
 
     def test_negative_threshold_raises(self):
         import pytest
+
         with pytest.raises(ValueError, match="threshold"):
             check_continuity(Path("a.png"), Path("b.png"), threshold=-0.1)
 
