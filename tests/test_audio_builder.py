@@ -323,13 +323,25 @@ class TestBuildFishTextFromDialogue:
     def test_invalid_emotion_ignored(self):
         from sitcom_pilot.audio_builder import build_fish_text_from_dialogue
 
-        line = {"speaker": "maya", "emotion": "not_real", "tone": None, "effect": None, "text": "Hi."}
+        line = {
+            "speaker": "maya",
+            "emotion": "not_real",
+            "tone": None,
+            "effect": None,
+            "text": "Hi.",
+        }
         assert build_fish_text_from_dialogue(line) == "Hi."
 
     def test_invalid_tone_ignored(self):
         from sitcom_pilot.audio_builder import build_fish_text_from_dialogue
 
-        line = {"speaker": "maya", "emotion": None, "tone": "not_real", "effect": None, "text": "Hi."}
+        line = {
+            "speaker": "maya",
+            "emotion": None,
+            "tone": "not_real",
+            "effect": None,
+            "text": "Hi.",
+        }
         assert build_fish_text_from_dialogue(line) == "Hi."
 
 
@@ -410,13 +422,18 @@ class TestSynthesizeDialogueLine:
 
 
 class TestBuildShotAudioEdgeCases:
-    def test_single_line_no_concat(self, tmp_path):
+    @patch("sitcom_pilot.audio_builder.concatenate_wavs")
+    @patch("sitcom_pilot.audio_builder.synthesize_dialogue_line")
+    def test_single_line_no_concat(self, mock_synth, mock_concat, tmp_path):
         from sitcom_pilot.audio_builder import build_shot_audio
 
+        mock_synth.return_value = True
+        mock_concat.return_value = True
         dialogue = [
             {"speaker": "maya", "emotion": None, "tone": None, "effect": None, "text": "Hi."}
         ]
         output = tmp_path / "shot.wav"
-        output.write_bytes(b"existing")
         result = build_shot_audio(dialogue, "maya", output)
         assert result is True
+        mock_synth.assert_called_once()
+        mock_concat.assert_called_once()

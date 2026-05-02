@@ -262,8 +262,6 @@ def test_non_strict_skips_speech_checks():
 
 
 def test_structural_validate_missing_fields():
-    from sitcom_pilot.validator import EpisodeValidator
-
     v = EpisodeValidator()
     with patch("sitcom_pilot.validator._JSONSCHEMA_AVAILABLE", False):
         errors = v.validate({"schema_version": "2.0"})
@@ -275,26 +273,34 @@ def test_structural_validate_missing_fields():
 
 
 def test_structural_validate_scenes_not_list():
-    from sitcom_pilot.validator import EpisodeValidator
-
     v = EpisodeValidator()
     with patch("sitcom_pilot.validator._JSONSCHEMA_AVAILABLE", False):
-        errors = v.validate({"schema_version": "2.0", "scenes": "bad", "cast": {}, "environments": {}, "show": "x", "title": "y"})
+        errors = v.validate({
+            "schema_version": "2.0",
+            "scenes": "bad",
+            "cast": {},
+            "environments": {},
+            "show": "x",
+            "title": "y",
+        })
     assert any("list" in e.lower() for e in errors)
 
 
 def test_structural_validate_cast_not_dict():
-    from sitcom_pilot.validator import EpisodeValidator
-
     v = EpisodeValidator()
     with patch("sitcom_pilot.validator._JSONSCHEMA_AVAILABLE", False):
-        errors = v.validate({"schema_version": "2.0", "scenes": [], "cast": "bad", "environments": {}, "show": "x", "title": "y"})
+        errors = v.validate({
+            "schema_version": "2.0",
+            "scenes": [],
+            "cast": "bad",
+            "environments": {},
+            "show": "x",
+            "title": "y",
+        })
     assert any("cast" in e.lower() for e in errors)
 
 
 def test_structural_validate_scene_missing_fields():
-    from sitcom_pilot.validator import EpisodeValidator
-
     v = EpisodeValidator()
     with patch("sitcom_pilot.validator._JSONSCHEMA_AVAILABLE", False):
         errors = v.validate({
@@ -309,8 +315,6 @@ def test_structural_validate_scene_missing_fields():
 
 
 def test_structural_validate_beat_missing_fields():
-    from sitcom_pilot.validator import EpisodeValidator
-
     v = EpisodeValidator()
     with patch("sitcom_pilot.validator._JSONSCHEMA_AVAILABLE", False):
         errors = v.validate({
@@ -332,8 +336,6 @@ def test_structural_validate_beat_missing_fields():
 
 
 def test_structural_validate_invalid_beat_kind():
-    from sitcom_pilot.validator import EpisodeValidator
-
     v = EpisodeValidator()
     with patch("sitcom_pilot.validator._JSONSCHEMA_AVAILABLE", False):
         errors = v.validate({

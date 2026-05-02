@@ -74,34 +74,45 @@ def test_env_override_image_provider():
 
 class TestFallbackPipelineConfig:
     def test_fallback_defaults(self):
-        from unittest.mock import MagicMock, patch
+        import importlib
+        import sys
+        from unittest.mock import patch
 
-        with patch("sitcom_pilot.config._PYDANTIC_AVAILABLE", False):
-            # Re-import to get the fallback class
-            import importlib
-            import sitcom_pilot.config as cfg_mod
+        saved = sys.modules.pop("sitcom_pilot.config", None)
+        try:
+            with patch.dict(sys.modules, {"pydantic_settings": None, "pydantic": None}):
+                import sitcom_pilot.config as cfg_mod
 
-            original = cfg_mod._PYDANTIC_AVAILABLE
-            cfg_mod._PYDANTIC_AVAILABLE = False
-            try:
-                # The fallback class is already defined at module level
-                # when pydantic is not available, so we test via from_env
-                # or direct instantiation of the fallback
-                from sitcom_pilot.config import PipelineConfig as PC
+                importlib.reload(cfg_mod)
+                cfg = cfg_mod.PipelineConfig()
+                assert cfg.comfyui_url == "http://127.0.0.1:8188"
+                assert cfg.output_dir == Path("output")
+                assert cfg.cooldown_seconds == 0.0
+                assert cfg.max_crash_retries == 3
+                assert cfg.image_provider == "mlx-flux"
+                assert cfg.video_provider == "mlx-ltx"
+                assert cfg.tts_provider == "mlx-audio"
+                assert cfg.asr_provider is None
+        finally:
+            if saved is not None:
+                sys.modules["sitcom_pilot.config"] = saved
+                importlib.reload(sys.modules["sitcom_pilot.config"])
 
-                # Since pydantic IS available, PipelineConfig is the pydantic one.
-                # We test the fallback logic by calling from_env on the fallback class.
-                # We can't easily swap the class, so test the fallback __init__ directly.
-                pass
-            finally:
-                cfg_mod._PYDANTIC_AVAILABLE = original
+    def test_fallback_from_env(self):
+        import importlib
+        import sys
+        from unittest.mock import patch
 
-    def test_from_env_method(self):
-        """Test PipelineConfig.from_env() classmethod exists and works."""
-        from sitcom_pilot.config import PipelineConfig
+        saved = sys.modules.pop("sitcom_pilot.config", None)
+        try:
+            with patch.dict(sys.modules, {"pydantic_settings": None, "pydantic": None}):
+                import sitcom_pilot.config as cfg_mod
 
-        # The pydantic version doesn't have from_env, only the fallback does
-        if hasattr(PipelineConfig, "from_env"):
-            cfg = PipelineConfig.from_env()
-            assert cfg.comfyui_url is not None
-            assert cfg.output_dir is not None
+                importlib.reload(cfg_mod)
+                cfg = cfg_mod.PipelineConfig.from_env()
+                assert cfg.comfyui_url is not None
+                assert cfg.output_dir is not None
+        finally:
+            if saved is not None:
+                sys.modules["sitcom_pilot.config"] = saved
+                importlib.reload(sys.modules["sitcom_pilot.config"])
