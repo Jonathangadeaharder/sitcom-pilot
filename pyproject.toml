@@ -15,10 +15,23 @@ dependencies = [
     "ormsgpack>=1.12.2",
     "rich>=15.0.0",
     "typer>=0.24.2",
+    # AIServices packages (clean client interfaces)
+    "text2image",
+    "image2image",
+    "image2video",
+    "text2speech",
+    "audio2subtitle",
 ]
 
-[tool.uv]
-dev-dependencies = [
+[tool.uv.sources]
+text2image = { path = "../AIServices/packages/text2image", editable = true }
+image2image = { path = "../AIServices/packages/image2image", editable = true }
+image2video = { path = "../AIServices/packages/image2video", editable = true }
+text2speech = { path = "../AIServices/packages/text2speech", editable = true }
+audio2subtitle = { path = "../AIServices/packages/audio2subtitle", editable = true }
+
+[dependency-groups]
+dev = [
     "mutmut>=3.5.0",
     "pillow>=12.2.0",
     "pygments<2.19",

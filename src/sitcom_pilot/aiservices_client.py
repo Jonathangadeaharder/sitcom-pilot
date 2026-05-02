@@ -34,22 +34,6 @@ class AIServicesClient:
         self._tts_provider = tts_provider
         self._asr_provider = asr_provider
         self._subprocess_fallback = subprocess_fallback
-        self._providers: dict[str, Any] = {}
-        self._ensure_registered()
-
-    def _ensure_registered(self) -> None:
-        from sitcom_pilot.providers import ensure_registered
-
-        ensure_registered()
-
-    def _get_provider(self, registry_name: str) -> Any:
-        if registry_name in self._providers:
-            return self._providers[registry_name]
-        from aiservices_core.providers import registry
-
-        provider = registry.get(registry_name)
-        self._providers[registry_name] = provider
-        return provider
 
     def text2image(
         self,
@@ -67,20 +51,19 @@ class AIServicesClient:
         output.parent.mkdir(parents=True, exist_ok=True)
 
         try:
-            from text2image.models import Text2ImageRequest
+            from text2image.client import generate
 
-            req = Text2ImageRequest(
-                prompt=prompt,
+            return generate(
+                prompt,
+                output,
+                seed=seed,
+                width=width,
+                height=height,
                 negative_prompt=negative_prompt,
                 guidance_scale=guidance_scale,
                 num_inference_steps=num_inference_steps,
-                seed=seed,
-                width=_div8(width),
-                height=_div8(height),
+                provider_name=self._image_provider,
             )
-            provider = self._get_provider(self._image_provider)
-            resp = provider.generate(req, output_path=str(output))
-            return Path(resp.output_path)
         except ImportError:
             pass
         except Exception as exc:
@@ -116,20 +99,19 @@ class AIServicesClient:
         inp = str(image_path)
 
         try:
-            from image2image.models import Image2ImageRequest
+            from image2image.client import generate
 
-            req = Image2ImageRequest(
-                image_path=inp,
-                prompt=prompt,
-                negative_prompt=negative_prompt,
+            return generate(
+                inp,
+                prompt,
+                output,
+                seed=seed,
                 strength=strength,
+                negative_prompt=negative_prompt,
                 guidance_scale=guidance_scale,
                 num_inference_steps=num_inference_steps,
-                seed=seed,
+                provider_name=self._image_edit_provider,
             )
-            provider = self._get_provider(self._image_edit_provider)
-            resp = provider.generate(req, output_path=str(output))
-            return Path(resp.output_path)
         except ImportError:
             pass
         except Exception as exc:
@@ -168,21 +150,20 @@ class AIServicesClient:
 
         result: Path | None = None
         try:
-            from image2video.models import Image2VideoRequest
+            from image2video.client import generate
 
-            req = Image2VideoRequest(
-                image_path=inp,
-                prompt=prompt,
-                width=_div8(width),
-                height=_div8(height),
+            result = generate(
+                inp,
+                prompt,
+                output,
+                seed=seed,
+                width=width,
+                height=height,
                 num_frames=num_frames,
                 num_inference_steps=num_inference_steps,
-                seed=seed,
                 fps=fps,
+                provider_name=self._video_provider,
             )
-            provider = self._get_provider(self._video_provider)
-            resp = provider.generate(req, output_path=str(output))
-            result = Path(resp.output_path)
         except ImportError:
             pass
         except Exception as exc:
@@ -228,19 +209,18 @@ class AIServicesClient:
         tagged_text = f"{tags} {text}".strip() if tags else text
 
         try:
-            from text2speech.models import Text2SpeechRequest
+            from text2speech.client import generate
 
-            req = Text2SpeechRequest(
-                text=text,
+            return generate(
+                text,
+                output,
                 voice_id=voice.voice_id if voice else None,
                 emotion=emotion,
                 tone=tone,
                 effect=effect,
                 reference_audio=voice.clone_from if voice else None,
+                provider_name=self._tts_provider,
             )
-            provider = self._get_provider(self._tts_provider)
-            resp = provider.generate(req, output_path=str(output))
-            return Path(resp.output_path)
         except ImportError:
             pass
         except Exception as exc:
@@ -269,16 +249,15 @@ class AIServicesClient:
         output.parent.mkdir(parents=True, exist_ok=True)
 
         try:
-            from audio2subtitle.models import Audio2SubtitleRequest
+            from audio2subtitle.client import generate
 
-            req = Audio2SubtitleRequest(
-                audio_path=str(audio_path),
+            return generate(
+                audio_path,
+                output,
                 language=language,
                 output_format=output_format,
+                provider_name=self._asr_provider or "audio2subtitle.mlx",
             )
-            provider = self._get_provider(self._asr_provider)
-            resp = provider.generate(req, output_path=str(output))
-            return Path(resp.output_path if hasattr(resp, "output_path") else resp)
         except ImportError:
             pass
         except Exception as exc:
@@ -318,6 +297,10 @@ class AIServicesClient:
         if self._asr_provider:
             caps["audio2subtitle"] = [self._asr_provider]
         return caps
+
+    # ------------------------------------------------------------------
+    # CLI subprocess fallbacks
+    # ------------------------------------------------------------------
 
     def _cli_text2image(
         self, *, prompt, output_path, seed, width, height, negative_prompt, guidance_scale, steps
