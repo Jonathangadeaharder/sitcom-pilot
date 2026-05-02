@@ -34,6 +34,24 @@ class TestCheckContinuity:
         result = check_continuity(Path("ref.png"), Path("gen.png"), threshold=0.7)
         assert not result.passed
 
+    @patch("sitcom_pilot.continuity._compute_ssim", return_value=0.7)
+    @patch("sitcom_pilot.continuity._load_image_gray")
+    def test_passes_at_exact_threshold(self, mock_load, mock_ssim):
+        mock_load.return_value = MagicMock()
+        result = check_continuity(Path("ref.png"), Path("gen.png"), threshold=0.7)
+        assert result.passed
+        assert result.ssim_score == 0.7
+
+    def test_invalid_threshold_raises(self):
+        import pytest
+        with pytest.raises(ValueError, match="threshold"):
+            check_continuity(Path("a.png"), Path("b.png"), threshold=1.5)
+
+    def test_negative_threshold_raises(self):
+        import pytest
+        with pytest.raises(ValueError, match="threshold"):
+            check_continuity(Path("a.png"), Path("b.png"), threshold=-0.1)
+
 
 class TestSsimFallback:
     def test_identical_images(self):
@@ -46,6 +64,13 @@ class TestSsimFallback:
         img_a.tobytes.return_value = b"\x00\x01\x02"
         img_b = MagicMock()
         img_b.tobytes.return_value = b"\x03\x04\x05"
+        assert _ssim_fallback(img_a, img_b) == 0.0
+
+    def test_different_sizes_returns_zero(self):
+        img_a = MagicMock()
+        img_a.size = (10, 10)
+        img_b = MagicMock()
+        img_b.size = (20, 20)
         assert _ssim_fallback(img_a, img_b) == 0.0
 
 

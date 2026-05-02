@@ -1,5 +1,5 @@
 import json
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 
 def _make_episode_v2(tmp_path, scenes=None, cast=None, envs=None):
@@ -319,3 +319,104 @@ class TestBuildFishTextFromDialogue:
 
         line = {"speaker": "maya", "emotion": None, "tone": None, "effect": None, "text": "Plain."}
         assert build_fish_text_from_dialogue(line) == "Plain."
+
+    def test_invalid_emotion_ignored(self):
+        from sitcom_pilot.audio_builder import build_fish_text_from_dialogue
+
+        line = {"speaker": "maya", "emotion": "not_real", "tone": None, "effect": None, "text": "Hi."}
+        assert build_fish_text_from_dialogue(line) == "Hi."
+
+    def test_invalid_tone_ignored(self):
+        from sitcom_pilot.audio_builder import build_fish_text_from_dialogue
+
+        line = {"speaker": "maya", "emotion": None, "tone": "not_real", "effect": None, "text": "Hi."}
+        assert build_fish_text_from_dialogue(line) == "Hi."
+
+
+class TestConcatenateWavs:
+    def test_empty_list_returns_false(self, tmp_path):
+        from sitcom_pilot.audio_builder import concatenate_wavs
+
+        assert concatenate_wavs([], tmp_path / "out.wav") is False
+
+    def test_single_file_copies(self, tmp_path):
+        from sitcom_pilot.audio_builder import concatenate_wavs
+
+        src = tmp_path / "in.wav"
+        src.write_bytes(b"RIFF" + b"\x00" * 100)
+        out = tmp_path / "sub" / "out.wav"
+        result = concatenate_wavs([src], out)
+        assert result is True
+        assert out.exists()
+
+    @patch("sitcom_pilot.audio_builder.subprocess.run")
+    def test_multiple_files_calls_ffmpeg(self, mock_run, tmp_path):
+        from sitcom_pilot.audio_builder import concatenate_wavs
+
+        mock_run.return_value = MagicMock(returncode=0)
+        f1 = tmp_path / "a.wav"
+        f2 = tmp_path / "b.wav"
+        f1.write_bytes(b"a")
+        f2.write_bytes(b"b")
+        out = tmp_path / "out.wav"
+
+        # Make output exist after mock subprocess
+        def side_effect(cmd, **kw):
+            out.write_bytes(b"merged")
+            return MagicMock(returncode=0)
+
+        mock_run.side_effect = side_effect
+        result = concatenate_wavs([f1, f2], out)
+        assert result is True
+        assert mock_run.called
+        cmd_args = mock_run.call_args[0][0]
+        assert "ffmpeg" in cmd_args[0]
+
+    @patch("sitcom_pilot.audio_builder.subprocess.run")
+    def test_ffmpeg_failure_returns_false(self, mock_run, tmp_path):
+        from sitcom_pilot.audio_builder import concatenate_wavs
+
+        mock_run.return_value = MagicMock(returncode=1)
+        f1 = tmp_path / "a.wav"
+        f2 = tmp_path / "b.wav"
+        f1.write_bytes(b"a")
+        f2.write_bytes(b"b")
+        out = tmp_path / "out.wav"
+        result = concatenate_wavs([f1, f2], out)
+        assert result is False
+
+    @patch("sitcom_pilot.audio_builder.subprocess.run")
+    def test_ffmpeg_exception_returns_false(self, mock_run, tmp_path):
+        from sitcom_pilot.audio_builder import concatenate_wavs
+
+        mock_run.side_effect = OSError("ffmpeg not found")
+        f1 = tmp_path / "a.wav"
+        f2 = tmp_path / "b.wav"
+        f1.write_bytes(b"a")
+        f2.write_bytes(b"b")
+        out = tmp_path / "out.wav"
+        result = concatenate_wavs([f1, f2], out)
+        assert result is False
+
+
+class TestSynthesizeDialogueLine:
+    def test_existing_output_returns_true(self, tmp_path):
+        from sitcom_pilot.audio_builder import synthesize_dialogue_line
+
+        out = tmp_path / "exists.wav"
+        out.write_bytes(b"RIFF")
+        result = synthesize_dialogue_line("test", "maya", out)
+        assert result is True
+
+
+class TestBuildShotAudioEdgeCases:
+    def test_single_line_no_concat(self, tmp_path):
+        from sitcom_pilot.audio_builder import build_shot_audio
+
+        dialogue = [
+            {"speaker": "maya", "emotion": None, "tone": None, "effect": None, "text": "Hi."}
+        ]
+        output = tmp_path / "shot.wav"
+        output.write_bytes(b"existing")
+        result = build_shot_audio(dialogue, "maya", output)
+        assert result is True
