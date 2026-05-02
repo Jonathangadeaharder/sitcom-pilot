@@ -109,9 +109,28 @@ class TestFallbackPipelineConfig:
                 import sitcom_pilot.config as cfg_mod
 
                 importlib.reload(cfg_mod)
-                cfg = cfg_mod.PipelineConfig.from_env()
-                assert cfg.comfyui_url is not None
-                assert cfg.output_dir is not None
+                env = {
+                    "SITCOM_COMFYUI_URL": "http://192.168.1.50:8188",
+                    "SITCOM_OUTPUT_DIR": "/tmp/fallback_out",
+                    "SITCOM_RUN_ID": "test-run-42",
+                    "SITCOM_COOLDOWN_SECONDS": "1.5",
+                    "SITCOM_MAX_CRASH_RETRIES": "5",
+                    "SITCOM_IMAGE_PROVIDER": "custom-img",
+                    "SITCOM_VIDEO_PROVIDER": "custom-vid",
+                    "SITCOM_TTS_PROVIDER": "custom-tts",
+                    "SITCOM_ASR_PROVIDER": "custom-asr",
+                }
+                with patch.dict(os.environ, env, clear=False):
+                    cfg = cfg_mod.PipelineConfig.from_env()
+                    assert cfg.comfyui_url == "http://192.168.1.50:8188"
+                    assert cfg.output_dir == Path("/tmp/fallback_out")
+                    assert cfg.run_id == "test-run-42"
+                    assert cfg.cooldown_seconds == 1.5
+                    assert cfg.max_crash_retries == 5
+                    assert cfg.image_provider == "custom-img"
+                    assert cfg.video_provider == "custom-vid"
+                    assert cfg.tts_provider == "custom-tts"
+                    assert cfg.asr_provider == "custom-asr"
         finally:
             if saved is not None:
                 sys.modules["sitcom_pilot.config"] = saved
