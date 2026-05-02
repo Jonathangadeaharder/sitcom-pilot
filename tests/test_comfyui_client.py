@@ -243,7 +243,7 @@ def test_wait_for_completion_uses_correct_url(client):
     mock_response.read.return_value = json.dumps(history).encode()
     with patch("urllib.request.urlopen", return_value=mock_response) as mock_urlopen:
         with patch("time.time", side_effect=[0, 0.001]):
-            result = client.wait_for_completion("abc-123", timeout=5, poll_interval=0.01)
+            client.wait_for_completion("abc-123", timeout=5, poll_interval=0.01)
             url = mock_urlopen.call_args[0][0]
             assert "/history/abc-123" in url
             assert mock_urlopen.call_args[1]["timeout"] == 10
