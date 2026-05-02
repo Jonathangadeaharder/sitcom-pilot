@@ -66,7 +66,8 @@ V2_EPISODE = {
 
 def _write_episode(tmp_path: Path, data: dict | None = None) -> Path:
     ep = tmp_path / "episode.json"
-    ep.write_text(json.dumps(data or V2_EPISODE))
+    payload = V2_EPISODE if data is None else data
+    ep.write_text(json.dumps(payload))
     return ep
 
 

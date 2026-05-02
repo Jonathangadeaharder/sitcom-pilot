@@ -41,6 +41,8 @@ def _compute_ssim(img_a, img_b) -> float:
 
 
 def _ssim_fallback(img_a, img_b) -> float:
+    if img_a.size != img_b.size:
+        return 0.0
     return 1.0 if img_a.tobytes() == img_b.tobytes() else 0.0
 
 
@@ -49,6 +51,8 @@ def check_continuity(
     generated_path: Path,
     threshold: float = 0.7,
 ) -> SimilarityResult:
+    if not 0.0 <= threshold <= 1.0:
+        raise ValueError("threshold must be between 0.0 and 1.0")
     img_a = _load_image_gray(reference_path)
     img_b = _load_image_gray(generated_path)
     score = _compute_ssim(img_a, img_b)

@@ -57,6 +57,8 @@ class CastManifest:
         return self.characters.get(slug)
 
     def add(self, profile: CharacterProfile) -> None:
+        if not profile.slug:
+            raise ValueError("CharacterProfile.slug must be non-empty")
         self.characters[profile.slug] = profile
 
     @property

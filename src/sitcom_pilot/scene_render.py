@@ -112,45 +112,64 @@ def _render_beat(
     manifest: CastManifest,
     episode: EpisodeData,
     scene: SceneData,
+    *,
+    max_retries: int = 1,
 ) -> BeatJob:
-    job.status = BeatStatus.RUNNING
-    try:
-        if Path(job.image_path).exists():
-            logger.info("Cache hit: %s", job.image_path)
-        else:
-            client.text2image(
-                job.prompt,
-                job.image_path,
-                seed=job.seed,
-            )
+    for attempt in range(max_retries + 1):
+        job.status = BeatStatus.RUNNING
+        try:
+            if Path(job.image_path).exists():
+                logger.info("Cache hit: %s", job.image_path)
+            else:
+                client.text2image(
+                    job.prompt,
+                    job.image_path,
+                    seed=job.seed,
+                )
 
-        if job.needs_audio and job.text and not job.audio_path.exists():
-            voice = None
-            char = manifest.get(job.speaker)
-            if char and char.voice:
-                voice = char.voice
-            client.text2speech(
-                job.text,
-                job.audio_path,
-                voice=voice,
-                character=episode.cast.get(job.speaker),
-            )
+            if job.needs_audio and job.text:
+                if job.audio_path.exists():
+                    logger.info("Cache hit: %s", job.audio_path)
+                else:
+                    voice = None
+                    char = manifest.get(job.speaker)
+                    if char and char.voice:
+                        voice = char.voice
+                    client.text2speech(
+                        job.text,
+                        job.audio_path,
+                        voice=voice,
+                        character=episode.cast.get(job.speaker),
+                    )
 
-        if job.image_path.exists():
-            audio_arg = job.audio_path if job.audio_path.exists() else None
-            client.image2video(
-                job.image_path,
-                job.prompt,
-                job.video_path,
-                audio_path=audio_arg,
-                seed=job.seed,
-            )
+            if job.video_path.exists():
+                logger.info("Cache hit: %s", job.video_path)
+            elif job.image_path.exists():
+                audio_arg = job.audio_path if job.audio_path.exists() else None
+                client.image2video(
+                    job.image_path,
+                    job.prompt,
+                    job.video_path,
+                    audio_path=audio_arg,
+                    seed=job.seed,
+                )
 
-        job.status = BeatStatus.DONE
-    except Exception as exc:
-        job.error = str(exc)
-        job.status = BeatStatus.FAILED
-        logger.error("Beat %s failed: %s", job.beat_id, exc)
+            job.status = BeatStatus.DONE
+            job.error = ""
+            return job
+        except Exception as exc:
+            if attempt == max_retries:
+                job.error = str(exc)
+                job.status = BeatStatus.FAILED
+                logger.error("Beat %s failed: %s", job.beat_id, exc)
+                return job
+            logger.warning(
+                "Beat %s attempt %d/%d failed: %s",
+                job.beat_id,
+                attempt + 1,
+                max_retries + 1,
+                exc,
+            )
     return job
 
 
@@ -163,8 +182,8 @@ def render_scene(
     *,
     max_workers: int = 1,
 ) -> SceneReport:
-    report = SceneReport(scene_id=scene.scene_id, total_beats=len(jobs))
     scene_jobs = [j for j in jobs if j.scene_id == scene.scene_id]
+    report = SceneReport(scene_id=scene.scene_id, total_beats=len(scene_jobs))
 
     if max_workers <= 1:
         for job in scene_jobs:

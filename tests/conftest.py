@@ -25,12 +25,20 @@ def episode_manifest():
     episode = loader.load(Path(_EPISODE_02))
     manifest = CastManifest()
     for slug, char in episode.cast.items():
+        refs = tuple(char.reference_images or ())
         manifest.add(
             CharacterProfile(
                 name=char.name,
                 slug=slug,
                 visual=char.visual,
-                refs=CharacterRef(),
+                refs=CharacterRef(
+                    front=refs[0] if len(refs) > 0 else "",
+                    three_quarter=refs[1] if len(refs) > 1 else "",
+                    profile=refs[2] if len(refs) > 2 else "",
+                    extra=refs[3:] if len(refs) > 3 else (),
+                ),
+                lora_path=char.lora,
+                voice=char.voice,
             )
         )
     return episode, manifest

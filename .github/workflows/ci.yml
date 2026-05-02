@@ -29,13 +29,13 @@ jobs:
         run: uv sync --dev
 
       - name: Ruff check
-        run: uvx ruff check .
+        run: uv run --python ${{ matrix.python-version }} ruff check .
 
       - name: Ruff format check
-        run: uvx ruff format --check .
+        run: uv run --python ${{ matrix.python-version }} ruff format --check .
 
       - name: Run tests with coverage
-        run: uv run pytest tests/ -q --cov=sitcom_pilot --cov-report=term-missing
+        run: uv run --python ${{ matrix.python-version }} pytest tests/ -q --cov=sitcom_pilot --cov-report=term-missing
 
       - name: Validate episode JSONs
-        run: uv run python -m sitcom_pilot.validator episode_01.json episode_02.json
+        run: uv run --python ${{ matrix.python-version }} python -m sitcom_pilot.validator episode_01.json episode_02.json

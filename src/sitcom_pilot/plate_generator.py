@@ -47,6 +47,8 @@ def generate_beat_plate(
     episode_id: str = "",
 ) -> Path:
     prompt = build_beat_prompt(beat, scene, episode, manifest, episode_id=episode_id)
+    if not 0.0 <= strength <= 1.0:
+        raise ValueError("strength must be between 0.0 and 1.0")
     output_path.parent.mkdir(parents=True, exist_ok=True)
     logger.info("Generating beat plate for %s: %s", beat.beat_id, prompt[:80])
     return client.image2image(

@@ -69,7 +69,7 @@ class TestConcatClips:
 
         content = captured["content"]
         assert "\\\\" in content
-        assert "'\\''" in content
+        assert "\\'" in content
 
 
 class TestMuxAudio:

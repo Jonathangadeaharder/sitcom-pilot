@@ -55,7 +55,7 @@ def concat_clips(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
         for p in clip_paths:
-            escaped = str(p).replace("\\", "\\\\").replace("'", "'\\''")
+            escaped = str(p).replace("\\", "\\\\").replace("'", r"\'")
             f.write(f"file '{escaped}'\n")
         list_path = f.name
     try:
@@ -160,7 +160,7 @@ def burn_in_captions(
     output_path: Path,
 ) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    srt_escaped = str(srt_path).replace("'", "'\\''")
+    srt_escaped = str(srt_path).replace("\\", "/").replace("'", r"\'").replace(":", r"\:")
     cmd = [
         "ffmpeg",
         "-y",
@@ -278,8 +278,10 @@ def _run(cmd: list[str]) -> subprocess.CompletedProcess:
     logger.debug("ffmpeg: %s", " ".join(cmd))
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if result.returncode != 0:
-        raise RuntimeError(
-            f"ffmpeg failed (rc={result.returncode}): {' '.join(cmd)}\n"
-            f"stderr: {result.stderr[:500]}"
-        )
+        error_msg = f"ffmpeg failed (rc={result.returncode}): {' '.join(cmd)}\n"
+        if result.stdout:
+            error_msg += f"stdout: {result.stdout[-1000:]}\n"
+        if result.stderr:
+            error_msg += f"stderr: {result.stderr[-1000:]}"
+        raise RuntimeError(error_msg)
     return result

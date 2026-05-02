@@ -8,9 +8,12 @@ dependencies = [
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
     # Structured logging
-    "structlog>=24.0.0",
+    "structlog>=25.1.0",
     # Episode schema validation
     "jsonschema>=4.21.0",
+    # Image processing (continuity checks)
+    "pillow>=12.2.0",
+    "scikit-image>=0.20.0",
     # Legacy audio pipeline deps
     "ormsgpack>=1.12.2",
     "rich>=15.0.0",
@@ -33,7 +36,6 @@ audio2subtitle = { path = "../AIServices/packages/audio2subtitle", editable = tr
 [dependency-groups]
 dev = [
     "mutmut>=3.5.0",
-    "pillow>=12.2.0",
     "pygments<2.19",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",

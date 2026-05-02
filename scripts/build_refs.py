@@ -42,7 +42,7 @@ def main() -> None:
     client = AIServicesClient()
 
     failed = 0
-    for i, (slug, char) in enumerate(manifest.characters.items()):
+    for i, (slug, char) in enumerate(sorted(manifest.characters.items())):
         views = ["front", "three_quarter", "profile"]
         for j, view in enumerate(views):
             seed = args.seed_base + i * 10 + j
