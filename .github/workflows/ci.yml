@@ -16,6 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Clone AIServices
+        run: git clone --depth 1 https://github.com/Jonathangadeaharder/AIServices.git ../AIServices
+
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
