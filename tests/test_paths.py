@@ -1,4 +1,5 @@
 """Tests for sitcom_pilot.paths — RunPaths output directory contract."""
+
 from __future__ import annotations
 
 from sitcom_pilot.paths import RunPaths

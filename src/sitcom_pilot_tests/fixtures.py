@@ -18,7 +18,7 @@ def sample_episode():
         "schema_version": "2.0",
         "cast": {},
         "environments": {},
-        "scenes": []
+        "scenes": [],
     }
 
 

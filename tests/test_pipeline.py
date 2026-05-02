@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -16,12 +15,12 @@ from sitcom_pilot.loader import (
     ShotData,
 )
 
-# legacy/ is already on sys.path via conftest.py — pipeline.py lives there now
-_LEGACY = str(Path(__file__).parent.parent / "legacy")
-if _LEGACY not in sys.path:
-    sys.path.insert(0, _LEGACY)
+pipeline = pytest.importorskip(
+    "pipeline",
+    reason="legacy pipeline module retired; see legacy/retired/",
+)
 
-from pipeline import (
+from pipeline import (  # noqa: E402
     generate_audio_for_episode,
     inject_audio_paths,
     merge_audio_video,
@@ -33,9 +32,15 @@ def _mini_episode(tmp_path: Path) -> Path:
     ep = {
         "title": "Test Episode",
         "cast": {
-            "maya": {"name": "Maya", "role": "engineer", "visual": "test",
-                      "trigger_word": "test", "profile": "maya_v1",
-                      "voice_seed": 42, "voice_temp": 0.8},
+            "maya": {
+                "name": "Maya",
+                "role": "engineer",
+                "visual": "test",
+                "trigger_word": "test",
+                "profile": "maya_v1",
+                "voice_seed": 42,
+                "voice_temp": 0.8,
+            },
         },
         "environments": {
             "desk": {"profile": "desk_v1", "trigger_word": "a desk"},
@@ -54,7 +59,13 @@ def _mini_episode(tmp_path: Path) -> Path:
                         "action_end": "end",
                         "seed": 100,
                         "dialogue": [
-                            {"speaker": "maya", "emotion": "calm", "tone": None, "effect": None, "text": "Hello world"},
+                            {
+                                "speaker": "maya",
+                                "emotion": "calm",
+                                "tone": None,
+                                "effect": None,
+                                "text": "Hello world",
+                            },
                         ],
                     },
                     {
@@ -79,13 +90,30 @@ def _make_episode_data():
     cast = {"maya": CharacterData(profile="maya_v1", trigger_word="test")}
     envs = {"desk": EnvironmentData(profile="desk_v1", trigger_word="a desk")}
     shots = [
-        ShotData(shot_id="001_01", camera_angle="close", action_start="s",
-                 action_end="e", seed=1, dialogue=[{"speaker": "maya", "text": "hi"}]),
-        ShotData(shot_id="001_02", camera_angle="wide", action_start="s",
-                 action_end="e", seed=2, dialogue=[]),
+        ShotData(
+            shot_id="001_01",
+            camera_angle="close",
+            action_start="s",
+            action_end="e",
+            seed=1,
+            dialogue=[{"speaker": "maya", "text": "hi"}],
+        ),
+        ShotData(
+            shot_id="001_02",
+            camera_angle="wide",
+            action_start="s",
+            action_end="e",
+            seed=2,
+            dialogue=[],
+        ),
     ]
-    scene = SceneData(scene_id="001", environment="desk",
-                      characters_present=["maya"], shots=shots, target_duration_sec=30)
+    scene = SceneData(
+        scene_id="001",
+        environment="desk",
+        characters_present=["maya"],
+        shots=shots,
+        target_duration_sec=30,
+    )
     return EpisodeData(title="Test", cast=cast, environments=envs, scenes=[scene])
 
 
@@ -115,10 +143,10 @@ class TestGenerateAudio:
 
     def test_empty_episode(self, tmp_path):
         cast = {}
-        shots = [ShotData(shot_id="001_01", camera_angle="c", action_start="s",
-                          action_end="e", seed=1)]
-        scene = SceneData(scene_id="001", environment="desk",
-                          characters_present=[], shots=shots)
+        shots = [
+            ShotData(shot_id="001_01", camera_angle="c", action_start="s", action_end="e", seed=1)
+        ]
+        scene = SceneData(scene_id="001", environment="desk", characters_present=[], shots=shots)
         ep = EpisodeData(title="T", cast={}, environments={}, scenes=[scene])
         out = tmp_path / "out"
         result = generate_audio_for_episode(ep, out, cast)
@@ -189,7 +217,7 @@ class TestRunPipelineAudioOnly:
     def test_audio_only_skips_video(self, mock_audio, tmp_path):
         ep_path = _mini_episode(tmp_path)
         out_dir = tmp_path / "output"
-        result = run_pipeline(ep_path, out_dir, audio_only=True)
+        run_pipeline(ep_path, out_dir, audio_only=True)
         mock_audio.assert_called_once()
 
 

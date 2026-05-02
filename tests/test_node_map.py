@@ -12,7 +12,14 @@ def test_default_node_map_has_required_fields():
 
 
 def test_custom_node_map_overrides():
-    nm = NodeMap(start_prompt="10", end_prompt="20", audio="30", seed="1", env_profile="50", char_profiles=["51", "52"])
+    nm = NodeMap(
+        start_prompt="10",
+        end_prompt="20",
+        audio="30",
+        seed="1",
+        env_profile="50",
+        char_profiles=["51", "52"],
+    )
     assert nm.start_prompt == "10"
     assert nm.end_prompt == "20"
     assert nm.audio == "30"
@@ -22,7 +29,14 @@ def test_custom_node_map_overrides():
 
 
 def test_from_dict_creates_node_map():
-    data = {"start_prompt": "99", "end_prompt": "88", "audio": "77", "seed": "1", "env_profile": "55", "char_profiles": ["60", "61"]}
+    data = {
+        "start_prompt": "99",
+        "end_prompt": "88",
+        "audio": "77",
+        "seed": "1",
+        "env_profile": "55",
+        "char_profiles": ["60", "61"],
+    }
     nm = NodeMap.from_dict(data)
     assert nm.start_prompt == "99"
     assert nm.char_profiles == ["60", "61"]

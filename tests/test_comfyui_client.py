@@ -24,12 +24,14 @@ def test_queue_prompt_retries_on_connection_error(client):
     mock_response = MagicMock()
     mock_response.read.return_value = json.dumps({"prompt_id": "xyz"}).encode()
     call_count = 0
+
     def side_effect(*args, **kwargs):
         nonlocal call_count
         call_count += 1
         if call_count == 1:
             raise ConnectionError("Connection refused")
         return mock_response
+
     with patch("urllib.request.urlopen", side_effect=side_effect):
         with patch("time.sleep"):
             prompt_id = client.queue_prompt({"test": True}, max_retries=3)
@@ -77,8 +79,12 @@ def test_get_output_paths_returns_file_list(client):
     history = {
         "abc-123": {
             "outputs": {
-                "9": {"images": [{"filename": "output_001.mp4", "subfolder": "", "type": "output"}]},
-                "15": {"videos": [{"filename": "final.mp4", "subfolder": "batch", "type": "output"}]},
+                "9": {
+                    "images": [{"filename": "output_001.mp4", "subfolder": "", "type": "output"}]
+                },
+                "15": {
+                    "videos": [{"filename": "final.mp4", "subfolder": "batch", "type": "output"}]
+                },
             }
         }
     }
@@ -184,12 +190,14 @@ def test_queue_prompt_retry_backoff(client):
     mock_response = MagicMock()
     mock_response.read.return_value = json.dumps({"prompt_id": "ok"}).encode()
     call_count = 0
+
     def side_effect(*args, **kwargs):
         nonlocal call_count
         call_count += 1
         if call_count <= 2:
             raise ConnectionError("retry")
         return mock_response
+
     with patch("urllib.request.urlopen", side_effect=side_effect):
         with patch("time.sleep") as mock_sleep:
             client.queue_prompt({"test": True}, max_retries=3)
@@ -235,7 +243,7 @@ def test_wait_for_completion_uses_correct_url(client):
     mock_response.read.return_value = json.dumps(history).encode()
     with patch("urllib.request.urlopen", return_value=mock_response) as mock_urlopen:
         with patch("time.time", side_effect=[0, 0.001]):
-            result = client.wait_for_completion("abc-123", timeout=5, poll_interval=0.01)
+            client.wait_for_completion("abc-123", timeout=5, poll_interval=0.01)
             url = mock_urlopen.call_args[0][0]
             assert "/history/abc-123" in url
             assert mock_urlopen.call_args[1]["timeout"] == 10
@@ -243,10 +251,12 @@ def test_wait_for_completion_uses_correct_url(client):
 
 def test_wait_for_completion_polls_with_correct_interval(client):
     call_count = 0
+
     def time_side_effect():
         nonlocal call_count
         call_count += 1
         return call_count * 0.05
+
     mock_response = MagicMock()
     mock_response.read.return_value = json.dumps({"x": {}}).encode()
     with patch("urllib.request.urlopen", return_value=mock_response):

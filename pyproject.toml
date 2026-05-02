@@ -8,25 +8,39 @@ dependencies = [
     "pydantic>=2.0.0",
     "pydantic-settings>=2.0.0",
     # Structured logging
-    "structlog>=24.0.0",
+    "structlog>=25.1.0",
     # Episode schema validation
     "jsonschema>=4.21.0",
-    # AIServices integration (local path — swap for PyPI release when published)
-    "aiservices-core",
+    # Image processing (continuity checks)
+    "pillow>=12.2.0",
+    "scikit-image>=0.20.0",
     # Legacy audio pipeline deps
     "ormsgpack>=1.12.2",
+    "rich>=15.0.0",
+    "typer>=0.24.2",
+    # AIServices packages (clean client interfaces)
+    "text2image",
+    "image2image",
+    "image2video",
+    "text2speech",
+    "audio2subtitle",
 ]
 
-[tool.uv]
-dev-dependencies = [
+[tool.uv.sources]
+text2image = { path = "../AIServices/packages/text2image", editable = true }
+image2image = { path = "../AIServices/packages/image2image", editable = true }
+image2video = { path = "../AIServices/packages/image2video", editable = true }
+text2speech = { path = "../AIServices/packages/text2speech", editable = true }
+audio2subtitle = { path = "../AIServices/packages/audio2subtitle", editable = true }
+
+[dependency-groups]
+dev = [
     "mutmut>=3.5.0",
     "pygments<2.19",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
+    "ruff>=0.15.0",
 ]
-
-[tool.uv.sources]
-aiservices-core = { path = "../AIServices/packages/aiservices_core", editable = true }
 
 [project.scripts]
 sitcom-pilot = "sitcom_pilot.cli.main:app"
@@ -37,17 +51,23 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+exclude = ["legacy/*"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
 ignore = []
 
 [tool.ruff.lint.per-file-ignores]
-"legacy/*" = ["E402", "I001"]
+"legacy/*" = ["E402", "E501", "F841", "I001"]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.mutmut]
+paths_to_mutate = ["src/sitcom_pilot/determinism.py", "src/sitcom_pilot/beat_prompts.py", "src/sitcom_pilot/scene_render.py", "src/sitcom_pilot/cast_manifest.py", "src/sitcom_pilot/continuity.py"]
+runner = "uv run pytest tests/ -q --no-header -x"
+tests_dir = ["tests/"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sitcom_pilot", "src/sitcom_pilot_utils", "src/sitcom_pilot_tests"]

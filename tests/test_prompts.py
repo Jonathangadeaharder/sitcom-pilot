@@ -115,9 +115,7 @@ def test_build_start_prompt_no_characters():
             ),
         ],
     )
-    prompt = builder.build_start_prompt(
-        episode.scenes[0].shots[0], episode.scenes[0], episode
-    )
+    prompt = builder.build_start_prompt(episode.scenes[0].shots[0], episode.scenes[0], episode)
     assert "rooftop at dusk" in prompt
 
 
@@ -134,6 +132,7 @@ def test_start_and_end_prompts_differ(sample_episode):
 
 def test_build_end_prompt_contains_action_end_not_start(sample_episode):
     from sitcom_pilot.prompts import PromptBuilder
+
     builder = PromptBuilder()
     scene = sample_episode.scenes[0]
     shot = scene.shots[0]
@@ -144,6 +143,7 @@ def test_build_end_prompt_contains_action_end_not_start(sample_episode):
 
 def test_build_start_prompt_contains_action_start_not_end(sample_episode):
     from sitcom_pilot.prompts import PromptBuilder
+
     builder = PromptBuilder()
     scene = sample_episode.scenes[0]
     shot = scene.shots[0]
@@ -154,6 +154,7 @@ def test_build_start_prompt_contains_action_start_not_end(sample_episode):
 
 def test_build_end_prompt_contains_env_and_chars(sample_episode):
     from sitcom_pilot.prompts import PromptBuilder
+
     builder = PromptBuilder()
     scene = sample_episode.scenes[0]
     shot = scene.shots[0]

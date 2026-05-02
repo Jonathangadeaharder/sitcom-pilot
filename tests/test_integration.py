@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sitcom_pilot.assembler import EpisodeAssembler
+from sitcom_pilot.assembler import concat_clips
 from sitcom_pilot.comfyui_client import ComfyUIClient
 from sitcom_pilot.loader import EpisodeLoader
 from sitcom_pilot.node_map import NodeMap
@@ -18,7 +18,10 @@ EPISODE_JSON = {
         "Derek": {"profile": "derek_v1", "trigger_word": "drk_man, navy blazer"},
     },
     "environments": {
-        "LivingRoom": {"profile": "living_room_v2", "trigger_word": "SF apartment living room, bay bridge view"},
+        "LivingRoom": {
+            "profile": "living_room_v2",
+            "trigger_word": "SF apartment living room, bay bridge view",
+        },
     },
     "scenes": [
         {
@@ -129,9 +132,7 @@ def test_prompt_builder_to_renderer_injects_both_prompts(episode, mock_client, n
     mock_client.wait_for_completion.return_value = True
 
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), node_map=node_map)
-    renderer.render_shot(
-        episode.scenes[0].shots[0], episode.scenes[0], episode, WORKFLOW_TEMPLATE
-    )
+    renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, WORKFLOW_TEMPLATE)
 
     workflow = mock_client.queue_prompt.call_args[0][0]
     start_text = workflow["6"]["inputs"]["text"]
@@ -149,20 +150,14 @@ def test_renderer_to_assembler_concat_list(tmp_path, episode, mock_client, node_
     results = renderer.render_episode(episode, WORKFLOW_TEMPLATE)
     all_results = [r for scene_results in results.values() for r in scene_results]
 
-    assembler = EpisodeAssembler(output_dir=tmp_path / "out")
     fake_clips = [tmp_path / f"{r.shot_id}.mp4" for r in all_results]
     for c in fake_clips:
         c.write_bytes(b"\x00")
 
-    with patch("subprocess.run") as mock_run:
-        mock_run.return_value = MagicMock(returncode=0)
-        ok = assembler.concatenate(fake_clips, tmp_path / "out" / "final.mp4")
+    with patch("sitcom_pilot.assembler._run", return_value=MagicMock(returncode=0)):
+        result = concat_clips(fake_clips, tmp_path / "out" / "final.mp4")
 
-    assert ok is True
-    concat_file = tmp_path / "out" / "concat_list.txt"
-    assert concat_file.exists()
-    lines = concat_file.read_text().strip().split("\n")
-    assert len(lines) == 3
+    assert result == tmp_path / "out" / "final.mp4"
 
 
 def test_progress_tracker_with_render_results(tmp_path, episode, mock_client, node_map):
@@ -185,8 +180,12 @@ def test_progress_tracker_with_render_results(tmp_path, episode, mock_client, no
 
 def test_node_map_custom_ids_used_in_renderer(episode, mock_client):
     custom_map = NodeMap(
-        start_prompt="100", end_prompt="200", audio="300",
-        seed="400", env_profile="500", char_profiles=["600", "601"],
+        start_prompt="100",
+        end_prompt="200",
+        audio="300",
+        seed="400",
+        env_profile="500",
+        char_profiles=["600", "601"],
     )
     mock_client.queue_prompt.return_value = "pid"
     mock_client.wait_for_completion.return_value = True
@@ -202,9 +201,7 @@ def test_node_map_custom_ids_used_in_renderer(episode, mock_client):
     }
 
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), node_map=custom_map)
-    renderer.render_shot(
-        episode.scenes[0].shots[0], episode.scenes[0], episode, custom_template
-    )
+    renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, custom_template)
 
     workflow = mock_client.queue_prompt.call_args[0][0]
     assert workflow["100"]["inputs"]["text"] != ""

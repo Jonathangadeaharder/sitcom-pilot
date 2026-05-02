@@ -8,6 +8,7 @@ from typing import Any
 # Optional jsonschema support
 try:
     import jsonschema
+
     _JSONSCHEMA_AVAILABLE = True
 except ImportError:
     _JSONSCHEMA_AVAILABLE = False
@@ -108,20 +109,16 @@ class EpisodeValidator:
                 continue
             for beat_idx, beat in enumerate(scene.get("beats", [])):
                 if not isinstance(beat, dict):
-                    errors.append(
-                        f"Scene[{scene_idx}].beat[{beat_idx}] must be an object"
-                    )
+                    errors.append(f"Scene[{scene_idx}].beat[{beat_idx}] must be an object")
                     continue
                 for key in ("beat_id", "kind"):
                     if key not in beat:
                         errors.append(
-                            f"Scene[{scene_idx}].beat[{beat_idx}]"
-                            f" missing required field: '{key}'"
+                            f"Scene[{scene_idx}].beat[{beat_idx}] missing required field: '{key}'"
                         )
                 if beat.get("kind") not in ("speech", "silent", None):
                     errors.append(
-                        f"Scene[{scene_idx}].beat[{beat_idx}]"
-                        f" kind must be 'speech' or 'silent'"
+                        f"Scene[{scene_idx}].beat[{beat_idx}] kind must be 'speech' or 'silent'"
                     )
         return errors
 
@@ -198,22 +195,29 @@ class EpisodeValidator:
 # CLI entry point
 # ---------------------------------------------------------------------------
 
+
 def main(argv: list[str] | None = None) -> int:
     """validate-episode <path> [<path> ...]
 
     Exits 0 if all files are valid, 1 if any have errors.
     """
     import argparse
+
     parser = argparse.ArgumentParser(
         prog="validate-episode",
         description="Validate one or more episode JSON files against the v2.0 schema.",
     )
-    parser.add_argument("paths", nargs="+", metavar="EPISODE_JSON",
-                        help="Path(s) to episode JSON file(s)")
-    parser.add_argument("--quiet", "-q", action="store_true",
-                        help="Only print errors, not OK messages")
-    parser.add_argument("--strict", action="store_true",
-                        help="Enable strict business-rule checks (speaker refs, etc.)")
+    parser.add_argument(
+        "paths", nargs="+", metavar="EPISODE_JSON", help="Path(s) to episode JSON file(s)"
+    )
+    parser.add_argument(
+        "--quiet", "-q", action="store_true", help="Only print errors, not OK messages"
+    )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Enable strict business-rule checks (speaker refs, etc.)",
+    )
     args = parser.parse_args(argv)
 
     validator = EpisodeValidator()

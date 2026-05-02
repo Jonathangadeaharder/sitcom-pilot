@@ -1,4 +1,5 @@
 """Tests for EpisodeLoader v2.0 beat-based schema support."""
+
 from __future__ import annotations
 
 import json
@@ -43,7 +44,14 @@ V2_EPISODE = {
             "role": "QA tester",
             "visual": "Irish man, curly red hair",
             "lora": "finn_lora_v2",
-            "voice": {"provider": "mlx-audio", "voice_id": "finn_v1", "clone_from": "", "seed": 389, "temperature": 0.8, "language": "en"},
+            "voice": {
+                "provider": "mlx-audio",
+                "voice_id": "finn_v1",
+                "clone_from": "",
+                "seed": 389,
+                "temperature": 0.8,
+                "language": "en",
+            },
         },
     },
     "environments": {
@@ -66,8 +74,24 @@ V2_EPISODE = {
             "target_seconds": 70,
             "mood": "tense",
             "beats": [
-                {"beat_id": "001_b00", "kind": "silent", "camera": "wide shot", "action": "Maya at desk", "duration_sec": 4.0, "seed": 110001},
-                {"beat_id": "001_b01", "kind": "speech", "speaker": "maya", "text": "This can't be right.", "camera": "close-up", "duration_sec": 3.0, "seed": 110002, "audio_path": "audio/001_b01.wav"},
+                {
+                    "beat_id": "001_b00",
+                    "kind": "silent",
+                    "camera": "wide shot",
+                    "action": "Maya at desk",
+                    "duration_sec": 4.0,
+                    "seed": 110001,
+                },
+                {
+                    "beat_id": "001_b01",
+                    "kind": "speech",
+                    "speaker": "maya",
+                    "text": "This can't be right.",
+                    "camera": "close-up",
+                    "duration_sec": 3.0,
+                    "seed": 110002,
+                    "audio_path": "audio/001_b01.wav",
+                },
             ],
         },
         {
@@ -76,7 +100,14 @@ V2_EPISODE = {
             "environment": "living_room",
             "characters_present": ["maya", "finn"],
             "beats": [
-                {"beat_id": "002_b00", "kind": "silent", "camera": "wide", "action": "Both in kitchen", "duration_sec": 4.0, "seed": 120001},
+                {
+                    "beat_id": "002_b00",
+                    "kind": "silent",
+                    "camera": "wide",
+                    "action": "Both in kitchen",
+                    "duration_sec": 4.0,
+                    "seed": 120001,
+                },
             ],
         },
     ],
@@ -258,9 +289,22 @@ def test_v1_backward_compat_still_works(tmp_path):
         "episode_title": "Test v1",
         "cast": {"Jerry": {"profile": "jerry_v2", "trigger_word": "jry_guy"}},
         "environments": {"Apt": {"profile": "apt_v1", "trigger_word": "apartment"}},
-        "scenes": [{"scene_id": "S01", "environment": "Apt", "characters_present": ["Jerry"],
-                    "shots": [{"shot_id": "S01_SH01", "camera_angle": "wide", "action_start": "standing",
-                               "action_end": "sitting", "seed": 42}]}],
+        "scenes": [
+            {
+                "scene_id": "S01",
+                "environment": "Apt",
+                "characters_present": ["Jerry"],
+                "shots": [
+                    {
+                        "shot_id": "S01_SH01",
+                        "camera_angle": "wide",
+                        "action_start": "standing",
+                        "action_end": "sitting",
+                        "seed": 42,
+                    }
+                ],
+            }
+        ],
     }
     path = tmp_path / "ep_v1.json"
     path.write_text(json.dumps(v1_ep))

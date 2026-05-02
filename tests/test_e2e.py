@@ -1,7 +1,7 @@
 import json
 from unittest.mock import MagicMock, patch
 
-from sitcom_pilot.assembler import EpisodeAssembler
+from sitcom_pilot.assembler import concat_clips
 from sitcom_pilot.comfyui_client import ComfyUIClient
 from sitcom_pilot.loader import (
     EpisodeLoader,
@@ -25,7 +25,14 @@ EPISODE_JSON = {
             "environment": "LivingRoom",
             "characters_present": ["Maya", "Derek"],
             "shots": [
-                {"shot_id": "S01_SH01", "camera_angle": "wide", "action_start": "entering room", "action_end": "sitting down", "audio_path": "audio/s1_shot1.wav", "seed": 42},
+                {
+                    "shot_id": "S01_SH01",
+                    "camera_angle": "wide",
+                    "action_start": "entering room",
+                    "action_end": "sitting down",
+                    "audio_path": "audio/s1_shot1.wav",
+                    "seed": 42,
+                },
             ],
         },
         {
@@ -33,7 +40,14 @@ EPISODE_JSON = {
             "environment": "LivingRoom",
             "characters_present": ["Maya"],
             "shots": [
-                {"shot_id": "S02_SH01", "camera_angle": "close up", "action_start": "smiling", "action_end": "laughing", "audio_path": "audio/s2_shot1.wav", "seed": 99},
+                {
+                    "shot_id": "S02_SH01",
+                    "camera_angle": "close up",
+                    "action_start": "smiling",
+                    "action_end": "laughing",
+                    "audio_path": "audio/s2_shot1.wav",
+                    "seed": 99,
+                },
             ],
         },
     ],
@@ -48,9 +62,13 @@ def test_full_pipeline_load_render_assemble(tmp_path):
     assert len(episode.scenes) == 2
 
     template = {
-        "6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}},
-        "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}},
-        "40": {"inputs": {"lora_name": ""}}, "41": {"inputs": {"lora_name": ""}}, "42": {"inputs": {"lora_name": ""}},
+        "6": {"inputs": {"text": ""}},
+        "12": {"inputs": {"text": ""}},
+        "25": {"inputs": {"audio": ""}},
+        "3": {"inputs": {"seed": 0}},
+        "40": {"inputs": {"lora_name": ""}},
+        "41": {"inputs": {"lora_name": ""}},
+        "42": {"inputs": {"lora_name": ""}},
     }
 
     mock_client = MagicMock(spec=ComfyUIClient)
@@ -73,13 +91,12 @@ def test_full_pipeline_load_render_assemble(tmp_path):
     assert progress.is_done("S01_SH01")
     assert progress.is_done("S02_SH01")
 
-    assembler = EpisodeAssembler(output_dir=tmp_path / "final")
     fake_clips = [tmp_path / "clip1.mp4", tmp_path / "clip2.mp4"]
     for c in fake_clips:
         c.write_bytes(b"\x00\x00\x00")
-    with patch("subprocess.run", return_value=MagicMock(returncode=0)):
-        ok = assembler.concatenate(fake_clips, tmp_path / "final" / "episode.mp4")
-        assert ok is True
+    with patch("sitcom_pilot.assembler._run", return_value=MagicMock(returncode=0)):
+        result = concat_clips(fake_clips, tmp_path / "final" / "episode.mp4")
+        assert result == tmp_path / "final" / "episode.mp4"
 
     wf = mock_client.queue_prompt.call_args_list[0][0][0]
     assert wf["40"]["inputs"]["lora_name"] == "living_room_v2.safetensors"
@@ -95,9 +112,13 @@ def test_pipeline_resume_after_partial_failure(tmp_path):
     episode = EpisodeLoader().load(ep_file)
 
     template = {
-        "6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}},
-        "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}},
-        "40": {"inputs": {"lora_name": ""}}, "41": {"inputs": {"lora_name": ""}}, "42": {"inputs": {"lora_name": ""}},
+        "6": {"inputs": {"text": ""}},
+        "12": {"inputs": {"text": ""}},
+        "25": {"inputs": {"audio": ""}},
+        "3": {"inputs": {"seed": 0}},
+        "40": {"inputs": {"lora_name": ""}},
+        "41": {"inputs": {"lora_name": ""}},
+        "42": {"inputs": {"lora_name": ""}},
     }
 
     mock_client = MagicMock(spec=ComfyUIClient)
@@ -114,7 +135,7 @@ def test_pipeline_resume_after_partial_failure(tmp_path):
                 continue
             result = renderer.render_shot(shot, scene, episode, template)
             if result.success:
-                outputs = mock_client.get_output_paths(result.prompt_id)
+                mock_client.get_output_paths(result.prompt_id)
                 progress.mark_done(shot.shot_id)
 
     assert progress.is_done("S01_SH01")

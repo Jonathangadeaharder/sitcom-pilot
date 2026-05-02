@@ -1,4 +1,5 @@
 """Tests for sitcom_pilot.manifest — RunManifest run record format."""
+
 from __future__ import annotations
 
 import json
@@ -36,13 +37,16 @@ def test_finish_sets_status_and_finished_at(tmp_path):
 def test_save_and_load_roundtrip(tmp_path):
     ep = tmp_path / "ep.json"
     m = RunManifest.create("run-42", ep, "Test Episode")
-    m.scenes.append(SceneRecord(
-        scene_id="001", title="Scene 1",
-        beats=[
-            BeatRecord("001_b00", "001", "silent", "rendered", prompt_id="p1"),
-            BeatRecord("001_b01", "001", "speech", "failed", error="timeout"),
-        ],
-    ))
+    m.scenes.append(
+        SceneRecord(
+            scene_id="001",
+            title="Scene 1",
+            beats=[
+                BeatRecord("001_b00", "001", "silent", "rendered", prompt_id="p1"),
+                BeatRecord("001_b01", "001", "speech", "failed", error="timeout"),
+            ],
+        )
+    )
     m.finish("partial")
     path = tmp_path / "manifest.json"
     m.save(path)
@@ -75,13 +79,23 @@ def test_scene_record_counts(tmp_path):
 def test_summary_counts_across_scenes(tmp_path):
     ep = tmp_path / "ep.json"
     m = RunManifest.create("r1", ep, "T")
-    m.scenes.append(SceneRecord("001", beats=[
-        BeatRecord("b1", "001", "silent", "rendered"),
-        BeatRecord("b2", "001", "silent", "failed"),
-    ]))
-    m.scenes.append(SceneRecord("002", beats=[
-        BeatRecord("b3", "002", "speech", "pending"),
-    ]))
+    m.scenes.append(
+        SceneRecord(
+            "001",
+            beats=[
+                BeatRecord("b1", "001", "silent", "rendered"),
+                BeatRecord("b2", "001", "silent", "failed"),
+            ],
+        )
+    )
+    m.scenes.append(
+        SceneRecord(
+            "002",
+            beats=[
+                BeatRecord("b3", "002", "speech", "pending"),
+            ],
+        )
+    )
     s = m.summary()
     assert s["total"] == 3
     assert s["rendered"] == 1

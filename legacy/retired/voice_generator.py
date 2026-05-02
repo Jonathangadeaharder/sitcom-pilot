@@ -6,11 +6,8 @@ reference voices for consistent character identity and emotional delivery.
 Uses Fish-Speech's API server (ormsgpack protocol) for TTS generation.
 """
 
-import os
-import re
 import subprocess
 import sys
-import time
 import wave
 from pathlib import Path
 
@@ -59,7 +56,7 @@ def synthesize_line(text: str, character_id: str, output_path: Path,
     try:
         import ormsgpack
     except ImportError:
-        print(f"    [WARN] ormsgpack not available, skipping API call")
+        print("    [WARN] ormsgpack not available, skipping API call")
         return False
 
     import urllib.request
@@ -263,12 +260,12 @@ def generate_all_voices() -> dict[str, dict]:
         results[sid] = scene_results
         generated += len(scene_results["lines"])
 
-    print(f"\n═══ Voice Generation Summary ═══")
+    print("\n═══ Voice Generation Summary ═══")
     print(f"  Total dialogue lines: {total_lines}")
     print(f"  Audio files generated: {generated}")
 
     # List scene audio files
-    print(f"\n  Scene audio files:")
+    print("\n  Scene audio files:")
     for sid, r in results.items():
         if r.get("scene_audio") and r["scene_audio"].exists():
             size = r["scene_audio"].stat().st_size

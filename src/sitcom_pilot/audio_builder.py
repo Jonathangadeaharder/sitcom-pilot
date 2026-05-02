@@ -16,29 +16,88 @@ _SAFE_NAME_RE = re.compile(r"[^a-zA-Z0-9_-]")
 def _safe_filename(name: str) -> str:
     return _SAFE_NAME_RE.sub("_", name)
 
+
 FISH_API_URL = "http://127.0.0.1:8090"
 TTS_TIMEOUT_SEC = 300
 
-VALID_EMOTIONS = frozenset({
-    "happy", "sad", "angry", "excited", "calm", "nervous", "confident",
-    "surprised", "satisfied", "delighted", "scared", "worried", "upset",
-    "frustrated", "depressed", "empathetic", "embarrassed", "disgusted",
-    "moved", "proud", "relaxed", "grateful", "curious", "sarcastic",
-    "disdainful", "unhappy", "anxious", "hysterical", "indifferent",
-    "uncertain", "doubtful", "confused", "disappointed", "regretful",
-    "guilty", "ashamed", "jealous", "envious", "hopeful", "optimistic",
-    "pessimistic", "nostalgic", "lonely", "bored", "contemptuous",
-    "sympathetic", "compassionate", "determined", "resigned",
-})
+VALID_EMOTIONS = frozenset(
+    {
+        "happy",
+        "sad",
+        "angry",
+        "excited",
+        "calm",
+        "nervous",
+        "confident",
+        "surprised",
+        "satisfied",
+        "delighted",
+        "scared",
+        "worried",
+        "upset",
+        "frustrated",
+        "depressed",
+        "empathetic",
+        "embarrassed",
+        "disgusted",
+        "moved",
+        "proud",
+        "relaxed",
+        "grateful",
+        "curious",
+        "sarcastic",
+        "disdainful",
+        "unhappy",
+        "anxious",
+        "hysterical",
+        "indifferent",
+        "uncertain",
+        "doubtful",
+        "confused",
+        "disappointed",
+        "regretful",
+        "guilty",
+        "ashamed",
+        "jealous",
+        "envious",
+        "hopeful",
+        "optimistic",
+        "pessimistic",
+        "nostalgic",
+        "lonely",
+        "bored",
+        "contemptuous",
+        "sympathetic",
+        "compassionate",
+        "determined",
+        "resigned",
+    }
+)
 
-VALID_TONES = frozenset({
-    "in a hurry tone", "shouting", "screaming", "whispering", "soft tone",
-})
+VALID_TONES = frozenset(
+    {
+        "in a hurry tone",
+        "shouting",
+        "screaming",
+        "whispering",
+        "soft tone",
+    }
+)
 
-VALID_EFFECTS = frozenset({
-    "laughing", "chuckling", "sobbing", "crying loudly", "sighing",
-    "groaning", "panting", "gasping", "yawning", "snoring",
-})
+VALID_EFFECTS = frozenset(
+    {
+        "laughing",
+        "chuckling",
+        "sobbing",
+        "crying loudly",
+        "sighing",
+        "groaning",
+        "panting",
+        "gasping",
+        "yawning",
+        "snoring",
+    }
+)
 
 
 def build_fish_text_from_dialogue(line: dict) -> str:
@@ -108,9 +167,8 @@ def synthesize_dialogue_line(
         audio_data = resp.read()
         output_path.parent.mkdir(parents=True, exist_ok=True)
         import tempfile
-        fd, tmp_path = tempfile.mkstemp(
-            dir=output_path.parent, suffix=".wav"
-        )
+
+        fd, tmp_path = tempfile.mkstemp(dir=output_path.parent, suffix=".wav")
         try:
             with os.fdopen(fd, "wb") as f:
                 f.write(audio_data)
@@ -132,6 +190,7 @@ def concatenate_wavs(wav_files: list[Path], output_path: Path, pause_sec: float 
         return False
     if len(wav_files) == 1:
         import shutil
+
         output_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(wav_files[0], output_path)
         return True
@@ -150,10 +209,17 @@ def concatenate_wavs(wav_files: list[Path], output_path: Path, pause_sec: float 
     concat_refs = "".join(f"[p{i}]" for i in range(n))
     filter_str = f"{pad_str}{concat_refs}concat=n={n}:v=0:a=1[out]"
     cmd = [
-        "ffmpeg", "-y", *inputs,
-        "-filter_complex", filter_str,
-        "-map", "[out]",
-        "-ar", "44100", "-ac", "1",
+        "ffmpeg",
+        "-y",
+        *inputs,
+        "-filter_complex",
+        filter_str,
+        "-map",
+        "[out]",
+        "-ar",
+        "44100",
+        "-ac",
+        "1",
         str(output_path),
     ]
     try:
@@ -179,10 +245,7 @@ def build_shot_audio(
     for i, line in enumerate(dialogue):
         fish_text = build_fish_text_from_dialogue(line)
         safe_spk = _safe_filename(line["speaker"])
-        line_file = (
-            output_path.parent
-            / f"{output_path.stem}_line_{i:03d}_{safe_spk}.wav"
-        )
+        line_file = output_path.parent / f"{output_path.stem}_line_{i:03d}_{safe_spk}.wav"
         success = synthesize_dialogue_line(
             fish_text=fish_text,
             character_id=line["speaker"],
@@ -195,7 +258,8 @@ def build_shot_audio(
         else:
             logger.error(
                 "Dialogue line %d failed for speaker '%s'; aborting shot",
-                i, line["speaker"],
+                i,
+                line["speaker"],
             )
             return False
     if not line_files:

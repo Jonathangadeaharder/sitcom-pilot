@@ -1,4 +1,5 @@
 """Tests for sitcom_pilot.validator — EpisodeValidator."""
+
 from __future__ import annotations
 
 import json
@@ -9,6 +10,7 @@ from sitcom_pilot.validator import EpisodeValidator
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _valid_v2_episode():
     return {
@@ -22,7 +24,14 @@ def _valid_v2_episode():
                 "name": "Maya Chen",
                 "visual": "East Asian woman, dark hair",
                 "lora": None,
-                "voice": {"provider": "mlx-audio", "voice_id": "maya_v1", "clone_from": "", "seed": 42, "temperature": 0.8, "language": "en"},
+                "voice": {
+                    "provider": "mlx-audio",
+                    "voice_id": "maya_v1",
+                    "clone_from": "",
+                    "seed": 42,
+                    "temperature": 0.8,
+                    "language": "en",
+                },
             }
         },
         "environments": {
@@ -37,7 +46,14 @@ def _valid_v2_episode():
                 "environment": "maya_desk",
                 "characters_present": ["maya"],
                 "beats": [
-                    {"beat_id": "001_b00", "kind": "silent", "camera": "wide", "action": "Maya at desk", "duration_sec": 4.0, "seed": 1001},
+                    {
+                        "beat_id": "001_b00",
+                        "kind": "silent",
+                        "camera": "wide",
+                        "action": "Maya at desk",
+                        "duration_sec": 4.0,
+                        "seed": 1001,
+                    },
                 ],
             }
         ],
@@ -47,6 +63,7 @@ def _valid_v2_episode():
 # ---------------------------------------------------------------------------
 # Valid episode
 # ---------------------------------------------------------------------------
+
 
 def test_valid_v2_episode_returns_no_errors():
     v = EpisodeValidator()
@@ -63,6 +80,7 @@ def test_valid_v2_file_returns_no_errors(tmp_path):
 # ---------------------------------------------------------------------------
 # Schema version
 # ---------------------------------------------------------------------------
+
 
 def test_wrong_schema_version_returns_error():
     ep = _valid_v2_episode()
@@ -82,6 +100,7 @@ def test_missing_schema_version_returns_error():
 # Environment references
 # ---------------------------------------------------------------------------
 
+
 def test_unknown_environment_ref_returns_error():
     ep = _valid_v2_episode()
     ep["scenes"][0]["environment"] = "nonexistent_env"
@@ -99,6 +118,7 @@ def test_known_environment_ref_is_ok():
 # Character references
 # ---------------------------------------------------------------------------
 
+
 def test_unknown_character_ref_returns_error():
     ep = _valid_v2_episode()
     ep["scenes"][0]["characters_present"].append("ghost_char")
@@ -110,11 +130,10 @@ def test_unknown_character_ref_returns_error():
 # Beat ID uniqueness
 # ---------------------------------------------------------------------------
 
+
 def test_duplicate_beat_id_returns_error():
     ep = _valid_v2_episode()
-    ep["scenes"][0]["beats"].append(
-        {"beat_id": "001_b00", "kind": "silent", "seed": 1002}
-    )
+    ep["scenes"][0]["beats"].append({"beat_id": "001_b00", "kind": "silent", "seed": 1002})
     errors = EpisodeValidator().validate(ep)
     assert any("Duplicate" in e for e in errors)
 
@@ -122,6 +141,7 @@ def test_duplicate_beat_id_returns_error():
 # ---------------------------------------------------------------------------
 # Speech beats require text + speaker
 # ---------------------------------------------------------------------------
+
 
 def test_speech_beat_missing_text_returns_error():
     ep = _valid_v2_episode()
@@ -153,6 +173,7 @@ def test_speech_beat_with_text_and_speaker_is_ok():
 # File errors
 # ---------------------------------------------------------------------------
 
+
 def test_missing_file_returns_error():
     v = EpisodeValidator()
     errors = v.validate_file(Path("/nonexistent/path/episode.json"))
@@ -170,6 +191,7 @@ def test_invalid_json_returns_error(tmp_path):
 # ---------------------------------------------------------------------------
 # Validate episode_01.json
 # ---------------------------------------------------------------------------
+
 
 def test_episode_01_validates_cleanly():
     ep_path = Path(__file__).parent.parent / "episode_01.json"

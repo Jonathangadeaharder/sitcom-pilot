@@ -43,7 +43,10 @@ class ShotRenderer:
         self._max_crash_retries = max_crash_retries
 
     def _inject_workflow(
-        self, shot: ShotData, scene: SceneData, episode: EpisodeData,
+        self,
+        shot: ShotData,
+        scene: SceneData,
+        episode: EpisodeData,
         workflow_template: dict[str, Any],
     ) -> dict[str, Any]:
         workflow = copy.deepcopy(workflow_template)
@@ -51,9 +54,9 @@ class ShotRenderer:
 
         env_data = episode.environments.get(scene.environment)
         if env_data and nm.env_profile in workflow:
-            workflow[nm.env_profile].setdefault("inputs", {})[
-                "lora_name"
-            ] = f"{env_data.profile}.safetensors"
+            workflow[nm.env_profile].setdefault("inputs", {})["lora_name"] = (
+                f"{env_data.profile}.safetensors"
+            )
 
         for idx, char_name in enumerate(scene.characters_present):
             if idx >= len(nm.char_profiles):
@@ -62,9 +65,9 @@ class ShotRenderer:
             if char_data:
                 node_id = nm.char_profiles[idx]
                 if node_id in workflow:
-                    workflow[node_id].setdefault("inputs", {})[
-                        "lora_name"
-                    ] = f"{char_data.profile}.safetensors"
+                    workflow[node_id].setdefault("inputs", {})["lora_name"] = (
+                        f"{char_data.profile}.safetensors"
+                    )
 
         start_prompt = self._builder.build_start_prompt(shot, scene, episode)
         end_prompt = self._builder.build_end_prompt(shot, scene, episode)
@@ -88,7 +91,10 @@ class ShotRenderer:
         return workflow
 
     def render_shot(
-        self, shot: ShotData, scene: SceneData, episode: EpisodeData,
+        self,
+        shot: ShotData,
+        scene: SceneData,
+        episode: EpisodeData,
         workflow_template: dict[str, Any],
     ) -> RenderResult:
         workflow = self._inject_workflow(shot, scene, episode, workflow_template)
@@ -113,7 +119,9 @@ class ShotRenderer:
         raise last_error
 
     def render_scene(
-        self, scene: SceneData, episode: EpisodeData,
+        self,
+        scene: SceneData,
+        episode: EpisodeData,
         workflow_template: dict[str, Any],
     ) -> list[RenderResult]:
         results = []
@@ -126,7 +134,9 @@ class ShotRenderer:
         return results
 
     def render_episode(
-        self, episode: EpisodeData, workflow_template: dict[str, Any],
+        self,
+        episode: EpisodeData,
+        workflow_template: dict[str, Any],
     ) -> dict[str, list[RenderResult]]:
         results = {}
         for scene in episode.scenes:

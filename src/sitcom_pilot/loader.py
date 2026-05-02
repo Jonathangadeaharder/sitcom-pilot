@@ -9,6 +9,7 @@ from typing import Any
 # Beat-based v2.0 data model
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class VoiceConfig:
     provider: str = ""
@@ -22,6 +23,7 @@ class VoiceConfig:
 @dataclass(frozen=True)
 class CharacterData:
     """Supports both v1 (profile/trigger_word) and v2 (name/visual/lora/voice)."""
+
     # v2 fields
     name: str = ""
     visual: str = ""
@@ -36,6 +38,7 @@ class CharacterData:
 @dataclass(frozen=True)
 class EnvironmentData:
     """Supports both v1 (profile/trigger_word) and v2 (trigger_word/style)."""
+
     trigger_word: str = ""
     style: str = ""
     reference_image: str = ""
@@ -60,6 +63,7 @@ class BeatData:
 @dataclass(frozen=True)
 class ShotData:
     """Legacy v1 shot model — kept for backward compat with existing tests."""
+
     shot_id: str
     camera_angle: str
     action_start: str
@@ -103,6 +107,7 @@ class EpisodeData:
 # ---------------------------------------------------------------------------
 # Loader
 # ---------------------------------------------------------------------------
+
 
 class EpisodeLoader:
     """Load an episode JSON file into EpisodeData.
@@ -149,14 +154,18 @@ class EpisodeLoader:
         for name, v in raw_cast.items():
             if is_v2:
                 voice_raw = v.get("voice") or {}
-                voice = VoiceConfig(
-                    provider=voice_raw.get("provider", ""),
-                    voice_id=voice_raw.get("voice_id", ""),
-                    clone_from=voice_raw.get("clone_from", ""),
-                    seed=voice_raw.get("seed", 0),
-                    temperature=voice_raw.get("temperature", 0.8),
-                    language=voice_raw.get("language", "en"),
-                ) if voice_raw else None
+                voice = (
+                    VoiceConfig(
+                        provider=voice_raw.get("provider", ""),
+                        voice_id=voice_raw.get("voice_id", ""),
+                        clone_from=voice_raw.get("clone_from", ""),
+                        seed=voice_raw.get("seed", 0),
+                        temperature=voice_raw.get("temperature", 0.8),
+                        language=voice_raw.get("language", "en"),
+                    )
+                    if voice_raw
+                    else None
+                )
                 result[name] = CharacterData(
                     name=v.get("name", name),
                     visual=v.get("visual", ""),
@@ -236,14 +245,16 @@ class EpisodeLoader:
                     for sh in s.get("shots", [])
                 ]
 
-            scenes.append(SceneData(
-                scene_id=s["scene_id"],
-                environment=s["environment"],
-                characters_present=s["characters_present"],
-                beats=beats,
-                shots=shots,
-                target_duration_sec=s.get("target_duration_sec", s.get("target_seconds", 60)),
-                title=s.get("title", ""),
-                mood=s.get("mood", ""),
-            ))
+            scenes.append(
+                SceneData(
+                    scene_id=s["scene_id"],
+                    environment=s["environment"],
+                    characters_present=s["characters_present"],
+                    beats=beats,
+                    shots=shots,
+                    target_duration_sec=s.get("target_duration_sec", s.get("target_seconds", 60)),
+                    title=s.get("title", ""),
+                    mood=s.get("mood", ""),
+                )
+            )
         return scenes
