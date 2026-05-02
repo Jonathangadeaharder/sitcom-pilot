@@ -163,15 +163,37 @@ Each beat is either a "speech" or "silent" beat.
 }
 ```
 
+## Beat Seed Allocation Convention
+
+Seeds ensure deterministic image/video generation per beat. The convention is:
+
+**Pattern:** `{episode_prefix}{scene_number}{beat_number}1`
+
+| Episode | Prefix | Example seed for scene 1, beat 0 | Example for scene 2, beat 3 |
+|---------|--------|----------------------------------|------------------------------|
+| S1E1 | `1` | `110001` (1 + 1 + 000 + 1) | `120031` (1 + 2 + 003 + 1) |
+| S1E2 | (none) | `10001` (1 + 000 + 1) | `20031` (2 + 003 + 1) |
+
+**Rules:**
+- Episode prefix: single digit matching episode number (omit if seeds stay unique without it)
+- Scene number: 1-2 digits matching `scene_id` numeric part
+- Beat index: 3 digits zero-padded matching beat position within scene (000, 001, 002...)
+- Suffix: always `1` (reserved for future sub-beat variants)
+- Silent beats follow the same convention as speech beats
+- Seeds must be unique within an episode to guarantee determinism
+
+**Reference asset seeds** (cast voices, environment refs) use the character/environment config `seed` field, not beat seeds.
+
 ## Best Practices
 
 1. **Use descriptive character IDs**: Use lowercase, underscore-separated names (e.g., "maya", "derek")
 2. **Use descriptive environment IDs**: Use lowercase, underscore-separated names (e.g., "living_room", "kitchen")
 3. **Use sequential beat IDs**: Use format "scene_id_bNN" (e.g., "001_b00", "001_b01")
-4. **Provide detailed visual descriptions**: The more detail, the better the image generation
-5. **Use trigger words for environments**: Detailed descriptions help generate consistent environments
-6. **Set dialogue_status**: Use "present" if dialogue is included, "missing" if not, "partial" if some is missing
-7. **Include reference images**: Reference images help maintain character and environment consistency
+4. **Follow the seed allocation convention**: See "Beat Seed Allocation Convention" above
+5. **Provide detailed visual descriptions**: The more detail, the better the image generation
+6. **Use trigger words for environments**: Detailed descriptions help generate consistent environments
+7. **Set dialogue_status**: Use "present" if dialogue is included, "missing" if not, "partial" if some is missing
+8. **Include reference images**: Reference images help maintain character and environment consistency
 
 ## Validation
 
