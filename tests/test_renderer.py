@@ -244,6 +244,7 @@ def test_render_shot_crash_recovery_disabled_raises(episode, mock_client, node_m
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), node_map=node_map)
     with pytest.raises(ConnectionError):
         renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
+    assert mock_client.queue_prompt.call_count >= 1
 
 
 def test_render_shot_char_profiles_overflow(mock_client):
@@ -302,8 +303,9 @@ def test_render_shot_crash_recovery_raises_after_max_retries(episode, mock_clien
         max_crash_retries=2,
     )
     with patch("time.sleep"):
-        with pytest.raises(ConnectionError):
+        with pytest.raises(ConnectionError) as exc_info:
             renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
+    assert "refused" in str(exc_info.value)
     assert mock_client.queue_prompt.call_count == 2
 
 
@@ -364,8 +366,9 @@ def test_render_shot_non_recovery_does_not_check_server(episode, mock_client, wo
     mock_client.queue_prompt.return_value = "pid"
     mock_client.wait_for_completion.return_value = True
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), crash_recovery=False)
-    renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, workflow_template)
+    result = renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, workflow_template)
     mock_client.is_server_running.assert_not_called()
+    assert result.success is True
 
 
 def test_render_shot_result_contains_prompt_id(episode, mock_client, workflow_template):
@@ -399,8 +402,9 @@ def test_render_shot_retries_calls_ensure_server_with_correct_args(episode, mock
         server_cmd=["python", "main.py"],
         server_cwd="/opt/comfyui",
     )
-    renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
+    result = renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
     mock_client.ensure_server_running.assert_called_once_with(["python", "main.py"], "/opt/comfyui")
+    assert result.success is True
 
 
 def test_render_shot_crash_recovery_skips_restart_when_server_up(episode, mock_client, node_map):
@@ -451,8 +455,10 @@ def test_render_shot_crash_recovery_raises_correct_exception(episode, mock_clien
         max_crash_retries=2,
     )
     with patch("time.sleep"):
-        with pytest.raises(ConnectionError, match="refused"):
+        with pytest.raises(ConnectionError) as exc_info:
             renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
+    assert "refused" in str(exc_info.value)
+    assert mock_client.queue_prompt.call_count >= 1
 
 
 def test_inject_workflow_with_minimal_template(mock_client):

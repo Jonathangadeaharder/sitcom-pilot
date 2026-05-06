@@ -42,8 +42,9 @@ def test_queue_prompt_retries_on_connection_error(client):
 def test_queue_prompt_raises_after_max_retries(client):
     with patch("urllib.request.urlopen", side_effect=ConnectionError("refused")):
         with patch("time.sleep"):
-            with pytest.raises(ConnectionError):
+            with pytest.raises(ConnectionError) as exc_info:
                 client.queue_prompt({"test": True}, max_retries=2)
+            assert "refused" in str(exc_info.value)
 
 
 def test_is_server_running_returns_true(client):
@@ -125,16 +126,19 @@ def test_get_output_paths_combines_images_and_gifs(client):
 
 def test_start_server_launches_subprocess(client):
     with patch("subprocess.Popen") as mock_popen:
-        mock_popen.return_value = MagicMock()
+        mock_process = MagicMock()
+        mock_popen.return_value = mock_process
         client.start_server(cmd=["python", "main.py"], cwd="/opt/comfyui")
         mock_popen.assert_called_once_with(["python", "main.py"], cwd="/opt/comfyui")
+        assert client._server_process is mock_process
 
 
 def test_ensure_server_running_does_nothing_when_up(client):
     with patch.object(client, "is_server_running", return_value=True):
         with patch.object(client, "start_server") as mock_start:
-            client.ensure_server_running(cmd=["python", "main.py"], cwd="/opt/comfyui")
+            result = client.ensure_server_running(cmd=["python", "main.py"], cwd="/opt/comfyui")
             mock_start.assert_not_called()
+            assert result is None
 
 
 def test_ensure_server_running_starts_when_down(client):
@@ -142,12 +146,14 @@ def test_ensure_server_running_starts_when_down(client):
         with patch.object(client, "start_server") as mock_start:
             client.ensure_server_running(cmd=["python", "main.py"], cwd="/opt/comfyui")
             mock_start.assert_called_once_with(cmd=["python", "main.py"], cwd="/opt/comfyui")
+            assert mock_start.call_count == 1
 
 
 def test_ensure_server_running_raises_without_cmd(client):
     with patch.object(client, "is_server_running", return_value=False):
-        with pytest.raises(RuntimeError, match="no start command"):
+        with pytest.raises(RuntimeError, match="no start command") as exc_info:
             client.ensure_server_running()
+        assert "no start command" in str(exc_info.value)
 
 
 def test_wait_for_completion_recovers_from_exception(client):
@@ -235,6 +241,7 @@ def test_start_server_sleeps_for_readiness(client):
         with patch("time.sleep") as mock_sleep:
             client.start_server(cmd=["python", "main.py"], cwd="/opt/comfyui")
             mock_sleep.assert_called_once_with(10)
+            assert mock_sleep.call_count == 1
 
 
 def test_wait_for_completion_uses_correct_url(client):
