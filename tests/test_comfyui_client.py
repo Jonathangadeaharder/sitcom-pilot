@@ -151,8 +151,9 @@ def test_ensure_server_running_starts_when_down(client):
 
 def test_ensure_server_running_raises_without_cmd(client):
     with patch.object(client, "is_server_running", return_value=False):
-        with pytest.raises(RuntimeError, match="no start command"):
+        with pytest.raises(RuntimeError, match="no start command") as exc_info:
             client.ensure_server_running()
+        assert "no start command" in str(exc_info.value)
 
 
 def test_wait_for_completion_recovers_from_exception(client):
