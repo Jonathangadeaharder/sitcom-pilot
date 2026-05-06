@@ -16,9 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Clone AIServices
-        run: git clone --depth 1 https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Jonathangadeaharder/AIServices.git ../AIServices
-
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
@@ -29,13 +26,13 @@ jobs:
         run: uv sync --dev
 
       - name: Ruff check
-        run: uv run --python ${{ matrix.python-version }} ruff check .
+        run: uvx ruff check .
 
       - name: Ruff format check
-        run: uv run --python ${{ matrix.python-version }} ruff format --check .
+        run: uvx ruff format --check .
 
       - name: Run tests with coverage
-        run: uv run --python ${{ matrix.python-version }} pytest tests/ -q --cov=sitcom_pilot --cov-report=term-missing
+        run: uv run pytest tests/ -q --cov=sitcom_pilot --cov-report=term-missing
 
       - name: Validate episode JSONs
-        run: uv run --python ${{ matrix.python-version }} python -m sitcom_pilot.validator episode_01.json episode_02.json
+        run: uv run python -m sitcom_pilot.validator episode_01.json episode_02.json
