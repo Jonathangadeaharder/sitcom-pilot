@@ -5,8 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from showrunner.assembler import (
-    EpisodeAssembler,
+from sitcom_pilot.assembler import (
     burn_in_captions,
     concat_clips,
     extract_thumbnail,
@@ -16,12 +15,12 @@ from showrunner.assembler import (
     mux_audio,
     uniformize_clip,
 )
-from showrunner.loader import BeatData
+from sitcom_pilot.loader import BeatData
 
 
 @pytest.fixture
 def mock_ffmpeg():
-    with patch("showrunner.assembler._run") as mock:
+    with patch("sitcom_pilot.assembler._run") as mock:
         mock.return_value = MagicMock(returncode=0)
         yield mock
 
@@ -65,7 +64,7 @@ class TestConcatClips:
             captured["content"] = Path(list_path).read_text()
             return MagicMock(returncode=0)
 
-        with patch("showrunner.assembler._run", side_effect=grab_list_path):
+        with patch("sitcom_pilot.assembler._run", side_effect=grab_list_path):
             concat_clips(tricky, out)
 
         content = captured["content"]
@@ -285,7 +284,7 @@ def test_concatenate_uses_video_codec(assembler, tmp_path):
 def test_init_creates_nested_output_dir(tmp_path):
     deep_dir = tmp_path / "a" / "b" / "c" / "output"
     with patch.object(EpisodeAssembler, "_detect_videotoolbox", return_value=False):
-        EpisodeAssembler(output_dir=deep_dir)
+        assembler = EpisodeAssembler(output_dir=deep_dir)
     assert deep_dir.exists()
 
 

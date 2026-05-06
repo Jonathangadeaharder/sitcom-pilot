@@ -2,17 +2,17 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from showrunner.comfyui_client import ComfyUIClient
-from showrunner.loader import (
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.loader import (
     CharacterData,
     EnvironmentData,
     EpisodeData,
     SceneData,
     ShotData,
 )
-from showrunner.node_map import NodeMap
-from showrunner.prompts import PromptBuilder
-from showrunner.renderer import ShotRenderer
+from sitcom_pilot.node_map import NodeMap
+from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.renderer import ShotRenderer
 
 
 @pytest.fixture
@@ -366,9 +366,7 @@ def test_render_shot_non_recovery_does_not_check_server(episode, mock_client, wo
     mock_client.queue_prompt.return_value = "pid"
     mock_client.wait_for_completion.return_value = True
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), crash_recovery=False)
-    result = renderer.render_shot(
-        episode.scenes[0].shots[0], episode.scenes[0], episode, workflow_template
-    )
+    result = renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, workflow_template)
     mock_client.is_server_running.assert_not_called()
     assert result.success is True
 
