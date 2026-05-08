@@ -15,6 +15,62 @@ TARGET_FPS = 16
 TARGET_CODEC = "libx264"
 
 
+class EpisodeAssembler:
+    def __init__(self, output_dir: Path) -> None:
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self._video_codec = "h264_videotoolbox" if self._detect_videotoolbox() else "libx264"
+
+    @staticmethod
+    def _detect_videotoolbox() -> bool:
+        try:
+            result = subprocess.run(
+                ["ffmpeg", "-encoders"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+            return "videotoolbox" in result.stdout
+        except (subprocess.SubprocessError, FileNotFoundError):
+            return False
+
+    def concatenate(self, clips: list[Path], output: Path) -> bool:
+        if not clips:
+            return False
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
+            for p in clips:
+                escaped = str(p).replace("\\", "\\\\").replace("'", r"\'")
+                f.write(f"file '{escaped}'\n")
+            list_path = f.name
+        try:
+            cmd = [
+                "ffmpeg",
+                "-y",
+                "-f",
+                "concat",
+                "-safe",
+                "0",
+                "-i",
+                list_path,
+                "-c:v",
+                self._video_codec,
+                "-pix_fmt",
+                "yuv420p",
+                "-c:a",
+                "aac",
+                "-movflags",
+                "+faststart",
+                str(output),
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            return result.returncode == 0
+        except (subprocess.SubprocessError, TimeoutError):
+            return False
+        finally:
+            Path(list_path).unlink(missing_ok=True)
+
+
 def uniformize_clip(
     input_path: Path,
     output_path: Path,
