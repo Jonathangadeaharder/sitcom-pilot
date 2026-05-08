@@ -1,4 +1,4 @@
-from sitcom_pilot.progress import ProgressTracker
+from showrunner.progress import ProgressTracker
 
 
 def test_mark_done_creates_entry(tmp_path):

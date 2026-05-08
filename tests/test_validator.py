@@ -1,12 +1,11 @@
-"""Tests for sitcom_pilot.validator — EpisodeValidator."""
-
+"""Tests for showrunner.validator — EpisodeValidator."""
 from __future__ import annotations
 
 import json
 from pathlib import Path
 from unittest.mock import patch
 
-from sitcom_pilot.validator import EpisodeValidator
+from showrunner.validator import EpisodeValidator
 
 # ---------------------------------------------------------------------------
 # Helpers

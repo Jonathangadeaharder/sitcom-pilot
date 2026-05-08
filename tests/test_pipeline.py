@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sitcom_pilot.loader import (
+from showrunner.loader import (
     CharacterData,
     EnvironmentData,
     EpisodeData,

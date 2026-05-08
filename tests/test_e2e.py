@@ -1,14 +1,13 @@
 import json
 from unittest.mock import MagicMock, patch
 
-from sitcom_pilot.assembler import concat_clips
-from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.loader import (
-    EpisodeLoader,
+from showrunner.assembler import concat_clips
+from showrunner.comfyui_client import ComfyUIClient
+from showrunner.loader import (    EpisodeLoader,
 )
-from sitcom_pilot.progress import ProgressTracker
-from sitcom_pilot.prompts import PromptBuilder
-from sitcom_pilot.renderer import ShotRenderer
+from showrunner.progress import ProgressTracker
+from showrunner.prompts import PromptBuilder
+from showrunner.renderer import ShotRenderer
 
 EPISODE_JSON = {
     "episode_title": "E2E Test Episode",

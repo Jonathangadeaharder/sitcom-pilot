@@ -1,5 +1,5 @@
 [project]
-name = "sitcom-pilot"
+name = "showrunner"
 version = "0.1.0"
 description = "Beat-based AI sitcom pilot pipeline (Buffering S01)"
 requires-python = ">=3.11"
@@ -43,7 +43,7 @@ dev = [
 ]
 
 [project.scripts]
-sitcom-pilot = "sitcom_pilot.cli.main:app"
+showrunner = "showrunner.cli.main:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -70,4 +70,4 @@ runner = "uv run pytest tests/ -q --no-header -x"
 tests_dir = ["tests/"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/sitcom_pilot", "src/sitcom_pilot_utils", "src/sitcom_pilot_tests"]
+packages = ["src/showrunner", "src/showrunner_utils", "src/showrunner_tests"]

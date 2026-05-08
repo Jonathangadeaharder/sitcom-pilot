@@ -30,14 +30,14 @@ def _make_episode_v2(tmp_path, scenes=None, cast=None, envs=None):
 
 class TestLoadEpisodeV2:
     def test_loads_new_title_format(self, tmp_path):
-        from sitcom_pilot.loader import EpisodeLoader
+        from showrunner.loader import EpisodeLoader
 
         path = _make_episode_v2(tmp_path)
         ep = EpisodeLoader().load(path)
         assert ep.title == "The Demo Day"
 
     def test_loads_old_episode_title_format(self, tmp_path):
-        from sitcom_pilot.loader import EpisodeLoader
+        from showrunner.loader import EpisodeLoader
 
         p = tmp_path / "old.json"
         p.write_text(
@@ -54,7 +54,7 @@ class TestLoadEpisodeV2:
         assert ep.title == "Old Format"
 
     def test_prefers_title_over_episode_title(self, tmp_path):
-        from sitcom_pilot.loader import EpisodeLoader
+        from showrunner.loader import EpisodeLoader
 
         p = tmp_path / "both.json"
         p.write_text(
@@ -72,7 +72,7 @@ class TestLoadEpisodeV2:
         assert ep.title == "New Title"
 
     def test_shot_has_dialogue(self, tmp_path):
-        from sitcom_pilot.loader import EpisodeLoader
+        from showrunner.loader import EpisodeLoader
 
         path = _make_episode_v2(
             tmp_path,
@@ -116,7 +116,7 @@ class TestLoadEpisodeV2:
         assert shot.dialogue[0]["emotion"] == "frustrated"
 
     def test_shot_with_no_dialogue(self, tmp_path):
-        from sitcom_pilot.loader import EpisodeLoader
+        from showrunner.loader import EpisodeLoader
 
         path = _make_episode_v2(
             tmp_path,
@@ -141,7 +141,7 @@ class TestLoadEpisodeV2:
         assert ep.scenes[0].shots[0].dialogue == []
 
     def test_old_audio_path_still_works(self, tmp_path):
-        from sitcom_pilot.loader import EpisodeLoader
+        from showrunner.loader import EpisodeLoader
 
         path = _make_episode_v2(
             tmp_path,
@@ -167,7 +167,7 @@ class TestLoadEpisodeV2:
         assert ep.scenes[0].shots[0].audio_path == "output/scene_001.wav"
 
     def test_scene_has_target_duration(self, tmp_path):
-        from sitcom_pilot.loader import EpisodeLoader
+        from showrunner.loader import EpisodeLoader
 
         path = _make_episode_v2(
             tmp_path,
@@ -185,7 +185,7 @@ class TestLoadEpisodeV2:
         assert ep.scenes[0].target_duration_sec == 90
 
     def test_scene_default_target_duration(self, tmp_path):
-        from sitcom_pilot.loader import EpisodeLoader
+        from showrunner.loader import EpisodeLoader
 
         path = _make_episode_v2(
             tmp_path,
@@ -203,10 +203,10 @@ class TestLoadEpisodeV2:
 
 
 class TestBuildShotAudio:
-    @patch("sitcom_pilot.audio_builder.concatenate_wavs")
-    @patch("sitcom_pilot.audio_builder.synthesize_dialogue_line")
+    @patch("showrunner.audio_builder.concatenate_wavs")
+    @patch("showrunner.audio_builder.synthesize_dialogue_line")
     def test_generates_per_shot_audio(self, mock_synth, mock_concat, tmp_path):
-        from sitcom_pilot.audio_builder import build_shot_audio
+        from showrunner.audio_builder import build_shot_audio
 
         mock_synth.return_value = True
         mock_concat.return_value = True
@@ -225,17 +225,17 @@ class TestBuildShotAudio:
         assert result is True
         mock_synth.assert_called_once()
 
-    @patch("sitcom_pilot.audio_builder.synthesize_dialogue_line")
+    @patch("showrunner.audio_builder.synthesize_dialogue_line")
     def test_empty_dialogue_returns_false(self, mock_synth, tmp_path):
-        from sitcom_pilot.audio_builder import build_shot_audio
+        from showrunner.audio_builder import build_shot_audio
 
         output = tmp_path / "shot.wav"
         assert build_shot_audio([], "maya", output) is False
 
-    @patch("sitcom_pilot.audio_builder.concatenate_wavs")
-    @patch("sitcom_pilot.audio_builder.synthesize_dialogue_line")
+    @patch("showrunner.audio_builder.concatenate_wavs")
+    @patch("showrunner.audio_builder.synthesize_dialogue_line")
     def test_multiple_lines_concatenated(self, mock_synth, mock_concat, tmp_path):
-        from sitcom_pilot.audio_builder import build_shot_audio
+        from showrunner.audio_builder import build_shot_audio
 
         mock_synth.return_value = True
         mock_concat.return_value = True
@@ -263,7 +263,7 @@ class TestBuildShotAudio:
         mock_concat.assert_called_once()
 
     def test_existing_output_skips(self, tmp_path):
-        from sitcom_pilot.audio_builder import build_shot_audio
+        from showrunner.audio_builder import build_shot_audio
 
         output = tmp_path / "shot.wav"
         output.write_bytes(b"existing")
@@ -273,9 +273,9 @@ class TestBuildShotAudio:
         result = build_shot_audio(dialogue, "maya", output)
         assert result is True
 
-    @patch("sitcom_pilot.audio_builder.synthesize_dialogue_line")
+    @patch("showrunner.audio_builder.synthesize_dialogue_line")
     def test_aborts_on_line_failure(self, mock_synth, tmp_path):
-        from sitcom_pilot.audio_builder import build_shot_audio
+        from showrunner.audio_builder import build_shot_audio
 
         mock_synth.return_value = False
 
@@ -291,7 +291,7 @@ class TestBuildShotAudio:
 
 class TestBuildFishTextFromDialogue:
     def test_emotion_prepended(self):
-        from sitcom_pilot.audio_builder import build_fish_text_from_dialogue
+        from showrunner.audio_builder import build_fish_text_from_dialogue
 
         line = {
             "speaker": "maya",
@@ -303,7 +303,7 @@ class TestBuildFishTextFromDialogue:
         assert build_fish_text_from_dialogue(line) == "(frustrated) Broken."
 
     def test_emotion_tone_effect(self):
-        from sitcom_pilot.audio_builder import build_fish_text_from_dialogue
+        from showrunner.audio_builder import build_fish_text_from_dialogue
 
         line = {
             "speaker": "finn",
@@ -315,7 +315,7 @@ class TestBuildFishTextFromDialogue:
         assert build_fish_text_from_dialogue(line) == "(nervous)(whispering)(sighing) Oh no."
 
     def test_no_tags_plain(self):
-        from sitcom_pilot.audio_builder import build_fish_text_from_dialogue
+        from showrunner.audio_builder import build_fish_text_from_dialogue
 
         line = {"speaker": "maya", "emotion": None, "tone": None, "effect": None, "text": "Plain."}
         assert build_fish_text_from_dialogue(line) == "Plain."

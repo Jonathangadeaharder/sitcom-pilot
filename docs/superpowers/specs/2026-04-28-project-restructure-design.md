@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-28  
 **Epic:** E0 - Foundation & New Schema  
-**Item:** E0.2 - Project layout: `src/sitcom_pilot/` + uv workspace  
+**Item:** E0.2 - Project layout: `src/showrunner/` + uv workspace  
 **Status:** Design Complete - Ready for Implementation
 
 ---
@@ -19,7 +19,7 @@ The current project uses a flat `orchestrator/` directory structure that:
 
 ### 1.2 Goals
 
-1. **Better Package Organization**: Move from `orchestrator/` to `src/sitcom_pilot/` structure
+1. **Better Package Organization**: Move from `orchestrator/` to `src/showrunner/` structure
 2. **uv Workspace Support**: Enable monorepo development with multiple packages
 3. **Future-Proofing**: Create structure that accommodates future packages
 4. **Maintainability**: Keep existing functionality while improving organization
@@ -39,9 +39,9 @@ The current project uses a flat `orchestrator/` directory structure that:
 ### 2.1 Proposed Structure
 
 ```
-sitcom_pilot/
+showrunner/
 ├── src/
-│   ├── sitcom_pilot/           # Core package
+│   ├── showrunner/           # Core package
 │   │   ├── __init__.py
 │   │   ├── assembler.py
 │   │   ├── audio_builder.py
@@ -58,10 +58,10 @@ sitcom_pilot/
 │   │   └── cli/                # CLI subpackage
 │   │       ├── __init__.py
 │   │       └── main.py
-│   ├── sitcom_pilot_utils/     # Utilities package
+│   ├── showrunner_utils/     # Utilities package
 │   │   ├── __init__.py
 │   │   └── helpers.py
-│   └── sitcom_pilot_tests/     # Test utilities package
+│   └── showrunner_tests/     # Test utilities package
 │       ├── __init__.py
 │       └── fixtures.py
 ├── tests/                      # Root-level tests
@@ -92,7 +92,7 @@ sitcom_pilot/
 
 ```toml
 [project]
-name = "sitcom-pilot"
+name = "showrunner"
 version = "0.1.0"
 description = "Beat-based AI sitcom pilot pipeline (Buffering S01)"
 requires-python = ">=3.11"
@@ -123,7 +123,7 @@ dev-dependencies = [
 aiservices-core = { path = "../AIServices/packages/aiservices_core", editable = true }
 
 [project.scripts]
-sitcom-pilot = "sitcom_pilot.cli.main:app"
+showrunner = "showrunner.cli.main:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -142,13 +142,13 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/sitcom_pilot", "src/sitcom_pilot_utils", "src/sitcom_pilot_tests"]
+packages = ["src/showrunner", "src/showrunner_utils", "src/showrunner_tests"]
 ```
 
 ### 3.2 Key Configuration Points
 
 1. **Build System**: Uses hatchling for modern Python packaging
-2. **CLI Entry Point**: Updated to `sitcom_pilot.cli.main:app`
+2. **CLI Entry Point**: Updated to `showrunner.cli.main:app`
 3. **Package Discovery**: Includes all packages in `src/`
 4. **Test Configuration**: Adds `src` to Python path for imports
 5. **uv Workspace**: Supports monorepo development
@@ -168,27 +168,27 @@ from orchestrator.validator import EpisodeValidator
 
 **New imports:**
 ```python
-from sitcom_pilot.loader import EpisodeLoader
-from sitcom_pilot.config import PipelineConfig
-from sitcom_pilot.validator import EpisodeValidator
+from showrunner.loader import EpisodeLoader
+from showrunner.config import PipelineConfig
+from showrunner.validator import EpisodeValidator
 ```
 
 ### 4.2 Files Requiring Updates
 
-1. **Core package files**: All files in `src/sitcom_pilot/`
+1. **Core package files**: All files in `src/showrunner/`
 2. **Test files**: All files in `tests/`
-3. **CLI files**: Files in `src/sitcom_pilot/cli/`
-4. **Utility files**: Files in `src/sitcom_pilot_utils/`
+3. **CLI files**: Files in `src/showrunner/cli/`
+4. **Utility files**: Files in `src/showrunner_utils/`
 5. **Documentation**: Any docs referencing `orchestrator`
 
 ### 4.3 Migration Commands
 
 ```bash
 # Update imports in all Python files
-find . -name "*.py" -type f -exec sed -i 's/orchestrator\./sitcom_pilot./g' {} \;
+find . -name "*.py" -type f -exec sed -i 's/orchestrator\./showrunner./g' {} \;
 
 # Update relative imports within package
-find src/sitcom_pilot -name "*.py" -type f -exec sed -i 's/from \./from sitcom_pilot./g' {} \;
+find src/showrunner -name "*.py" -type f -exec sed -i 's/from \./from showrunner./g' {} \;
 ```
 
 ---
@@ -198,7 +198,7 @@ find src/sitcom_pilot -name "*.py" -type f -exec sed -i 's/from \./from sitcom_p
 ### 5.1 CLI Package Structure
 
 ```
-src/sitcom_pilot/
+src/showrunner/
 ├── cli/
 │   ├── __init__.py
 │   └── main.py
@@ -214,9 +214,9 @@ from __future__ import annotations
 
 import typer
 from pathlib import Path
-from sitcom_pilot.config import PipelineConfig
-from sitcom_pilot.loader import EpisodeLoader
-from sitcom_pilot.validator import EpisodeValidator
+from showrunner.config import PipelineConfig
+from showrunner.loader import EpisodeLoader
+from showrunner.validator import EpisodeValidator
 
 app = typer.Typer(help="Sitcom Pilot CLI")
 
@@ -252,7 +252,7 @@ if __name__ == "__main__":
 **pyproject.toml:**
 ```toml
 [project.scripts]
-sitcom-pilot = "sitcom_pilot.cli.main:app"
+showrunner = "showrunner.cli.main:app"
 ```
 
 ---
@@ -278,13 +278,13 @@ from orchestrator.config import PipelineConfig
 
 **New:**
 ```python
-from sitcom_pilot.loader import EpisodeLoader
-from sitcom_pilot.config import PipelineConfig
+from showrunner.loader import EpisodeLoader
+from showrunner.config import PipelineConfig
 ```
 
 ### 6.3 Test Utilities Package
 
-**src/sitcom_pilot_tests/fixtures.py:**
+**src/showrunner_tests/fixtures.py:**
 ```python
 from __future__ import annotations
 
@@ -316,27 +316,27 @@ def sample_episode():
 
 **Step 1: Create directory structure**
 ```bash
-mkdir -p src/sitcom_pilot/cli
-mkdir -p src/sitcom_pilot_utils
-mkdir -p src/sitcom_pilot_tests
+mkdir -p src/showrunner/cli
+mkdir -p src/showrunner_utils
+mkdir -p src/showrunner_tests
 ```
 
-**Step 2: Move orchestrator/ to src/sitcom_pilot/**
+**Step 2: Move orchestrator/ to src/showrunner/**
 ```bash
-mv orchestrator/* src/sitcom_pilot/
+mv orchestrator/* src/showrunner/
 ```
 
 **Step 3: Create __init__.py files**
 ```bash
-touch src/sitcom_pilot/__init__.py
-touch src/sitcom_pilot/cli/__init__.py
-touch src/sitcom_pilot_utils/__init__.py
-touch src/sitcom_pilot_tests/__init__.py
+touch src/showrunner/__init__.py
+touch src/showrunner/cli/__init__.py
+touch src/showrunner_utils/__init__.py
+touch src/showrunner_tests/__init__.py
 ```
 
 **Step 4: Update imports in all Python files**
 ```bash
-find . -name "*.py" -type f -exec sed -i 's/orchestrator\./sitcom_pilot./g' {} \;
+find . -name "*.py" -type f -exec sed -i 's/orchestrator\./showrunner./g' {} \;
 ```
 
 **Step 5: Update pyproject.toml**
@@ -345,11 +345,11 @@ find . -name "*.py" -type f -exec sed -i 's/orchestrator\./sitcom_pilot./g' {} \
 - Update CLI entry point
 
 **Step 6: Create CLI main.py**
-- Move CLI logic from orchestrator to `src/sitcom_pilot/cli/main.py`
+- Move CLI logic from orchestrator to `src/showrunner/cli/main.py`
 
 **Step 7: Update test imports**
 ```bash
-find tests -name "*.py" -type f -exec sed -i 's/orchestrator\./sitcom_pilot./g' {} \;
+find tests -name "*.py" -type f -exec sed -i 's/orchestrator\./showrunner./g' {} \;
 ```
 
 **Step 8: Remove old orchestrator/ directory**
@@ -404,10 +404,10 @@ If issues arise:
 
 ### 9.1 Potential Additions
 
-1. **sitcom_pilot_web**: Web interface for the pipeline
-2. **sitcom_pilot_api**: REST API for the pipeline
-3. **sitcom_pilot_monitor**: Monitoring and logging package
-4. **sitcom_pilot_deploy**: Deployment utilities
+1. **showrunner_web**: Web interface for the pipeline
+2. **showrunner_api**: REST API for the pipeline
+3. **showrunner_monitor**: Monitoring and logging package
+4. **showrunner_deploy**: Deployment utilities
 
 ### 9.2 Scalability
 
@@ -430,17 +430,17 @@ The new structure supports:
 ## Appendix A: File Checklist
 
 ### Files to Create
-- [ ] `src/sitcom_pilot/__init__.py`
-- [ ] `src/sitcom_pilot/cli/__init__.py`
-- [ ] `src/sitcom_pilot/cli/main.py`
-- [ ] `src/sitcom_pilot_utils/__init__.py`
-- [ ] `src/sitcom_pilot_utils/helpers.py`
-- [ ] `src/sitcom_pilot_tests/__init__.py`
-- [ ] `src/sitcom_pilot_tests/fixtures.py`
+- [ ] `src/showrunner/__init__.py`
+- [ ] `src/showrunner/cli/__init__.py`
+- [ ] `src/showrunner/cli/main.py`
+- [ ] `src/showrunner_utils/__init__.py`
+- [ ] `src/showrunner_utils/helpers.py`
+- [ ] `src/showrunner_tests/__init__.py`
+- [ ] `src/showrunner_tests/fixtures.py`
 
 ### Files to Modify
 - [ ] `pyproject.toml`
-- [ ] All Python files in `src/sitcom_pilot/`
+- [ ] All Python files in `src/showrunner/`
 - [ ] All test files in `tests/`
 - [ ] Documentation files
 
@@ -454,16 +454,16 @@ The new structure supports:
 ### Migration Commands
 ```bash
 # Create directory structure
-mkdir -p src/sitcom_pilot/cli src/sitcom_pilot_utils src/sitcom_pilot_tests
+mkdir -p src/showrunner/cli src/showrunner_utils src/showrunner_tests
 
 # Move orchestrator to new location
-mv orchestrator/* src/sitcom_pilot/
+mv orchestrator/* src/showrunner/
 
 # Create __init__.py files
-touch src/sitcom_pilot/__init__.py src/sitcom_pilot/cli/__init__.py src/sitcom_pilot_utils/__init__.py src/sitcom_pilot_tests/__init__.py
+touch src/showrunner/__init__.py src/showrunner/cli/__init__.py src/showrunner_utils/__init__.py src/showrunner_tests/__init__.py
 
 # Update imports
-find . -name "*.py" -type f -exec sed -i 's/orchestrator\./sitcom_pilot./g' {} \;
+find . -name "*.py" -type f -exec sed -i 's/orchestrator\./showrunner./g' {} \;
 
 # Remove old directory
 rm -rf orchestrator/
@@ -475,10 +475,10 @@ uv run pytest
 ### Verification Commands
 ```bash
 # Check imports
-python -c "from sitcom_pilot.loader import EpisodeLoader; print('Import OK')"
+python -c "from showrunner.loader import EpisodeLoader; print('Import OK')"
 
 # Check CLI
-sitcom-pilot --help
+showrunner --help
 
 # Check uv workspace
 uv workspace list

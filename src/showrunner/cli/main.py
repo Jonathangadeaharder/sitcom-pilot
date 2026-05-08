@@ -13,7 +13,7 @@ from rich.panel import Panel
 from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
 from rich.table import Table
 
-from sitcom_pilot.validator import EpisodeValidator
+from showrunner.validator import EpisodeValidator
 
 logger = structlog.get_logger()
 console = Console()

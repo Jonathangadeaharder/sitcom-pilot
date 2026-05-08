@@ -40,7 +40,7 @@ Replace the entire `schemas/episode_v2.schema.json` with:
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://sitcom-pilot/schemas/episode_v2.schema.json",
+  "$id": "https://showrunner/schemas/episode_v2.schema.json",
   "title": "Episode",
   "description": "Beat-based episode schema v2.0 for the Sitcom Pilot pipeline. All render fields are optional and will use AIServices defaults if not specified.",
   "type": "object",
@@ -491,7 +491,7 @@ Expected output: All tests pass
 - [ ] **Step 3: Test CLI validation**
 
 ```bash
-uv run sitcom-pilot validate episode_template.json
+uv run showrunner validate episode_template.json
 ```
 
 Expected output:
@@ -529,7 +529,7 @@ The episode template is a canonical JSON file that defines the structure for cre
 3. **Define characters**: Add your characters to the `cast` section
 4. **Define environments**: Add your environments to the `environments` section
 5. **Create scenes**: Add your scenes with beats to the `scenes` section
-6. **Validate**: Run `sitcom-pilot validate your_episode.json` to check for errors
+6. **Validate**: Run `showrunner validate your_episode.json` to check for errors
 
 ## Field Reference
 
@@ -699,7 +699,7 @@ Each beat is either a "speech" or "silent" beat.
 Validate your episode file using the CLI:
 
 ```bash
-sitcom-pilot validate your_episode.json
+showrunner validate your_episode.json
 ```
 
 Or using Python:
@@ -1045,7 +1045,7 @@ Validation OK
 - [ ] **Step 3: Test CLI validation**
 
 ```bash
-uv run sitcom-pilot validate episode_template.json
+uv run showrunner validate episode_template.json
 ```
 
 Expected output:

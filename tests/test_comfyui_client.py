@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sitcom_pilot.comfyui_client import ComfyUIClient
+from showrunner.comfyui_client import ComfyUIClient
 
 
 @pytest.fixture

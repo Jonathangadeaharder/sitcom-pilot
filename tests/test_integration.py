@@ -3,14 +3,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sitcom_pilot.assembler import concat_clips
-from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.loader import EpisodeLoader
-from sitcom_pilot.node_map import NodeMap
-from sitcom_pilot.progress import ProgressTracker
-from sitcom_pilot.prompts import PromptBuilder
-from sitcom_pilot.renderer import ShotRenderer
-
+from showrunner.assembler import concat_clips
+from showrunner.comfyui_client import ComfyUIClient
+from showrunner.loader import EpisodeLoader
+from showrunner.node_map import NodeMap
+from showrunner.progress import ProgressTracker
+from showrunner.prompts import PromptBuilder
+from showrunner.renderer import ShotRenderer
 EPISODE_JSON = {
     "episode_title": "Integration Test Episode",
     "cast": {

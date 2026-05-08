@@ -5,7 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sitcom_pilot.assembler import (
+from showrunner.assembler import (
+    EpisodeAssembler,
     burn_in_captions,
     concat_clips,
     extract_thumbnail,
@@ -15,7 +16,7 @@ from sitcom_pilot.assembler import (
     mux_audio,
     uniformize_clip,
 )
-from sitcom_pilot.loader import BeatData
+from showrunner.loader import BeatData
 
 
 @pytest.fixture

@@ -12,14 +12,14 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from sitcom_pilot.loader import EpisodeData, EpisodeLoader  # noqa: E402
-from sitcom_pilot.audio_builder import build_shot_audio  # noqa: E402
-from sitcom_pilot.prompts import PromptBuilder  # noqa: E402
-from sitcom_pilot.comfyui_client import ComfyUIClient  # noqa: E402
-from sitcom_pilot.renderer import ShotRenderer  # noqa: E402
-from sitcom_pilot.assembler import EpisodeAssembler  # noqa: E402
-from sitcom_pilot.node_map import NodeMap  # noqa: E402
-from sitcom_pilot.progress import ProgressTracker  # noqa: E402
+from showrunner.loader import EpisodeData, EpisodeLoader  # noqa: E402
+from showrunner.audio_builder import build_shot_audio  # noqa: E402
+from showrunner.prompts import PromptBuilder  # noqa: E402
+from showrunner.comfyui_client import ComfyUIClient  # noqa: E402
+from showrunner.renderer import ShotRenderer  # noqa: E402
+from showrunner.assembler import EpisodeAssembler  # noqa: E402
+from showrunner.node_map import NodeMap  # noqa: E402
+from showrunner.progress import ProgressTracker  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -114,7 +114,7 @@ def run_pipeline(
     if episode.schema_version == "2.0":
         raise SystemExit(
             "This legacy pipeline only supports v1 (shot-based) episode files. "
-            "For v2 beat-based episodes, use the src/sitcom_pilot pipeline."
+            "For v2 beat-based episodes, use the src/showrunner pipeline."
         )
     output_dir.mkdir(parents=True, exist_ok=True)
 

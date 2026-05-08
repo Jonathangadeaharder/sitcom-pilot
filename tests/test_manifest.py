@@ -1,10 +1,9 @@
-"""Tests for sitcom_pilot.manifest — RunManifest run record format."""
-
+"""Tests for showrunner.manifest — RunManifest run record format."""
 from __future__ import annotations
 
 import json
 
-from sitcom_pilot.manifest import BeatRecord, RunManifest, SceneRecord
+from showrunner.manifest import BeatRecord, RunManifest, SceneRecord
 
 
 def test_create_sets_run_id_and_episode_path(tmp_path):

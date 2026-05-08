@@ -1,6 +1,6 @@
 import json
 
-from sitcom_pilot.loader import EpisodeLoader
+from showrunner.loader import EpisodeLoader
 
 
 def test_load_valid_episode_returns_episode_data(tmp_path):

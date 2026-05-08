@@ -32,7 +32,7 @@ from voice_generator_v3 import (  # noqa: E402
 
 V2_EPISODE_GUARD = (
     "This script only supports v1 (shot-based) episode files. "
-    "For v2 beat-based episodes, use the src/sitcom_pilot pipeline."
+    "For v2 beat-based episodes, use the src/showrunner pipeline."
 )
 
 FISH_API_URL = "http://127.0.0.1:8090"
