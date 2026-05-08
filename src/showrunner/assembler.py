@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from sitcom_pilot.loader import BeatData
+from showrunner.loader import BeatData
 
 logger = logging.getLogger(__name__)
 

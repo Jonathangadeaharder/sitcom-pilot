@@ -78,10 +78,10 @@ class TestFallbackPipelineConfig:
         import sys
         from unittest.mock import patch
 
-        saved = sys.modules.pop("sitcom_pilot.config", None)
+        saved = sys.modules.pop("showrunner.config", None)
         try:
             with patch.dict(sys.modules, {"pydantic_settings": None, "pydantic": None}):
-                import sitcom_pilot.config as cfg_mod
+                import showrunner.config as cfg_mod
 
                 importlib.reload(cfg_mod)
                 cfg = cfg_mod.PipelineConfig()
@@ -95,18 +95,18 @@ class TestFallbackPipelineConfig:
                 assert cfg.asr_provider is None
         finally:
             if saved is not None:
-                sys.modules["sitcom_pilot.config"] = saved
-                importlib.reload(sys.modules["sitcom_pilot.config"])
+                sys.modules["showrunner.config"] = saved
+                importlib.reload(sys.modules["showrunner.config"])
 
     def test_fallback_from_env(self):
         import importlib
         import sys
         from unittest.mock import patch
 
-        saved = sys.modules.pop("sitcom_pilot.config", None)
+        saved = sys.modules.pop("showrunner.config", None)
         try:
             with patch.dict(sys.modules, {"pydantic_settings": None, "pydantic": None}):
-                import sitcom_pilot.config as cfg_mod
+                import showrunner.config as cfg_mod
 
                 importlib.reload(cfg_mod)
                 env = {
@@ -133,5 +133,5 @@ class TestFallbackPipelineConfig:
                     assert cfg.asr_provider == "custom-asr"
         finally:
             if saved is not None:
-                sys.modules["sitcom_pilot.config"] = saved
-                importlib.reload(sys.modules["sitcom_pilot.config"])
+                sys.modules["showrunner.config"] = saved
+                importlib.reload(sys.modules["showrunner.config"])

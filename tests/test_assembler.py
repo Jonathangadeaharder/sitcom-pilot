@@ -21,7 +21,7 @@ from showrunner.loader import BeatData
 
 @pytest.fixture
 def mock_ffmpeg():
-    with patch("sitcom_pilot.assembler._run") as mock:
+    with patch("showrunner.assembler._run") as mock:
         mock.return_value = MagicMock(returncode=0)
         yield mock
 
@@ -65,7 +65,7 @@ class TestConcatClips:
             captured["content"] = Path(list_path).read_text()
             return MagicMock(returncode=0)
 
-        with patch("sitcom_pilot.assembler._run", side_effect=grab_list_path):
+        with patch("showrunner.assembler._run", side_effect=grab_list_path):
             concat_clips(tricky, out)
 
         content = captured["content"]

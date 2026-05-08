@@ -3,10 +3,10 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from sitcom_pilot.aiservices_client import AIServicesClient
-from sitcom_pilot.beat_prompts import build_beat_prompt, build_scene_prompt
-from sitcom_pilot.cast_manifest import CastManifest
-from sitcom_pilot.loader import BeatData, EpisodeData, SceneData
+from showrunner.aiservices_client import AIServicesClient
+from showrunner.beat_prompts import build_beat_prompt, build_scene_prompt
+from showrunner.cast_manifest import CastManifest
+from showrunner.loader import BeatData, EpisodeData, SceneData
 
 logger = logging.getLogger(__name__)
 

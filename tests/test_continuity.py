@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from sitcom_pilot.continuity import (
+from showrunner.continuity import (
     SimilarityResult,
     _ssim_fallback,
     batch_check,
@@ -19,23 +19,23 @@ class TestSimilarityResult:
 
 
 class TestCheckContinuity:
-    @patch("sitcom_pilot.continuity._compute_ssim", return_value=0.9)
-    @patch("sitcom_pilot.continuity._load_image_gray")
+    @patch("showrunner.continuity._compute_ssim", return_value=0.9)
+    @patch("showrunner.continuity._load_image_gray")
     def test_passes_above_threshold(self, mock_load, mock_ssim):
         mock_load.return_value = MagicMock()
         result = check_continuity(Path("ref.png"), Path("gen.png"), threshold=0.7)
         assert result.passed
         assert result.ssim_score == 0.9
 
-    @patch("sitcom_pilot.continuity._compute_ssim", return_value=0.3)
-    @patch("sitcom_pilot.continuity._load_image_gray")
+    @patch("showrunner.continuity._compute_ssim", return_value=0.3)
+    @patch("showrunner.continuity._load_image_gray")
     def test_fails_below_threshold(self, mock_load, mock_ssim):
         mock_load.return_value = MagicMock()
         result = check_continuity(Path("ref.png"), Path("gen.png"), threshold=0.7)
         assert not result.passed
 
-    @patch("sitcom_pilot.continuity._compute_ssim", return_value=0.7)
-    @patch("sitcom_pilot.continuity._load_image_gray")
+    @patch("showrunner.continuity._compute_ssim", return_value=0.7)
+    @patch("showrunner.continuity._load_image_gray")
     def test_passes_at_exact_threshold(self, mock_load, mock_ssim):
         mock_load.return_value = MagicMock()
         result = check_continuity(Path("ref.png"), Path("gen.png"), threshold=0.7)
@@ -77,29 +77,29 @@ class TestSsimFallback:
 
 
 class TestBatchCheck:
-    @patch("sitcom_pilot.continuity.check_continuity")
+    @patch("showrunner.continuity.check_continuity")
     def test_batch(self, mock_check):
         mock_check.return_value = SimilarityResult("a", "b", 0.8, True)
         results = batch_check([(Path("a"), Path("b"))])
         assert len(results) == 1
         assert results[0].passed
 
-    @patch("sitcom_pilot.continuity._load_image_gray", side_effect=OSError("missing"))
+    @patch("showrunner.continuity._load_image_gray", side_effect=OSError("missing"))
     def test_oserror_caught(self, mock_load):
         results = batch_check([(Path("a"), Path("b"))])
         assert results == []
 
-    @patch("sitcom_pilot.continuity._load_image_gray", side_effect=ValueError("bad"))
+    @patch("showrunner.continuity._load_image_gray", side_effect=ValueError("bad"))
     def test_valueerror_caught(self, mock_load):
         results = batch_check([(Path("a"), Path("b"))])
         assert results == []
 
-    @patch("sitcom_pilot.continuity._load_image_gray", side_effect=ImportError("nope"))
+    @patch("showrunner.continuity._load_image_gray", side_effect=ImportError("nope"))
     def test_importerror_caught(self, mock_load):
         results = batch_check([(Path("a"), Path("b"))])
         assert results == []
 
-    @patch("sitcom_pilot.continuity._load_image_gray", side_effect=RuntimeError("boom"))
+    @patch("showrunner.continuity._load_image_gray", side_effect=RuntimeError("boom"))
     def test_runtimeerror_propagates(self, mock_load):
         import pytest
 
@@ -118,7 +118,7 @@ class TestLoadImageGray:
         img_path = tmp_path / "test.png"
         Image.new("RGB", (10, 10), "red").save(img_path)
 
-        from sitcom_pilot.continuity import _load_image_gray
+        from showrunner.continuity import _load_image_gray
 
         result = _load_image_gray(img_path)
         assert result.mode == "L"

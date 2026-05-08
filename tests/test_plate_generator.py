@@ -3,9 +3,10 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile
-from sitcom_pilot.loader import BeatData, EpisodeData, SceneData
-from sitcom_pilot.plate_generator import generate_beat_plate, generate_scene_plate
+
+from showrunner.cast_manifest import CastManifest, CharacterProfile
+from showrunner.loader import BeatData, EpisodeData, SceneData
+from showrunner.plate_generator import generate_beat_plate, generate_scene_plate
 
 
 @pytest.fixture
@@ -30,7 +31,7 @@ def episode():
 
 
 class TestGenerateScenePlate:
-    @patch("sitcom_pilot.plate_generator.AIServicesClient")
+    @patch("showrunner.plate_generator.AIServicesClient")
     def test_generates_image(self, MockClient, manifest, episode, tmp_path):
         mock_client = MagicMock()
         mock_client.text2image.return_value = tmp_path / "plate.png"
@@ -43,7 +44,7 @@ class TestGenerateScenePlate:
 
 
 class TestGenerateBeatPlate:
-    @patch("sitcom_pilot.plate_generator.AIServicesClient")
+    @patch("showrunner.plate_generator.AIServicesClient")
     def test_generates_from_scene_plate(self, MockClient, manifest, episode, tmp_path):
         mock_client = MagicMock()
         mock_client.image2image.return_value = tmp_path / "beat.png"

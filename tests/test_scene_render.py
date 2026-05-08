@@ -5,16 +5,17 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile
-from sitcom_pilot.loader import (
+
+from showrunner.cast_manifest import CastManifest, CharacterProfile
+from showrunner.loader import (
     BeatData,
     CharacterData,
     EpisodeData,
     SceneData,
     VoiceConfig,
 )
-from sitcom_pilot.paths import RunPaths
-from sitcom_pilot.scene_render import (
+from showrunner.paths import RunPaths
+from showrunner.scene_render import (
     BeatJob,
     SceneReport,
     allocate_durations,

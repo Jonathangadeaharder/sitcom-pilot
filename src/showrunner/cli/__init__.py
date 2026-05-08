@@ -1,3 +1,3 @@
-from sitcom_pilot.cli.main import app
+from showrunner.cli.main import app
 
 __all__ = ["app"]

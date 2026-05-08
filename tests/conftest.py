@@ -2,8 +2,9 @@ import sys
 from pathlib import Path
 
 import pytest
-from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile, CharacterRef
-from sitcom_pilot.loader import EpisodeLoader
+
+from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
+from showrunner.loader import EpisodeLoader
 
 sys.path  # ensure imported before use below
 

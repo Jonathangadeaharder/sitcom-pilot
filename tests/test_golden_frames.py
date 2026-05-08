@@ -3,11 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from sitcom_pilot.beat_prompts import build_beat_prompt, build_scene_prompt
-from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile, CharacterRef
-from sitcom_pilot.continuity import SimilarityResult, batch_check
-from sitcom_pilot.determinism import compute_manifest_hash
-from sitcom_pilot.loader import EpisodeLoader
+
+from showrunner.beat_prompts import build_beat_prompt, build_scene_prompt
+from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
+from showrunner.continuity import SimilarityResult, batch_check
+from showrunner.determinism import compute_manifest_hash
+from showrunner.loader import EpisodeLoader
 
 EPISODE_02 = Path(__file__).resolve().parent.parent / "episode_02.json"
 
@@ -84,7 +85,7 @@ class TestGoldenFrameDeterminism:
         b = tmp_path / "b.png"
         img.save(a)
         img.save(b)
-        from sitcom_pilot.continuity import check_continuity
+        from showrunner.continuity import check_continuity
 
         result = check_continuity(a, b, threshold=0.9)
         assert result.passed
@@ -96,7 +97,7 @@ class TestGoldenFrameDeterminism:
         b = tmp_path / "b.png"
         Image.new("L", (64, 64), color=0).save(a)
         Image.new("L", (64, 64), color=255).save(b)
-        from sitcom_pilot.continuity import check_continuity
+        from showrunner.continuity import check_continuity
 
         result = check_continuity(a, b, threshold=0.9)
         assert not result.passed

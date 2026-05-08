@@ -7,11 +7,11 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
 
-from sitcom_pilot.aiservices_client import AIServicesClient
-from sitcom_pilot.beat_prompts import build_beat_prompt
-from sitcom_pilot.cast_manifest import CastManifest
-from sitcom_pilot.loader import EpisodeData, SceneData
-from sitcom_pilot.paths import RunPaths
+from showrunner.aiservices_client import AIServicesClient
+from showrunner.beat_prompts import build_beat_prompt
+from showrunner.cast_manifest import CastManifest
+from showrunner.loader import EpisodeData, SceneData
+from showrunner.paths import RunPaths
 
 logger = logging.getLogger(__name__)
 

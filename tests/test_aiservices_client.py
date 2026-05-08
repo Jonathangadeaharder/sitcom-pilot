@@ -4,8 +4,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from sitcom_pilot.aiservices_client import AIServicesClient, _build_speech_tags, _div8
-from sitcom_pilot.loader import VoiceConfig
+
+from showrunner.aiservices_client import AIServicesClient, _build_speech_tags, _div8
+from showrunner.loader import VoiceConfig
 
 
 @pytest.fixture
@@ -61,7 +62,7 @@ class TestText2Image:
             assert isinstance(result, Path)
             mock_gen.assert_called_once()
 
-    @patch("sitcom_pilot.aiservices_client._run_cli")
+    @patch("showrunner.aiservices_client._run_cli")
     def test_subprocess_fallback(self, mock_cli, client, tmp_path):
         with patch("text2image.client.generate", side_effect=ImportError):
             result = client.text2image("a cat", tmp_path / "out.png", seed=42)
@@ -75,7 +76,7 @@ class TestText2Image:
 
 
 class TestImage2Image:
-    @patch("sitcom_pilot.aiservices_client._run_cli")
+    @patch("showrunner.aiservices_client._run_cli")
     def test_subprocess_fallback(self, mock_cli, client, tmp_path):
         with patch("image2image.client.generate", side_effect=ImportError):
             result = client.image2image(
@@ -86,7 +87,7 @@ class TestImage2Image:
 
 
 class TestImage2Video:
-    @patch("sitcom_pilot.aiservices_client._run_cli")
+    @patch("showrunner.aiservices_client._run_cli")
     def test_subprocess_fallback(self, mock_cli, client, tmp_path):
         with patch("image2video.client.generate", side_effect=ImportError):
             result = client.image2video(
@@ -95,8 +96,8 @@ class TestImage2Video:
             assert isinstance(result, Path)
             mock_cli.assert_called_once()
 
-    @patch("sitcom_pilot.aiservices_client._mux_audio")
-    @patch("sitcom_pilot.aiservices_client._run_cli")
+    @patch("showrunner.aiservices_client._mux_audio")
+    @patch("showrunner.aiservices_client._run_cli")
     def test_audio_mux(self, mock_cli, mock_mux, client, tmp_path):
         mock_mux.return_value = tmp_path / "out.mp4"
         with patch("image2video.client.generate", side_effect=ImportError):
@@ -112,7 +113,7 @@ class TestImage2Video:
 
 
 class TestText2Speech:
-    @patch("sitcom_pilot.aiservices_client._run_cli")
+    @patch("showrunner.aiservices_client._run_cli")
     def test_subprocess_fallback(self, mock_cli, client, tmp_path):
         voice = VoiceConfig(provider="mlx-audio", voice_id="maya_v1", seed=42, temperature=0.8)
         with patch("text2speech.client.generate", side_effect=ImportError):
@@ -123,14 +124,14 @@ class TestText2Speech:
             mock_cli.assert_called_once()
 
     def test_character_voice_extraction(self, client, tmp_path):
-        from sitcom_pilot.loader import CharacterData
+        from showrunner.loader import CharacterData
 
         char = CharacterData(
             name="Maya",
             voice=VoiceConfig(provider="mlx-audio", voice_id="maya_v1", clone_from="ref.wav"),
         )
         with patch("text2speech.client.generate", side_effect=ImportError):
-            with patch("sitcom_pilot.aiservices_client._run_cli"):
+            with patch("showrunner.aiservices_client._run_cli"):
                 result = client.text2speech("Hi", tmp_path / "out.wav", character=char)
                 assert isinstance(result, Path)
 
@@ -166,7 +167,7 @@ class TestDiscoverCapabilities:
 
 
 class TestOutputDirCreation:
-    @patch("sitcom_pilot.aiservices_client._run_cli")
+    @patch("showrunner.aiservices_client._run_cli")
     def test_creates_parent_dirs(self, mock_cli, client, tmp_path):
         deep = tmp_path / "a" / "b" / "c" / "out.png"
         with patch("text2image.client.generate", side_effect=ImportError):
@@ -175,7 +176,7 @@ class TestOutputDirCreation:
 
 
 class TestAudio2Subtitle:
-    @patch("sitcom_pilot.aiservices_client._run_cli")
+    @patch("showrunner.aiservices_client._run_cli")
     def test_subprocess_fallback(self, mock_cli, client, tmp_path):
         with patch("audio2subtitle.client.generate", side_effect=ImportError):
             result = client.audio2subtitle(tmp_path / "audio.wav", tmp_path / "out.srt")

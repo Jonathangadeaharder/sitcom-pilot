@@ -94,7 +94,7 @@ def test_full_pipeline_load_render_assemble(tmp_path):
     fake_clips = [tmp_path / "clip1.mp4", tmp_path / "clip2.mp4"]
     for c in fake_clips:
         c.write_bytes(b"\x00\x00\x00")
-    with patch("sitcom_pilot.assembler._run", return_value=MagicMock(returncode=0)):
+    with patch("showrunner.assembler._run", return_value=MagicMock(returncode=0)):
         result = concat_clips(fake_clips, tmp_path / "final" / "episode.mp4")
         assert result == tmp_path / "final" / "episode.mp4"
 

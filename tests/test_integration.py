@@ -154,7 +154,7 @@ def test_renderer_to_assembler_concat_list(tmp_path, episode, mock_client, node_
     for c in fake_clips:
         c.write_bytes(b"\x00")
 
-    with patch("sitcom_pilot.assembler._run", return_value=MagicMock(returncode=0)):
+    with patch("showrunner.assembler._run", return_value=MagicMock(returncode=0)):
         result = concat_clips(fake_clips, tmp_path / "out" / "final.mp4")
 
     assert result == tmp_path / "out" / "final.mp4"

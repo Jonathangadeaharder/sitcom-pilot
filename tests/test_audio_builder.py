@@ -321,7 +321,7 @@ class TestBuildFishTextFromDialogue:
         assert build_fish_text_from_dialogue(line) == "Plain."
 
     def test_invalid_emotion_ignored(self):
-        from sitcom_pilot.audio_builder import build_fish_text_from_dialogue
+        from showrunner.audio_builder import build_fish_text_from_dialogue
 
         line = {
             "speaker": "maya",
@@ -333,7 +333,7 @@ class TestBuildFishTextFromDialogue:
         assert build_fish_text_from_dialogue(line) == "Hi."
 
     def test_invalid_tone_ignored(self):
-        from sitcom_pilot.audio_builder import build_fish_text_from_dialogue
+        from showrunner.audio_builder import build_fish_text_from_dialogue
 
         line = {
             "speaker": "maya",
@@ -347,12 +347,12 @@ class TestBuildFishTextFromDialogue:
 
 class TestConcatenateWavs:
     def test_empty_list_returns_false(self, tmp_path):
-        from sitcom_pilot.audio_builder import concatenate_wavs
+        from showrunner.audio_builder import concatenate_wavs
 
         assert concatenate_wavs([], tmp_path / "out.wav") is False
 
     def test_single_file_copies(self, tmp_path):
-        from sitcom_pilot.audio_builder import concatenate_wavs
+        from showrunner.audio_builder import concatenate_wavs
 
         src = tmp_path / "in.wav"
         src.write_bytes(b"RIFF" + b"\x00" * 100)
@@ -361,9 +361,9 @@ class TestConcatenateWavs:
         assert result is True
         assert out.exists()
 
-    @patch("sitcom_pilot.audio_builder.subprocess.run")
+    @patch("showrunner.audio_builder.subprocess.run")
     def test_multiple_files_calls_ffmpeg(self, mock_run, tmp_path):
-        from sitcom_pilot.audio_builder import concatenate_wavs
+        from showrunner.audio_builder import concatenate_wavs
 
         mock_run.return_value = MagicMock(returncode=0)
         f1 = tmp_path / "a.wav"
@@ -384,9 +384,9 @@ class TestConcatenateWavs:
         cmd_args = mock_run.call_args[0][0]
         assert "ffmpeg" in cmd_args[0]
 
-    @patch("sitcom_pilot.audio_builder.subprocess.run")
+    @patch("showrunner.audio_builder.subprocess.run")
     def test_ffmpeg_failure_returns_false(self, mock_run, tmp_path):
-        from sitcom_pilot.audio_builder import concatenate_wavs
+        from showrunner.audio_builder import concatenate_wavs
 
         mock_run.return_value = MagicMock(returncode=1)
         f1 = tmp_path / "a.wav"
@@ -397,9 +397,9 @@ class TestConcatenateWavs:
         result = concatenate_wavs([f1, f2], out)
         assert result is False
 
-    @patch("sitcom_pilot.audio_builder.subprocess.run")
+    @patch("showrunner.audio_builder.subprocess.run")
     def test_ffmpeg_exception_returns_false(self, mock_run, tmp_path):
-        from sitcom_pilot.audio_builder import concatenate_wavs
+        from showrunner.audio_builder import concatenate_wavs
 
         mock_run.side_effect = OSError("ffmpeg not found")
         f1 = tmp_path / "a.wav"
@@ -413,7 +413,7 @@ class TestConcatenateWavs:
 
 class TestSynthesizeDialogueLine:
     def test_existing_output_returns_true(self, tmp_path):
-        from sitcom_pilot.audio_builder import synthesize_dialogue_line
+        from showrunner.audio_builder import synthesize_dialogue_line
 
         out = tmp_path / "exists.wav"
         out.write_bytes(b"RIFF")
@@ -422,10 +422,10 @@ class TestSynthesizeDialogueLine:
 
 
 class TestBuildShotAudioEdgeCases:
-    @patch("sitcom_pilot.audio_builder.concatenate_wavs")
-    @patch("sitcom_pilot.audio_builder.synthesize_dialogue_line")
+    @patch("showrunner.audio_builder.concatenate_wavs")
+    @patch("showrunner.audio_builder.synthesize_dialogue_line")
     def test_single_line_no_concat(self, mock_synth, mock_concat, tmp_path):
-        from sitcom_pilot.audio_builder import build_shot_audio
+        from showrunner.audio_builder import build_shot_audio
 
         mock_synth.return_value = True
         mock_concat.return_value = True

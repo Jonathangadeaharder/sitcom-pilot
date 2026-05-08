@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from sitcom_pilot.loader import CharacterData, VoiceConfig
+from showrunner.loader import CharacterData, VoiceConfig
 
 logger = logging.getLogger(__name__)
 
