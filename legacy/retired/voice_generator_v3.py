@@ -50,7 +50,7 @@ def load_episode(path: Path) -> dict:
     if data.get("schema_version") == "2.0":
         print(
             "This script only supports v1 (shot-based) episode files. "
-            "For v2 beat-based episodes, use the src/sitcom_pilot pipeline.",
+            "For v2 beat-based episodes, use the src/showrunner pipeline.",
             file=sys.stderr,
         )
         sys.exit(1)

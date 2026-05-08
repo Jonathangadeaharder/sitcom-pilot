@@ -1,14 +1,14 @@
 import json
 from unittest.mock import MagicMock, patch
 
-from sitcom_pilot.assembler import concat_clips
-from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.loader import (
+from showrunner.assembler import concat_clips
+from showrunner.comfyui_client import ComfyUIClient
+from showrunner.loader import (
     EpisodeLoader,
 )
-from sitcom_pilot.progress import ProgressTracker
-from sitcom_pilot.prompts import PromptBuilder
-from sitcom_pilot.renderer import ShotRenderer
+from showrunner.progress import ProgressTracker
+from showrunner.prompts import PromptBuilder
+from showrunner.renderer import ShotRenderer
 
 EPISODE_JSON = {
     "episode_title": "E2E Test Episode",
@@ -94,7 +94,7 @@ def test_full_pipeline_load_render_assemble(tmp_path):
     fake_clips = [tmp_path / "clip1.mp4", tmp_path / "clip2.mp4"]
     for c in fake_clips:
         c.write_bytes(b"\x00\x00\x00")
-    with patch("sitcom_pilot.assembler._run", return_value=MagicMock(returncode=0)):
+    with patch("showrunner.assembler._run", return_value=MagicMock(returncode=0)):
         result = concat_clips(fake_clips, tmp_path / "final" / "episode.mp4")
         assert result == tmp_path / "final" / "episode.mp4"
 

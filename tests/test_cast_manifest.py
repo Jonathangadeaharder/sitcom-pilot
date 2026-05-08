@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from sitcom_pilot.cast_manifest import (
+from showrunner.cast_manifest import (
     CastManifest,
     CharacterProfile,
     CharacterRef,
     WardrobeEntry,
 )
-from sitcom_pilot.loader import VoiceConfig
+from showrunner.loader import VoiceConfig
 
 
 class TestCharacterRef:

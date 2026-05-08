@@ -2275,7 +2275,7 @@ wheels = [
 ]
 
 [[package]]
-name = "sitcom-pilot"
+name = "showrunner"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
@@ -2306,6 +2306,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiservices-core", editable = "../AIServices/packages/aiservices_core" },
     { name = "audio2subtitle", editable = "../AIServices/packages/audio2subtitle" },
     { name = "image2image", editable = "../AIServices/packages/image2image" },
     { name = "image2video", editable = "../AIServices/packages/image2video" },

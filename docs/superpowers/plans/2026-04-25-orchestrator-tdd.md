@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a decoupled, testable sitcom_pilot that drives ComfyUI via API to render video shots from a JSON cut-sheet, with crash recovery and Apple Silicon MPS optimization.
+**Goal:** Build a decoupled, testable showrunner that drives ComfyUI via API to render video shots from a JSON cut-sheet, with crash recovery and Apple Silicon MPS optimization.
 
 **Architecture:** Pipeline is split into 5 units with clear interfaces: (1) `EpisodeLoader` parses the JSON cut-sheet, (2) `PromptBuilder` constructs ComfyUI-ready prompts from shot data, (3) `ComfyUIClient` handles API communication with retry/crash recovery, (4) `ShotRenderer` orchestrates per-shot rendering, (5) `EpisodeAssembler` concatenates outputs. Each unit is independently testable.
 
@@ -14,7 +14,7 @@
 
 ```
 ├── src/
-│   └── sitcom_pilot/
+│   └── showrunner/
 │       ├── __init__.py          # Package init, exports public API
 │       ├── loader.py            # EpisodeLoader — parses episode JSON
 │       ├── prompts.py           # PromptBuilder — builds ComfyUI text prompts
@@ -51,7 +51,7 @@
 ## Task 1: EpisodeLoader — Parse Episode JSON
 
 **Files:**
-- Create: `src/sitcom_pilot/loader.py`
+- Create: `src/showrunner/loader.py`
 - Create: `tests/conftest.py`
 - Create: `tests/test_loader.py`
 
@@ -64,7 +64,7 @@
 import json
 import pytest
 from pathlib import Path
-from sitcom_pilot.loader import EpisodeLoader
+from showrunner.loader import EpisodeLoader
 
 
 def test_load_valid_episode_returns_episode_data(tmp_path):
@@ -111,22 +111,22 @@ def test_load_valid_episode_returns_episode_data(tmp_path):
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `python3 -m pytest tests/test_loader.py -v`
-Expected: FAIL — `ModuleNotFoundError: No module named 'sitcom_pilot'`
+Expected: FAIL — `ModuleNotFoundError: No module named 'showrunner'`
 
 ### GREEN
 
 - [ ] **Step 3: Create package init and minimal loader**
 
 ```python
-# src/sitcom_pilot/__init__.py
+# src/showrunner/__init__.py
 
-from sitcom_pilot.loader import EpisodeLoader
+from showrunner.loader import EpisodeLoader
 
 __all__ = ["EpisodeLoader"]
 ```
 
 ```python
-# src/sitcom_pilot/loader.py
+# src/showrunner/loader.py
 from __future__ import annotations
 
 import json
@@ -274,7 +274,7 @@ Expected: All PASS
 - [ ] **Step 9: Commit**
 
 ```bash
-git add src/sitcom_pilot/__init__.py src/sitcom_pilot/loader.py tests/conftest.py tests/test_loader.py
+git add src/showrunner/__init__.py src/showrunner/loader.py tests/conftest.py tests/test_loader.py
 git commit -m "feat: add EpisodeLoader with full test coverage"
 ```
 
@@ -283,7 +283,7 @@ git commit -m "feat: add EpisodeLoader with full test coverage"
 ## Task 2: PromptBuilder — Construct ComfyUI Prompts
 
 **Files:**
-- Create: `src/sitcom_pilot/prompts.py`
+- Create: `src/showrunner/prompts.py`
 - Create: `tests/test_prompts.py`
 
 ### RED
@@ -293,10 +293,10 @@ git commit -m "feat: add EpisodeLoader with full test coverage"
 ```python
 # tests/test_prompts.py
 import pytest
-from sitcom_pilot.loader import (
+from showrunner.loader import (
     CharacterData, EnvironmentData, SceneData, ShotData, EpisodeData,
 )
-from sitcom_pilot.prompts import PromptBuilder
+from showrunner.prompts import PromptBuilder
 
 
 @pytest.fixture
@@ -370,17 +370,17 @@ def test_build_start_prompt_no_characters():
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `python3 -m pytest tests/test_prompts.py -v`
-Expected: FAIL — `ModuleNotFoundError: No module named 'sitcom_pilot.prompts'`
+Expected: FAIL — `ModuleNotFoundError: No module named 'showrunner.prompts'`
 
 ### GREEN
 
 - [ ] **Step 3: Implement PromptBuilder**
 
 ```python
-# src/sitcom_pilot/prompts.py
+# src/showrunner/prompts.py
 from __future__ import annotations
 
-from sitcom_pilot.loader import EpisodeData, SceneData, ShotData
+from showrunner.loader import EpisodeData, SceneData, ShotData
 
 
 class PromptBuilder:
@@ -417,7 +417,7 @@ Expected: All PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/sitcom_pilot/prompts.py tests/test_prompts.py
+git add src/showrunner/prompts.py tests/test_prompts.py
 git commit -m "feat: add PromptBuilder with full test coverage"
 ```
 
@@ -426,7 +426,7 @@ git commit -m "feat: add PromptBuilder with full test coverage"
 ## Task 3: ComfyUIClient — API Communication with Crash Recovery
 
 **Files:**
-- Create: `src/sitcom_pilot/comfyui_client.py`
+- Create: `src/showrunner/comfyui_client.py`
 - Create: `tests/test_comfyui_client.py`
 
 ### RED
@@ -438,7 +438,7 @@ git commit -m "feat: add PromptBuilder with full test coverage"
 import json
 import pytest
 from unittest.mock import patch, MagicMock
-from sitcom_pilot.comfyui_client import ComfyUIClient
+from showrunner.comfyui_client import ComfyUIClient
 
 
 @pytest.fixture
@@ -531,7 +531,7 @@ Expected: FAIL — `ModuleNotFoundError`
 - [ ] **Step 3: Implement ComfyUIClient**
 
 ```python
-# src/sitcom_pilot/comfyui_client.py
+# src/showrunner/comfyui_client.py
 from __future__ import annotations
 
 import json
@@ -609,7 +609,7 @@ Expected: All PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/sitcom_pilot/comfyui_client.py tests/test_comfyui_client.py
+git add src/showrunner/comfyui_client.py tests/test_comfyui_client.py
 git commit -m "feat: add ComfyUIClient with retry and crash recovery tests"
 ```
 
@@ -618,7 +618,7 @@ git commit -m "feat: add ComfyUIClient with retry and crash recovery tests"
 ## Task 4: ShotRenderer — Drive Per-Shot Rendering
 
 **Files:**
-- Create: `src/sitcom_pilot/renderer.py`
+- Create: `src/showrunner/renderer.py`
 - Create: `tests/test_renderer.py`
 
 ### RED
@@ -630,12 +630,12 @@ git commit -m "feat: add ComfyUIClient with retry and crash recovery tests"
 import json
 import pytest
 from unittest.mock import MagicMock, call, patch
-from sitcom_pilot.renderer import ShotRenderer
-from sitcom_pilot.loader import (
+from showrunner.renderer import ShotRenderer
+from showrunner.loader import (
     CharacterData, EnvironmentData, SceneData, ShotData, EpisodeData,
 )
-from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.prompts import PromptBuilder
+from showrunner.comfyui_client import ComfyUIClient
+from showrunner.prompts import PromptBuilder
 
 
 @pytest.fixture
@@ -759,7 +759,7 @@ Expected: FAIL — `ModuleNotFoundError`
 - [ ] **Step 3: Implement ShotRenderer**
 
 ```python
-# src/sitcom_pilot/renderer.py
+# src/showrunner/renderer.py
 from __future__ import annotations
 
 import copy
@@ -767,9 +767,9 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.loader import EpisodeData, SceneData, ShotData
-from sitcom_pilot.prompts import PromptBuilder
+from showrunner.comfyui_client import ComfyUIClient
+from showrunner.loader import EpisodeData, SceneData, ShotData
+from showrunner.prompts import PromptBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -877,7 +877,7 @@ Expected: All PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/sitcom_pilot/renderer.py tests/test_renderer.py
+git add src/showrunner/renderer.py tests/test_renderer.py
 git commit -m "feat: add ShotRenderer with full test coverage"
 ```
 
@@ -886,7 +886,7 @@ git commit -m "feat: add ShotRenderer with full test coverage"
 ## Task 5: EpisodeAssembler — FFmpeg Concatenation
 
 **Files:**
-- Create: `src/sitcom_pilot/assembler.py`
+- Create: `src/showrunner/assembler.py`
 - Create: `tests/test_assembler.py`
 
 ### RED
@@ -898,7 +898,7 @@ git commit -m "feat: add ShotRenderer with full test coverage"
 import pytest
 from unittest.mock import patch, MagicMock, call
 from pathlib import Path
-from sitcom_pilot.assembler import EpisodeAssembler
+from showrunner.assembler import EpisodeAssembler
 
 
 @pytest.fixture
@@ -973,7 +973,7 @@ Expected: FAIL
 - [ ] **Step 3: Implement EpisodeAssembler**
 
 ```python
-# src/sitcom_pilot/assembler.py
+# src/showrunner/assembler.py
 from __future__ import annotations
 
 import logging
@@ -1035,7 +1035,7 @@ Expected: All PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add src/sitcom_pilot/assembler.py tests/test_assembler.py
+git add src/showrunner/assembler.py tests/test_assembler.py
 git commit -m "feat: add EpisodeAssembler with VideoToolbox detection and tests"
 ```
 
@@ -1056,11 +1056,11 @@ import json
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-from sitcom_pilot.loader import EpisodeLoader
-from sitcom_pilot.prompts import PromptBuilder
-from sitcom_pilot.renderer import ShotRenderer
-from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.assembler import EpisodeAssembler
+from showrunner.loader import EpisodeLoader
+from showrunner.prompts import PromptBuilder
+from showrunner.renderer import ShotRenderer
+from showrunner.comfyui_client import ComfyUIClient
+from showrunner.assembler import EpisodeAssembler
 
 
 EPISODE_JSON = {
@@ -1268,7 +1268,7 @@ Convert the existing `script.py` data into the new JSON format with 6 scenes, 4 
 ```python
 # tests/test_episode_01.py
 from pathlib import Path
-from sitcom_pilot.loader import EpisodeLoader
+from showrunner.loader import EpisodeLoader
 
 
 def test_episode_01_loads():
@@ -1295,12 +1295,12 @@ git commit -m "feat: add Buffering S01E01 episode cut-sheet in JSON format"
 ## Task 8: CLI Entry Point
 
 **Files:**
-- Create: `src/sitcom_pilot/cli/main.py`
+- Create: `src/showrunner/cli/main.py`
 
 - [ ] **Step 1: Create thin CLI wrapper**
 
 ```python
-# src/sitcom_pilot/cli/main.py
+# src/showrunner/cli/main.py
 #!/usr/bin/env python3
 import argparse
 import json
@@ -1308,11 +1308,11 @@ import logging
 import sys
 from pathlib import Path
 
-from sitcom_pilot.loader import EpisodeLoader
-from sitcom_pilot.prompts import PromptBuilder
-from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.renderer import ShotRenderer
-from sitcom_pilot.assembler import EpisodeAssembler
+from showrunner.loader import EpisodeLoader
+from showrunner.prompts import PromptBuilder
+from showrunner.comfyui_client import ComfyUIClient
+from showrunner.renderer import ShotRenderer
+from showrunner.assembler import EpisodeAssembler
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
@@ -1361,8 +1361,8 @@ if __name__ == "__main__":
 - [ ] **Step 2: Commit**
 
 ```bash
-git add src/sitcom_pilot/cli/main.py
-git commit -m "feat: add CLI entry point for sitcom-pilot"
+git add src/showrunner/cli/main.py
+git commit -m "feat: add CLI entry point for showrunner"
 ```
 
 ---

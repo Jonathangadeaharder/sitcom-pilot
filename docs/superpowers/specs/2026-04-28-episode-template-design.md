@@ -277,7 +277,7 @@ docs/
 ### 6.1 File Structure
 
 ```
-sitcom_pilot/
+showrunner/
 ├── episode_template.json          # New template file
 ├── schemas/
 │   └── episode_v2.schema.json     # Enhanced schema (update existing)
@@ -374,5 +374,5 @@ uv run python -c "import json; from jsonschema import validate; validate(instanc
 uv run pytest
 
 # Check CLI
-uv run sitcom-pilot validate episode_template.json
+uv run showrunner validate episode_template.json
 ```

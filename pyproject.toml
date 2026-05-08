@@ -1,5 +1,5 @@
 [project]
-name = "sitcom-pilot"
+name = "showrunner"
 version = "0.1.0"
 description = "Beat-based AI sitcom pilot pipeline (Buffering S01)"
 requires-python = ">=3.11"
@@ -27,11 +27,11 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-text2image = { path = "../AIServices/packages/text2image", editable = true }
-image2image = { path = "../AIServices/packages/image2image", editable = true }
-image2video = { path = "../AIServices/packages/image2video", editable = true }
-text2speech = { path = "../AIServices/packages/text2speech", editable = true }
-audio2subtitle = { path = "../AIServices/packages/audio2subtitle", editable = true }
+text2image = { path = "aiservices/packages/text2image", editable = true }
+image2image = { path = "aiservices/packages/image2image", editable = true }
+image2video = { path = "aiservices/packages/image2video", editable = true }
+text2speech = { path = "aiservices/packages/text2speech", editable = true }
+audio2subtitle = { path = "aiservices/packages/audio2subtitle", editable = true }
 
 [dependency-groups]
 dev = [
@@ -43,7 +43,7 @@ dev = [
 ]
 
 [project.scripts]
-sitcom-pilot = "sitcom_pilot.cli.main:app"
+showrunner = "showrunner.cli.main:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -65,9 +65,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.mutmut]
-paths_to_mutate = ["src/sitcom_pilot/determinism.py", "src/sitcom_pilot/beat_prompts.py", "src/sitcom_pilot/scene_render.py", "src/sitcom_pilot/cast_manifest.py", "src/sitcom_pilot/continuity.py"]
+paths_to_mutate = ["src/showrunner/determinism.py", "src/showrunner/beat_prompts.py", "src/showrunner/scene_render.py", "src/showrunner/cast_manifest.py", "src/showrunner/continuity.py"]
 runner = "uv run pytest tests/ -q --no-header -x"
 tests_dir = ["tests/"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/sitcom_pilot", "src/sitcom_pilot_utils", "src/sitcom_pilot_tests"]
+packages = ["src/showrunner", "src/showrunner_utils", "src/showrunner_tests"]

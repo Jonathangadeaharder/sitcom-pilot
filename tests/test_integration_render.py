@@ -6,10 +6,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile, CharacterRef
-from sitcom_pilot.loader import EpisodeLoader
-from sitcom_pilot.paths import RunPaths
-from sitcom_pilot.scene_render import BeatStatus, plan_beats, render_episode, render_scene
+from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
+from showrunner.loader import EpisodeLoader
+from showrunner.paths import RunPaths
+from showrunner.scene_render import BeatStatus, plan_beats, render_episode, render_scene
 
 EPISODE_02 = Path(__file__).resolve().parent.parent / "episode_02.json"
 

@@ -6,10 +6,10 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.loader import EpisodeData, SceneData, ShotData
-from sitcom_pilot.node_map import NodeMap
-from sitcom_pilot.prompts import PromptBuilder
+from showrunner.comfyui_client import ComfyUIClient
+from showrunner.loader import EpisodeData, SceneData, ShotData
+from showrunner.node_map import NodeMap
+from showrunner.prompts import PromptBuilder
 
 logger = logging.getLogger(__name__)
 

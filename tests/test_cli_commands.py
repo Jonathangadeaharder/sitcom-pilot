@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 from typer.testing import CliRunner
 
-from sitcom_pilot.cli.main import app
+from showrunner.cli.main import app
 
 runner = CliRunner()
 
@@ -136,7 +136,7 @@ class TestPlan:
 
 
 class TestBootstrap:
-    @patch("sitcom_pilot.aiservices_client.AIServicesClient")
+    @patch("showrunner.aiservices_client.AIServicesClient")
     def test_bootstrap_generates_refs(self, mock_client_cls, tmp_path: Path):
         mock_client = MagicMock()
         mock_client.text2image.return_value = Path("/tmp/ref.png")
@@ -150,7 +150,7 @@ class TestBootstrap:
         manifest_path = out / "bootstrap" / "cast_manifest.json"
         assert manifest_path.exists()
 
-    @patch("sitcom_pilot.aiservices_client.AIServicesClient")
+    @patch("showrunner.aiservices_client.AIServicesClient")
     def test_bootstrap_handles_failure(self, mock_client_cls, tmp_path: Path):
         mock_client = MagicMock()
         mock_client.text2image.side_effect = RuntimeError("boom")
@@ -168,7 +168,7 @@ class TestBootstrap:
 
 
 class TestRenderBeat:
-    @patch("sitcom_pilot.aiservices_client.AIServicesClient")
+    @patch("showrunner.aiservices_client.AIServicesClient")
     def test_render_beat_success(self, mock_client_cls, tmp_path: Path):
         mock_client = MagicMock()
         mock_client.text2image.return_value = Path("/tmp/img.png")
@@ -189,7 +189,7 @@ class TestRenderBeat:
 
 
 class TestRenderScene:
-    @patch("sitcom_pilot.aiservices_client.AIServicesClient")
+    @patch("showrunner.aiservices_client.AIServicesClient")
     def test_render_scene_success(self, mock_client_cls, tmp_path: Path):
         mock_client = MagicMock()
         mock_client.text2image.return_value = Path("/tmp/img.png")
@@ -208,7 +208,7 @@ class TestRenderScene:
 
 
 class TestRenderEpisode:
-    @patch("sitcom_pilot.aiservices_client.AIServicesClient")
+    @patch("showrunner.aiservices_client.AIServicesClient")
     def test_render_episode_success(self, mock_client_cls, tmp_path: Path):
         mock_client = MagicMock()
         mock_client.text2image.return_value = Path("/tmp/img.png")
@@ -228,8 +228,8 @@ class TestRenderEpisode:
 
 
 class TestAssemble:
-    @patch("sitcom_pilot.assembler.concat_clips")
-    @patch("sitcom_pilot.assembler.generate_srt")
+    @patch("showrunner.assembler.concat_clips")
+    @patch("showrunner.assembler.generate_srt")
     def test_assemble_with_clips(self, mock_srt, mock_concat, tmp_path: Path):
         ep = _write_episode(tmp_path)
         out = tmp_path / "output"
@@ -257,9 +257,9 @@ class TestAssemble:
         result = runner.invoke(app, ["assemble", str(ep), "--output-dir", str(out)])
         assert result.exit_code == 1
 
-    @patch("sitcom_pilot.assembler.concat_clips")
-    @patch("sitcom_pilot.assembler.generate_srt")
-    @patch("sitcom_pilot.assembler.burn_in_captions")
+    @patch("showrunner.assembler.concat_clips")
+    @patch("showrunner.assembler.generate_srt")
+    @patch("showrunner.assembler.burn_in_captions")
     def test_assemble_with_captions(self, mock_burn, mock_srt, mock_concat, tmp_path: Path):
         ep = _write_episode(tmp_path)
         out = tmp_path / "output"

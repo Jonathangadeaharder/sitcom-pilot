@@ -9,13 +9,13 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from sitcom_pilot.loader import EpisodeLoader
-from sitcom_pilot.prompts import PromptBuilder
-from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.renderer import ShotRenderer
-from sitcom_pilot.assembler import concat_clips
-from sitcom_pilot.node_map import NodeMap
-from sitcom_pilot.progress import ProgressTracker
+from showrunner.loader import EpisodeLoader
+from showrunner.prompts import PromptBuilder
+from showrunner.comfyui_client import ComfyUIClient
+from showrunner.renderer import ShotRenderer
+from showrunner.assembler import concat_clips
+from showrunner.node_map import NodeMap
+from showrunner.progress import ProgressTracker
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 

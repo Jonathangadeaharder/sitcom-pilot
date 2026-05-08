@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import pytest
 
-from sitcom_pilot.beat_prompts import build_beat_prompt, build_character_prompt, build_scene_prompt
-from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile, WardrobeEntry
-from sitcom_pilot.loader import BeatData, EpisodeData, SceneData
+from showrunner.beat_prompts import build_beat_prompt, build_character_prompt, build_scene_prompt
+from showrunner.cast_manifest import CastManifest, CharacterProfile, WardrobeEntry
+from showrunner.loader import BeatData, EpisodeData, SceneData
 
 
 @pytest.fixture

@@ -13,7 +13,7 @@ from rich.panel import Panel
 from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
 from rich.table import Table
 
-from sitcom_pilot.validator import EpisodeValidator
+from showrunner.validator import EpisodeValidator
 
 logger = structlog.get_logger()
 console = Console()
@@ -93,9 +93,9 @@ def plan(
     """Show beat plan with prompts (dry run)."""
     _setup_logging(verbose)
 
-    from sitcom_pilot.cast_manifest import CastManifest
-    from sitcom_pilot.loader import EpisodeLoader
-    from sitcom_pilot.scene_render import plan_beats
+    from showrunner.cast_manifest import CastManifest
+    from showrunner.loader import EpisodeLoader
+    from showrunner.scene_render import plan_beats
 
     data = _load_episode(Path(episode_path))
 
@@ -104,7 +104,7 @@ def plan(
 
     manifest = CastManifest()
     for slug, char in episode.cast.items():
-        from sitcom_pilot.cast_manifest import CharacterProfile
+        from showrunner.cast_manifest import CharacterProfile
 
         manifest.add(
             CharacterProfile(
@@ -115,7 +115,7 @@ def plan(
             )
         )
 
-    from sitcom_pilot.paths import RunPaths
+    from showrunner.paths import RunPaths
 
     paths = RunPaths(Path("output"))
     jobs = plan_beats(episode, manifest, paths, episode_id=data.get("title", ""))
@@ -160,9 +160,9 @@ def bootstrap(
     """Generate reference images and voice samples for cast."""
     _setup_logging()
 
-    from sitcom_pilot.aiservices_client import AIServicesClient
-    from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile, CharacterRef
-    from sitcom_pilot.loader import EpisodeLoader
+    from showrunner.aiservices_client import AIServicesClient
+    from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
+    from showrunner.loader import EpisodeLoader
 
     loader = EpisodeLoader()
     episode = loader.load(Path(episode_path))
@@ -258,10 +258,10 @@ def render_beat(
     """Render a single beat."""
     _setup_logging()
 
-    from sitcom_pilot.aiservices_client import AIServicesClient
-    from sitcom_pilot.loader import EpisodeLoader
-    from sitcom_pilot.paths import RunPaths
-    from sitcom_pilot.scene_render import _render_beat, plan_beats
+    from showrunner.aiservices_client import AIServicesClient
+    from showrunner.loader import EpisodeLoader
+    from showrunner.paths import RunPaths
+    from showrunner.scene_render import _render_beat, plan_beats
 
     loader = EpisodeLoader()
     episode = loader.load(Path(episode_path))
@@ -310,10 +310,10 @@ def render_scene(
     """Render all beats in a scene."""
     _setup_logging()
 
-    from sitcom_pilot.aiservices_client import AIServicesClient
-    from sitcom_pilot.loader import EpisodeLoader
-    from sitcom_pilot.paths import RunPaths
-    from sitcom_pilot.scene_render import plan_beats, render_scene
+    from showrunner.aiservices_client import AIServicesClient
+    from showrunner.loader import EpisodeLoader
+    from showrunner.paths import RunPaths
+    from showrunner.scene_render import plan_beats, render_scene
 
     loader = EpisodeLoader()
     episode = loader.load(Path(episode_path))
@@ -357,10 +357,10 @@ def render_episode_cmd(
     """Render all beats in an episode."""
     _setup_logging()
 
-    from sitcom_pilot.aiservices_client import AIServicesClient
-    from sitcom_pilot.loader import EpisodeLoader
-    from sitcom_pilot.paths import RunPaths
-    from sitcom_pilot.scene_render import plan_beats, render_episode
+    from showrunner.aiservices_client import AIServicesClient
+    from showrunner.loader import EpisodeLoader
+    from showrunner.paths import RunPaths
+    from showrunner.scene_render import plan_beats, render_episode
 
     loader = EpisodeLoader()
     episode = loader.load(Path(episode_path))
@@ -411,14 +411,14 @@ def assemble(
     """Assemble rendered clips into final video."""
     _setup_logging()
 
-    from sitcom_pilot.assembler import (
+    from showrunner.assembler import (
         burn_in_captions,
         concat_clips,
         generate_srt,
     )
-    from sitcom_pilot.loader import EpisodeLoader
-    from sitcom_pilot.paths import RunPaths
-    from sitcom_pilot.scene_render import plan_beats
+    from showrunner.loader import EpisodeLoader
+    from showrunner.paths import RunPaths
+    from showrunner.scene_render import plan_beats
 
     loader = EpisodeLoader()
     episode = loader.load(Path(episode_path))
@@ -441,7 +441,7 @@ def assemble(
     for job in jobs:
         if job.video_path.exists():
             video_paths.append(job.video_path)
-            from sitcom_pilot.loader import BeatData
+            from showrunner.loader import BeatData
 
             beat = BeatData(
                 beat_id=job.beat_id,
@@ -547,7 +547,7 @@ def doctor() -> None:
 
 
 def _build_manifest(episode):
-    from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile
+    from showrunner.cast_manifest import CastManifest, CharacterProfile
 
     manifest = CastManifest()
     for slug, char in episode.cast.items():

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from sitcom_pilot.loader import EpisodeLoader
+from showrunner.loader import EpisodeLoader
 
 
 def test_episode_01_loads():

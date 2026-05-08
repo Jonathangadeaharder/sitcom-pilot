@@ -1,4 +1,4 @@
-"""Tests for sitcom_pilot.validator — EpisodeValidator."""
+"""Tests for showrunner.validator — EpisodeValidator."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
-from sitcom_pilot.validator import EpisodeValidator
+from showrunner.validator import EpisodeValidator
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -263,7 +263,7 @@ def test_non_strict_skips_speech_checks():
 
 def test_structural_validate_missing_fields():
     v = EpisodeValidator()
-    with patch("sitcom_pilot.validator._JSONSCHEMA_AVAILABLE", False):
+    with patch("showrunner.validator._JSONSCHEMA_AVAILABLE", False):
         errors = v.validate({"schema_version": "2.0"})
     assert any("show" in e for e in errors)
     assert any("title" in e for e in errors)
@@ -274,7 +274,7 @@ def test_structural_validate_missing_fields():
 
 def test_structural_validate_scenes_not_list():
     v = EpisodeValidator()
-    with patch("sitcom_pilot.validator._JSONSCHEMA_AVAILABLE", False):
+    with patch("showrunner.validator._JSONSCHEMA_AVAILABLE", False):
         errors = v.validate(
             {
                 "schema_version": "2.0",
@@ -290,7 +290,7 @@ def test_structural_validate_scenes_not_list():
 
 def test_structural_validate_cast_not_dict():
     v = EpisodeValidator()
-    with patch("sitcom_pilot.validator._JSONSCHEMA_AVAILABLE", False):
+    with patch("showrunner.validator._JSONSCHEMA_AVAILABLE", False):
         errors = v.validate(
             {
                 "schema_version": "2.0",
@@ -306,7 +306,7 @@ def test_structural_validate_cast_not_dict():
 
 def test_structural_validate_scene_missing_fields():
     v = EpisodeValidator()
-    with patch("sitcom_pilot.validator._JSONSCHEMA_AVAILABLE", False):
+    with patch("showrunner.validator._JSONSCHEMA_AVAILABLE", False):
         errors = v.validate(
             {
                 "schema_version": "2.0",
@@ -322,7 +322,7 @@ def test_structural_validate_scene_missing_fields():
 
 def test_structural_validate_beat_missing_fields():
     v = EpisodeValidator()
-    with patch("sitcom_pilot.validator._JSONSCHEMA_AVAILABLE", False):
+    with patch("showrunner.validator._JSONSCHEMA_AVAILABLE", False):
         errors = v.validate(
             {
                 "schema_version": "2.0",
@@ -345,7 +345,7 @@ def test_structural_validate_beat_missing_fields():
 
 def test_structural_validate_invalid_beat_kind():
     v = EpisodeValidator()
-    with patch("sitcom_pilot.validator._JSONSCHEMA_AVAILABLE", False):
+    with patch("showrunner.validator._JSONSCHEMA_AVAILABLE", False):
         errors = v.validate(
             {
                 "schema_version": "2.0",
@@ -372,7 +372,7 @@ def test_structural_validate_invalid_beat_kind():
 
 
 def test_main_valid_file(capsys):
-    from sitcom_pilot.validator import main
+    from showrunner.validator import main
 
     ep_path = Path(__file__).parent.parent / "episode_01.json"
     exit_code = main([str(ep_path)])
@@ -381,7 +381,7 @@ def test_main_valid_file(capsys):
 
 
 def test_main_invalid_file(tmp_path, capsys):
-    from sitcom_pilot.validator import main
+    from showrunner.validator import main
 
     bad = tmp_path / "bad.json"
     bad.write_text('{"schema_version": "1.0"}')
@@ -391,7 +391,7 @@ def test_main_invalid_file(tmp_path, capsys):
 
 
 def test_main_quiet_flag(tmp_path, capsys):
-    from sitcom_pilot.validator import main
+    from showrunner.validator import main
 
     ep_path = Path(__file__).parent.parent / "episode_01.json"
     exit_code = main([str(ep_path), "--quiet"])
@@ -400,7 +400,7 @@ def test_main_quiet_flag(tmp_path, capsys):
 
 
 def test_main_strict_flag(tmp_path, capsys):
-    from sitcom_pilot.validator import main
+    from showrunner.validator import main
 
     ep = _valid_v2_episode()
     ep["scenes"][0]["beats"].append(
@@ -416,7 +416,7 @@ def test_main_strict_flag(tmp_path, capsys):
 
 
 def test_main_multiple_files(capsys):
-    from sitcom_pilot.validator import main
+    from showrunner.validator import main
 
     ep_path = Path(__file__).parent.parent / "episode_01.json"
     ep2_path = Path(__file__).parent.parent / "episode_02.json"
@@ -425,7 +425,7 @@ def test_main_multiple_files(capsys):
 
 
 def test_main_nonexistent_file(capsys):
-    from sitcom_pilot.validator import main
+    from showrunner.validator import main
 
     exit_code = main(["/nonexistent/path.json"])
     assert exit_code == 1

@@ -11,7 +11,7 @@ The episode template is a canonical JSON file that defines the structure for cre
 3. **Define characters**: Add your characters to the `cast` section
 4. **Define environments**: Add your environments to the `environments` section
 5. **Create scenes**: Add your scenes with beats to the `scenes` section
-6. **Validate**: Run `sitcom-pilot validate your_episode.json` to check for errors
+6. **Validate**: Run `showrunner validate your_episode.json` to check for errors
 
 ## Field Reference
 
@@ -200,7 +200,7 @@ Seeds ensure deterministic image/video generation per beat. The convention is:
 Validate your episode file using the CLI:
 
 ```bash
-sitcom-pilot validate your_episode.json
+showrunner validate your_episode.json
 ```
 
 Or using Python:

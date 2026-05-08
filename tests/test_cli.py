@@ -73,9 +73,7 @@ def test_dry_run_prints_prompts(tmp_path, capsys):
     )
     import sys
 
-    with patch.object(
-        sys, "argv", ["sitcom_pilot.py", str(ep), "--workflow", str(wf), "--dry-run"]
-    ):
+    with patch.object(sys, "argv", ["showrunner.py", str(ep), "--workflow", str(wf), "--dry-run"]):
         mod = _load_main_module()
         mod.main()
     output = capsys.readouterr().out
@@ -111,14 +109,14 @@ def test_render_and_assemble(tmp_path):
 
     mock_client_cls = MagicMock(return_value=mock_client)
 
-    with patch("sitcom_pilot.comfyui_client.ComfyUIClient", mock_client_cls):
+    with patch("showrunner.comfyui_client.ComfyUIClient", mock_client_cls):
         with patch("subprocess.run", return_value=MagicMock(returncode=0)):
             import sys
 
             with patch.object(
                 sys,
                 "argv",
-                ["sitcom_pilot.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)],
+                ["showrunner.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)],
             ):
                 mod = _load_main_module()
                 mod.main()
@@ -145,12 +143,12 @@ def test_cli_exits_when_server_down(tmp_path):
     mock_client = MagicMock()
     mock_client.is_server_running.return_value = False
     mock_client_cls = MagicMock(return_value=mock_client)
-    with patch("sitcom_pilot.comfyui_client.ComfyUIClient", mock_client_cls):
+    with patch("showrunner.comfyui_client.ComfyUIClient", mock_client_cls):
         import sys
 
-        with patch.object(sys, "argv", ["sitcom_pilot.py", str(ep), "--workflow", str(wf)]):
-            mod = _load_main_module()
+        with patch.object(sys, "argv", ["showrunner.py", str(ep), "--workflow", str(wf)]):
             with pytest.raises(SystemExit) as exc_info:
+                mod = _load_main_module()
                 mod.main()
             assert exc_info.value.code == 1
 
@@ -181,13 +179,13 @@ def test_cli_with_resume(tmp_path):
     mock_client_cls = MagicMock(return_value=mock_client)
     import sys
 
-    with patch("sitcom_pilot.comfyui_client.ComfyUIClient", mock_client_cls):
+    with patch("showrunner.comfyui_client.ComfyUIClient", mock_client_cls):
         with patch("subprocess.run", return_value=MagicMock(returncode=0)):
             with patch.object(
                 sys,
                 "argv",
                 [
-                    "sitcom_pilot.py",
+                    "showrunner.py",
                     str(ep),
                     "--workflow",
                     str(wf),
@@ -236,7 +234,7 @@ def test_cli_with_node_map(tmp_path, capsys):
     with patch.object(
         sys,
         "argv",
-        ["sitcom_pilot.py", str(ep), "--workflow", str(wf), "--dry-run", "--node-map", str(nm)],
+        ["showrunner.py", str(ep), "--workflow", str(wf), "--dry-run", "--node-map", str(nm)],
     ):
         mod = _load_main_module()
         mod.main()
@@ -268,11 +266,11 @@ def test_cli_no_outputs_to_assemble(tmp_path, capsys):
     mock_client_cls = MagicMock(return_value=mock_client)
     import sys
 
-    with patch("sitcom_pilot.comfyui_client.ComfyUIClient", mock_client_cls):
+    with patch("showrunner.comfyui_client.ComfyUIClient", mock_client_cls):
         with patch.object(
             sys,
             "argv",
-            ["sitcom_pilot.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)],
+            ["showrunner.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)],
         ):
             mod = _load_main_module()
             mod.main()
@@ -306,13 +304,13 @@ def test_cli_crash_recovery(tmp_path):
     mock_client_cls = MagicMock(return_value=mock_client)
     import sys
 
-    with patch("sitcom_pilot.comfyui_client.ComfyUIClient", mock_client_cls):
+    with patch("showrunner.comfyui_client.ComfyUIClient", mock_client_cls):
         with patch("subprocess.run", return_value=MagicMock(returncode=0)):
             with patch.object(
                 sys,
                 "argv",
                 [
-                    "sitcom_pilot.py",
+                    "showrunner.py",
                     str(ep),
                     "--workflow",
                     str(wf),

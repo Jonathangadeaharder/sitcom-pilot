@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile
-from sitcom_pilot.loader import BeatData, EpisodeData, SceneData
+from showrunner.cast_manifest import CastManifest, CharacterProfile
+from showrunner.loader import BeatData, EpisodeData, SceneData
 
 
 def build_character_prompt(

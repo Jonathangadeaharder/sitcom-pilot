@@ -3,13 +3,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sitcom_pilot.assembler import concat_clips
-from sitcom_pilot.comfyui_client import ComfyUIClient
-from sitcom_pilot.loader import EpisodeLoader
-from sitcom_pilot.node_map import NodeMap
-from sitcom_pilot.progress import ProgressTracker
-from sitcom_pilot.prompts import PromptBuilder
-from sitcom_pilot.renderer import ShotRenderer
+from showrunner.assembler import concat_clips
+from showrunner.comfyui_client import ComfyUIClient
+from showrunner.loader import EpisodeLoader
+from showrunner.node_map import NodeMap
+from showrunner.progress import ProgressTracker
+from showrunner.prompts import PromptBuilder
+from showrunner.renderer import ShotRenderer
 
 EPISODE_JSON = {
     "episode_title": "Integration Test Episode",
@@ -154,7 +154,7 @@ def test_renderer_to_assembler_concat_list(tmp_path, episode, mock_client, node_
     for c in fake_clips:
         c.write_bytes(b"\x00")
 
-    with patch("sitcom_pilot.assembler._run", return_value=MagicMock(returncode=0)):
+    with patch("showrunner.assembler._run", return_value=MagicMock(returncode=0)):
         result = concat_clips(fake_clips, tmp_path / "out" / "final.mp4")
 
     assert result == tmp_path / "out" / "final.mp4"

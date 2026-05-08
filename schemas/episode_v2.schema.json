@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://sitcom-pilot/schemas/episode_v2.schema.json",
+  "$id": "https://showrunner/schemas/episode_v2.schema.json",
   "title": "Episode",
   "description": "Beat-based episode schema v2.0 for the Sitcom Pilot pipeline. All render fields are optional and will use AIServices defaults if not specified.",
   "type": "object",

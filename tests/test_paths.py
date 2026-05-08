@@ -1,8 +1,8 @@
-"""Tests for sitcom_pilot.paths — RunPaths output directory contract."""
+"""Tests for showrunner.paths — RunPaths output directory contract."""
 
 from __future__ import annotations
 
-from sitcom_pilot.paths import RunPaths
+from showrunner.paths import RunPaths
 
 
 def test_run_dir_uses_provided_run_id(tmp_path):

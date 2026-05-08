@@ -4,8 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 
-from sitcom_pilot.cast_manifest import CastManifest
-from sitcom_pilot.loader import EpisodeData
+from showrunner.cast_manifest import CastManifest
+from showrunner.loader import EpisodeData
 
 
 def compute_manifest_hash(episode: EpisodeData, manifest: CastManifest) -> str:

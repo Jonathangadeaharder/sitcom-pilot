@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Restructure the project from flat `orchestrator/` layout to `src/sitcom_pilot/` with uv workspace support for monorepo development.
+**Goal:** Restructure the project from flat `orchestrator/` layout to `src/showrunner/` with uv workspace support for monorepo development.
 
-**Architecture:** Move all code from `orchestrator/` to `src/sitcom_pilot/`, create additional packages (`sitcom_pilot_utils`, `sitcom_pilot_tests`), update all imports, configure uv workspace with hatchling build system, and create CLI subpackage.
+**Architecture:** Move all code from `orchestrator/` to `src/showrunner/`, create additional packages (`showrunner_utils`, `showrunner_tests`), update all imports, configure uv workspace with hatchling build system, and create CLI subpackage.
 
 **Tech Stack:** Python 3.11+, uv, hatchling, typer, pydantic, pytest
 
@@ -13,18 +13,18 @@
 ## File Structure
 
 ### Files to Create
-- `src/sitcom_pilot/__init__.py` - Core package init
-- `src/sitcom_pilot/cli/__init__.py` - CLI package init
-- `src/sitcom_pilot/cli/main.py` - CLI entry point
-- `src/sitcom_pilot_utils/__init__.py` - Utilities package init
-- `src/sitcom_pilot_utils/helpers.py` - Utility functions
-- `src/sitcom_pilot_tests/__init__.py` - Test utilities package init
-- `src/sitcom_pilot_tests/fixtures.py` - Test fixtures
+- `src/showrunner/__init__.py` - Core package init
+- `src/showrunner/cli/__init__.py` - CLI package init
+- `src/showrunner/cli/main.py` - CLI entry point
+- `src/showrunner_utils/__init__.py` - Utilities package init
+- `src/showrunner_utils/helpers.py` - Utility functions
+- `src/showrunner_tests/__init__.py` - Test utilities package init
+- `src/showrunner_tests/fixtures.py` - Test fixtures
 
 ### Files to Modify
 - `pyproject.toml` - Update build system, package config, CLI entry point
-- All Python files in `src/sitcom_pilot/` - Update imports from `orchestrator.` to `sitcom_pilot.`
-- All test files in `tests/` - Update imports from `orchestrator.` to `sitcom_pilot.`
+- All Python files in `src/showrunner/` - Update imports from `orchestrator.` to `showrunner.`
+- All test files in `tests/` - Update imports from `orchestrator.` to `showrunner.`
 - Documentation files - Update references to `orchestrator`
 
 ### Files to Delete
@@ -35,17 +35,17 @@
 ## Task 1: Create Directory Structure
 
 **Files:**
-- Create: `src/sitcom_pilot/` (directory)
-- Create: `src/sitcom_pilot/cli/` (directory)
-- Create: `src/sitcom_pilot_utils/` (directory)
-- Create: `src/sitcom_pilot_tests/` (directory)
+- Create: `src/showrunner/` (directory)
+- Create: `src/showrunner/cli/` (directory)
+- Create: `src/showrunner_utils/` (directory)
+- Create: `src/showrunner_tests/` (directory)
 
 - [ ] **Step 1: Create src directory structure**
 
 ```bash
-mkdir -p src/sitcom_pilot/cli
-mkdir -p src/sitcom_pilot_utils
-mkdir -p src/sitcom_pilot_tests
+mkdir -p src/showrunner/cli
+mkdir -p src/showrunner_utils
+mkdir -p src/showrunner_tests
 ```
 
 - [ ] **Step 2: Verify directory creation**
@@ -59,9 +59,9 @@ Expected output:
 total 0
 drwxr-xr-x  5 user  staff  160 Apr 28 10:00 .
 drwxr-xr-x  8 user  staff  256 Apr 28 10:00 ..
-drwxr-xr-x  4 user  staff  128 Apr 28 10:00 sitcom_pilot
-drwxr-xr-x  2 user  staff   64 Apr 28 10:00 sitcom_pilot_tests
-drwxr-xr-x  2 user  staff   64 Apr 28 10:00 sitcom_pilot_utils
+drwxr-xr-x  4 user  staff  128 Apr 28 10:00 showrunner
+drwxr-xr-x  2 user  staff   64 Apr 28 10:00 showrunner_tests
+drwxr-xr-x  2 user  staff   64 Apr 28 10:00 showrunner_utils
 ```
 
 - [ ] **Step 3: Commit directory structure**
@@ -76,18 +76,18 @@ git commit -m "chore: create src directory structure for monorepo layout"
 ## Task 2: Move Core Package
 
 **Files:**
-- Move: `orchestrator/*` → `src/sitcom_pilot/`
+- Move: `orchestrator/*` → `src/showrunner/`
 
 - [ ] **Step 1: Move orchestrator files to new location**
 
 ```bash
-mv orchestrator/* src/sitcom_pilot/
+mv orchestrator/* src/showrunner/
 ```
 
 - [ ] **Step 2: Verify file movement**
 
 ```bash
-ls -la src/sitcom_pilot/
+ls -la src/showrunner/
 ```
 
 Expected output:
@@ -120,7 +120,7 @@ rm -rf orchestrator/
 
 ```bash
 git add -A
-git commit -m "feat: move orchestrator/ to src/sitcom_pilot/ for new layout"
+git commit -m "feat: move orchestrator/ to src/showrunner/ for new layout"
 ```
 
 ---
@@ -128,10 +128,10 @@ git commit -m "feat: move orchestrator/ to src/sitcom_pilot/ for new layout"
 ## Task 3: Create Package Init Files
 
 **Files:**
-- Create: `src/sitcom_pilot/__init__.py`
-- Create: `src/sitcom_pilot/cli/__init__.py`
-- Create: `src/sitcom_pilot_utils/__init__.py`
-- Create: `src/sitcom_pilot_tests/__init__.py`
+- Create: `src/showrunner/__init__.py`
+- Create: `src/showrunner/cli/__init__.py`
+- Create: `src/showrunner_utils/__init__.py`
+- Create: `src/showrunner_tests/__init__.py`
 
 - [ ] **Step 1: Create core package __init__.py**
 
@@ -141,7 +141,7 @@ git commit -m "feat: move orchestrator/ to src/sitcom_pilot/ for new layout"
 __version__ = "0.1.0"
 ```
 
-Write this to `src/sitcom_pilot/__init__.py`
+Write this to `src/showrunner/__init__.py`
 
 - [ ] **Step 2: Create CLI package __init__.py**
 
@@ -149,7 +149,7 @@ Write this to `src/sitcom_pilot/__init__.py`
 """Sitcom Pilot CLI."""
 ```
 
-Write this to `src/sitcom_pilot/cli/__init__.py`
+Write this to `src/showrunner/cli/__init__.py`
 
 - [ ] **Step 3: Create utilities package __init__.py**
 
@@ -157,7 +157,7 @@ Write this to `src/sitcom_pilot/cli/__init__.py`
 """Sitcom Pilot utilities."""
 ```
 
-Write this to `src/sitcom_pilot_utils/__init__.py`
+Write this to `src/showrunner_utils/__init__.py`
 
 - [ ] **Step 4: Create test utilities package __init__.py**
 
@@ -165,7 +165,7 @@ Write this to `src/sitcom_pilot_utils/__init__.py`
 """Sitcom Pilot test utilities."""
 ```
 
-Write this to `src/sitcom_pilot_tests/__init__.py`
+Write this to `src/showrunner_tests/__init__.py`
 
 - [ ] **Step 5: Verify __init__.py files created**
 
@@ -175,10 +175,10 @@ find src -name "__init__.py" -type f
 
 Expected output:
 ```
-src/sitcom_pilot/__init__.py
-src/sitcom_pilot/cli/__init__.py
-src/sitcom_pilot_tests/__init__.py
-src/sitcom_pilot_utils/__init__.py
+src/showrunner/__init__.py
+src/showrunner/cli/__init__.py
+src/showrunner_tests/__init__.py
+src/showrunner_utils/__init__.py
 ```
 
 - [ ] **Step 6: Commit init files**
@@ -193,18 +193,18 @@ git commit -m "feat: add __init__.py files for all packages"
 ## Task 4: Update Imports in Core Package
 
 **Files:**
-- Modify: All `.py` files in `src/sitcom_pilot/`
+- Modify: All `.py` files in `src/showrunner/`
 
 - [ ] **Step 1: Update imports in all core package files**
 
 ```bash
-find src/sitcom_pilot -name "*.py" -type f -exec sed -i '' 's/orchestrator\./sitcom_pilot./g' {} \;
+find src/showrunner -name "*.py" -type f -exec sed -i '' 's/orchestrator\./showrunner./g' {} \;
 ```
 
 - [ ] **Step 2: Verify import updates in loader.py**
 
 ```bash
-grep -n "import" src/sitcom_pilot/loader.py | head -5
+grep -n "import" src/showrunner/loader.py | head -5
 ```
 
 Expected output:
@@ -219,7 +219,7 @@ Expected output:
 - [ ] **Step 3: Check for remaining orchestrator references**
 
 ```bash
-grep -r "orchestrator" src/sitcom_pilot/ || echo "No orchestrator references found"
+grep -r "orchestrator" src/showrunner/ || echo "No orchestrator references found"
 ```
 
 Expected output:
@@ -230,8 +230,8 @@ No orchestrator references found
 - [ ] **Step 4: Commit import updates**
 
 ```bash
-git add src/sitcom_pilot/
-git commit -m "refactor: update imports from orchestrator to sitcom_pilot"
+git add src/showrunner/
+git commit -m "refactor: update imports from orchestrator to showrunner"
 ```
 
 ---
@@ -244,7 +244,7 @@ git commit -m "refactor: update imports from orchestrator to sitcom_pilot"
 - [ ] **Step 1: Update imports in all test files**
 
 ```bash
-find tests -name "*.py" -type f -exec sed -i '' 's/orchestrator\./sitcom_pilot./g' {} \;
+find tests -name "*.py" -type f -exec sed -i '' 's/orchestrator\./showrunner./g' {} \;
 ```
 
 - [ ] **Step 2: Verify import updates in test_loader_v2.py**
@@ -262,7 +262,7 @@ Expected output:
 5: from pathlib import Path
 6: 
 7: import pytest
-8: from sitcom_pilot.loader import EpisodeLoader, BeatData, VoiceConfig
+8: from showrunner.loader import EpisodeLoader, BeatData, VoiceConfig
 ```
 
 - [ ] **Step 3: Check for remaining orchestrator references in tests**
@@ -280,7 +280,7 @@ No orchestrator references found
 
 ```bash
 git add tests/
-git commit -m "refactor: update test imports from orchestrator to sitcom_pilot"
+git commit -m "refactor: update test imports from orchestrator to showrunner"
 ```
 
 ---
@@ -302,7 +302,7 @@ Replace the entire `pyproject.toml` with:
 
 ```toml
 [project]
-name = "sitcom-pilot"
+name = "showrunner"
 version = "0.1.0"
 description = "Beat-based AI sitcom pilot pipeline (Buffering S01)"
 requires-python = ">=3.11"
@@ -333,7 +333,7 @@ dev-dependencies = [
 aiservices-core = { path = "../AIServices/packages/aiservices_core", editable = true }
 
 [project.scripts]
-sitcom-pilot = "sitcom_pilot.cli.main:app"
+showrunner = "showrunner.cli.main:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -352,7 +352,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/sitcom_pilot", "src/sitcom_pilot_utils", "src/sitcom_pilot_tests"]
+packages = ["src/showrunner", "src/showrunner_utils", "src/showrunner_tests"]
 ```
 
 - [ ] **Step 3: Verify pyproject.toml syntax**
@@ -378,7 +378,7 @@ git commit -m "feat: update pyproject.toml for src layout and uv workspace"
 ## Task 7: Create CLI Entry Point
 
 **Files:**
-- Create: `src/sitcom_pilot/cli/main.py`
+- Create: `src/showrunner/cli/main.py`
 
 - [ ] **Step 1: Create CLI main.py**
 
@@ -387,9 +387,9 @@ from __future__ import annotations
 
 import typer
 from pathlib import Path
-from sitcom_pilot.config import PipelineConfig
-from sitcom_pilot.loader import EpisodeLoader
-from sitcom_pilot.validator import EpisodeValidator
+from showrunner.config import PipelineConfig
+from showrunner.loader import EpisodeLoader
+from showrunner.validator import EpisodeValidator
 
 app = typer.Typer(help="Sitcom Pilot CLI")
 
@@ -424,12 +424,12 @@ if __name__ == "__main__":
     app()
 ```
 
-Write this to `src/sitcom_pilot/cli/main.py`
+Write this to `src/showrunner/cli/main.py`
 
 - [ ] **Step 2: Verify CLI module imports**
 
 ```bash
-cd src/sitcom_pilot/cli && python -c "import main; print('CLI module OK')"
+cd src/showrunner/cli && python -c "import main; print('CLI module OK')"
 ```
 
 Expected output:
@@ -440,8 +440,8 @@ CLI module OK
 - [ ] **Step 3: Commit CLI entry point**
 
 ```bash
-git add src/sitcom_pilot/cli/
-git commit -m "feat: add CLI entry point for sitcom-pilot command"
+git add src/showrunner/cli/
+git commit -m "feat: add CLI entry point for showrunner command"
 ```
 
 ---
@@ -449,8 +449,8 @@ git commit -m "feat: add CLI entry point for sitcom-pilot command"
 ## Task 8: Create Utility Packages
 
 **Files:**
-- Create: `src/sitcom_pilot_utils/helpers.py`
-- Create: `src/sitcom_pilot_tests/fixtures.py`
+- Create: `src/showrunner_utils/helpers.py`
+- Create: `src/showrunner_tests/fixtures.py`
 
 - [ ] **Step 1: Create helpers.py**
 
@@ -484,7 +484,7 @@ def save_json(data: dict[str, Any], path: Path) -> None:
         json.dump(data, f, indent=2)
 ```
 
-Write this to `src/sitcom_pilot_utils/helpers.py`
+Write this to `src/showrunner_utils/helpers.py`
 
 - [ ] **Step 2: Create fixtures.py**
 
@@ -522,13 +522,13 @@ def sample_episode_path(tmp_path, sample_episode):
     return path
 ```
 
-Write this to `src/sitcom_pilot_tests/fixtures.py`
+Write this to `src/showrunner_tests/fixtures.py`
 
 - [ ] **Step 3: Verify utility modules**
 
 ```bash
-python -c "from sitcom_pilot_utils.helpers import ensure_dir; print('Utils OK')"
-python -c "from sitcom_pilot_tests.fixtures import sample_episode; print('Fixtures OK')"
+python -c "from showrunner_utils.helpers import ensure_dir; print('Utils OK')"
+python -c "from showrunner_tests.fixtures import sample_episode; print('Fixtures OK')"
 ```
 
 Expected output:
@@ -540,7 +540,7 @@ Fixtures OK
 - [ ] **Step 4: Commit utility packages**
 
 ```bash
-git add src/sitcom_pilot_utils/ src/sitcom_pilot_tests/
+git add src/showrunner_utils/ src/showrunner_tests/
 git commit -m "feat: add utility and test fixture packages"
 ```
 
@@ -561,7 +561,7 @@ Expected output:
 ```
 ============================= test session starts ==============================
 platform darwin -- Python 3.11.x, pytest-9.x.x, pluggy-1.x.x
-rootdir: /path/to/sitcom_pilot
+rootdir: /path/to/showrunner
 configfile: pyproject.toml
 collected XX items
 
@@ -599,7 +599,7 @@ Expected output:
 ```
 ============================= test session starts ==============================
 platform darwin -- Python 3.11.x, pytest-9.x.x, pluggy-1.x.x
-rootdir: /path/to/sitcom_pilot
+rootdir: /path/to/showrunner
 configfile: pyproject.toml
 collected XX items
 
@@ -632,12 +632,12 @@ tests/test_loader_v2.py::test_v1_cast_profile_and_trigger_word PASSED    [100%]
 - [ ] **Step 3: Verify CLI works**
 
 ```bash
-uv run sitcom-pilot --help
+uv run showrunner --help
 ```
 
 Expected output:
 ```
-Usage: sitcom-pilot [OPTIONS] COMMAND [ARGS]...
+Usage: showrunner [OPTIONS] COMMAND [ARGS]...
 
   Sitcom Pilot CLI
 
@@ -671,7 +671,7 @@ grep -r "orchestrator" docs/ || echo "No orchestrator references in docs"
 
 - [ ] **Step 2: Update documentation if needed**
 
-If references found, update them to use `sitcom_pilot` instead of `orchestrator`.
+If references found, update them to use `showrunner` instead of `orchestrator`.
 
 - [ ] **Step 3: Update README if it exists**
 
@@ -681,7 +681,7 @@ Check if `README.md` exists and update any references.
 
 ```bash
 git add docs/ README.md 2>/dev/null || true
-git commit -m "docs: update references from orchestrator to sitcom_pilot"
+git commit -m "docs: update references from orchestrator to showrunner"
 ```
 
 ---
@@ -708,7 +708,7 @@ tree -L 3 src/
 Expected output:
 ```
 src/
-├── sitcom_pilot/
+├── showrunner/
 │   ├── __init__.py
 │   ├── assembler.py
 │   ├── audio_builder.py
@@ -725,10 +725,10 @@ src/
 │   ├── prompts.py
 │   ├── renderer.py
 │   └── validator.py
-├── sitcom_pilot_tests/
+├── showrunner_tests/
 │   ├── __init__.py
 │   └── fixtures.py
-└── sitcom_pilot_utils/
+└── showrunner_utils/
     ├── __init__.py
     └── helpers.py
 ```
@@ -739,12 +739,12 @@ src/
 uv workspace list
 ```
 
-Expected output: Shows sitcom-pilot package
+Expected output: Shows showrunner package
 
 - [ ] **Step 4: Run CLI validation test**
 
 ```bash
-uv run sitcom-pilot validate episode_01.json
+uv run showrunner validate episode_01.json
 ```
 
 Expected output:

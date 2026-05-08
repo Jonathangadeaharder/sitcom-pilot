@@ -1,5 +1,5 @@
 def main():
-    print("Hello from sitcom-pilot!")
+    print("Hello from showrunner!")
 
 
 if __name__ == "__main__":

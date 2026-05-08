@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from sitcom_pilot.loader import BeatData, EpisodeLoader, VoiceConfig
+from showrunner.loader import BeatData, EpisodeLoader, VoiceConfig
 
 V2_EPISODE = {
     "show": "Buffering",
