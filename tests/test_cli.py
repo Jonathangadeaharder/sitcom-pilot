@@ -73,9 +73,7 @@ def test_dry_run_prints_prompts(tmp_path, capsys):
     )
     import sys
 
-    with patch.object(
-        sys, "argv", ["showrunner.py", str(ep), "--workflow", str(wf), "--dry-run"]
-    ):
+    with patch.object(sys, "argv", ["showrunner.py", str(ep), "--workflow", str(wf), "--dry-run"]):
         mod = _load_main_module()
         mod.main()
     output = capsys.readouterr().out
@@ -120,7 +118,7 @@ def test_render_and_assemble(tmp_path):
                 "argv",
                 ["showrunner.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)],
             ):
-        mod = _load_main_module()
+                mod = _load_main_module()
                 mod.main()
 
     assert mock_client.queue_prompt.call_count == 2
@@ -149,8 +147,8 @@ def test_cli_exits_when_server_down(tmp_path):
         import sys
 
         with patch.object(sys, "argv", ["showrunner.py", str(ep), "--workflow", str(wf)]):
-        mod = _load_main_module()
             with pytest.raises(SystemExit) as exc_info:
+                mod = _load_main_module()
                 mod.main()
             assert exc_info.value.code == 1
 
@@ -197,7 +195,7 @@ def test_cli_with_resume(tmp_path):
                     str(progress_file),
                 ],
             ):
-        mod = _load_main_module()
+                mod = _load_main_module()
                 mod.main()
     assert mock_client.queue_prompt.call_count == 2
 
@@ -274,7 +272,7 @@ def test_cli_no_outputs_to_assemble(tmp_path, capsys):
             "argv",
             ["showrunner.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)],
         ):
-        mod = _load_main_module()
+            mod = _load_main_module()
             mod.main()
     output = capsys.readouterr().out
     assert "No outputs to assemble" in output
@@ -326,6 +324,6 @@ def test_cli_crash_recovery(tmp_path):
                     "/opt",
                 ],
             ):
-        mod = _load_main_module()
+                mod = _load_main_module()
                 mod.main()
     assert mock_client.queue_prompt.call_count == 2

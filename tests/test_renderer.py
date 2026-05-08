@@ -366,7 +366,9 @@ def test_render_shot_non_recovery_does_not_check_server(episode, mock_client, wo
     mock_client.queue_prompt.return_value = "pid"
     mock_client.wait_for_completion.return_value = True
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), crash_recovery=False)
-    result = renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, workflow_template)
+    result = renderer.render_shot(
+        episode.scenes[0].shots[0], episode.scenes[0], episode, workflow_template
+    )
     mock_client.is_server_running.assert_not_called()
     assert result.success is True
 
