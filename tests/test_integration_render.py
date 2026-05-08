@@ -5,7 +5,6 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-
 from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile, CharacterRef
 from sitcom_pilot.loader import EpisodeLoader
 from sitcom_pilot.paths import RunPaths

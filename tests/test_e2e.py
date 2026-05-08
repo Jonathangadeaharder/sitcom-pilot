@@ -3,7 +3,8 @@ from unittest.mock import MagicMock, patch
 
 from showrunner.assembler import concat_clips
 from showrunner.comfyui_client import ComfyUIClient
-from showrunner.loader import (    EpisodeLoader,
+from showrunner.loader import (
+    EpisodeLoader,
 )
 from showrunner.progress import ProgressTracker
 from showrunner.prompts import PromptBuilder

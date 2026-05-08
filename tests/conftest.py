@@ -2,7 +2,6 @@ import sys
 from pathlib import Path
 
 import pytest
-
 from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile, CharacterRef
 from sitcom_pilot.loader import EpisodeLoader
 

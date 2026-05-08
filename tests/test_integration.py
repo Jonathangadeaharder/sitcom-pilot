@@ -10,6 +10,7 @@ from showrunner.node_map import NodeMap
 from showrunner.progress import ProgressTracker
 from showrunner.prompts import PromptBuilder
 from showrunner.renderer import ShotRenderer
+
 EPISODE_JSON = {
     "episode_title": "Integration Test Episode",
     "cast": {

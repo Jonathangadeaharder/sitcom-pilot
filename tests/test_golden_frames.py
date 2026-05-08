@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from sitcom_pilot.beat_prompts import build_beat_prompt, build_scene_prompt
 from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile, CharacterRef
 from sitcom_pilot.continuity import SimilarityResult, batch_check

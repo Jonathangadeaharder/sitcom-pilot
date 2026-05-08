@@ -3,7 +3,6 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile
 from sitcom_pilot.loader import BeatData, EpisodeData, SceneData
 from sitcom_pilot.plate_generator import generate_beat_plate, generate_scene_plate

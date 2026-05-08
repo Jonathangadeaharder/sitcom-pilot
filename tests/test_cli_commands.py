@@ -4,9 +4,8 @@ import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from typer.testing import CliRunner
-
 from sitcom_pilot.cli.main import app
+from typer.testing import CliRunner
 
 runner = CliRunner()
 

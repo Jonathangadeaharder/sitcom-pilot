@@ -4,7 +4,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-
 from sitcom_pilot.aiservices_client import AIServicesClient, _build_speech_tags, _div8
 from sitcom_pilot.loader import VoiceConfig
 
