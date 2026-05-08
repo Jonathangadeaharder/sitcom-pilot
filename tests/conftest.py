@@ -3,6 +3,9 @@ from pathlib import Path
 
 import pytest
 
+from unittest.mock import patch
+
+from showrunner.assembler import EpisodeAssembler
 from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
 from showrunner.loader import EpisodeLoader
 
@@ -42,3 +45,9 @@ def episode_manifest():
             )
         )
     return episode, manifest
+
+
+@pytest.fixture
+def assembler(tmp_path):
+    with patch.object(EpisodeAssembler, "_detect_videotoolbox", return_value=False):
+        return EpisodeAssembler(output_dir=tmp_path / "output")

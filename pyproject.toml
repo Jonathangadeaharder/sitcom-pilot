@@ -65,7 +65,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.mutmut]
-paths_to_mutate = ["src/sitcom_pilot/determinism.py", "src/sitcom_pilot/beat_prompts.py", "src/sitcom_pilot/scene_render.py", "src/sitcom_pilot/cast_manifest.py", "src/sitcom_pilot/continuity.py"]
+paths_to_mutate = ["src/showrunner/determinism.py", "src/showrunner/beat_prompts.py", "src/showrunner/scene_render.py", "src/showrunner/cast_manifest.py", "src/showrunner/continuity.py"]
 runner = "uv run pytest tests/ -q --no-header -x"
 tests_dir = ["tests/"]
 
