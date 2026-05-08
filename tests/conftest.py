@@ -1,9 +1,8 @@
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
-
-from unittest.mock import patch
 
 from showrunner.assembler import EpisodeAssembler
 from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
