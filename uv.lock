@@ -11,7 +11,7 @@ resolution-markers = [
 [[package]]
 name = "aiservices-core"
 version = "0.1.0"
-source = { editable = "/Users/jonathangadeaharder/Documents/projects/AIServices/packages/aiservices_core" }
+source = { editable = "../AIServices/packages/aiservices_core" }
 dependencies = [
     { name = "numpy" },
     { name = "pillow" },
@@ -2306,9 +2306,11 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiservices-core", editable = "../AIServices/packages/aiservices_core" },
     { name = "audio2subtitle", editable = "../AIServices/packages/audio2subtitle" },
     { name = "image2image", editable = "../AIServices/packages/image2image" },
-    { name = "image2video", editable = "../AIServices/packages/image2video" },    { name = "jsonschema", specifier = ">=4.21.0" },
+    { name = "image2video", editable = "../AIServices/packages/image2video" },
+    { name = "jsonschema", specifier = ">=4.21.0" },
     { name = "ormsgpack", specifier = ">=1.12.2" },
     { name = "pillow", specifier = ">=12.2.0" },
     { name = "pydantic", specifier = ">=2.0.0" },
