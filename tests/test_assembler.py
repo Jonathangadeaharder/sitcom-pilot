@@ -285,7 +285,7 @@ def test_concatenate_uses_video_codec(assembler, tmp_path):
 def test_init_creates_nested_output_dir(tmp_path):
     deep_dir = tmp_path / "a" / "b" / "c" / "output"
     with patch.object(EpisodeAssembler, "_detect_videotoolbox", return_value=False):
-        assembler = EpisodeAssembler(output_dir=deep_dir)
+        EpisodeAssembler(output_dir=deep_dir)
     assert deep_dir.exists()
 
 
