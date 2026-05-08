@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  quality:
+  lint-and-test:
     runs-on: self-hosted
     strategy:
       matrix:
