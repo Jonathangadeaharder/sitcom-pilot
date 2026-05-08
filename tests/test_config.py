@@ -1,4 +1,5 @@
 """Tests for showrunner.config — PipelineConfig."""
+
 from __future__ import annotations
 
 import os

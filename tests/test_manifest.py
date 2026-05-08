@@ -1,4 +1,5 @@
 """Tests for showrunner.manifest — RunManifest run record format."""
+
 from __future__ import annotations
 
 import json

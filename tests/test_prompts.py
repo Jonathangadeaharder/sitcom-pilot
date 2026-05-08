@@ -132,6 +132,7 @@ def test_start_and_end_prompts_differ(sample_episode):
 
 def test_build_end_prompt_contains_action_end_not_start(sample_episode):
     from showrunner.prompts import PromptBuilder
+
     builder = PromptBuilder()
     scene = sample_episode.scenes[0]
     shot = scene.shots[0]
@@ -142,6 +143,7 @@ def test_build_end_prompt_contains_action_end_not_start(sample_episode):
 
 def test_build_start_prompt_contains_action_start_not_end(sample_episode):
     from showrunner.prompts import PromptBuilder
+
     builder = PromptBuilder()
     scene = sample_episode.scenes[0]
     shot = scene.shots[0]
@@ -152,6 +154,7 @@ def test_build_start_prompt_contains_action_start_not_end(sample_episode):
 
 def test_build_end_prompt_contains_env_and_chars(sample_episode):
     from showrunner.prompts import PromptBuilder
+
     builder = PromptBuilder()
     scene = sample_episode.scenes[0]
     shot = scene.shots[0]

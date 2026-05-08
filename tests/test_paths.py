@@ -1,4 +1,5 @@
 """Tests for showrunner.paths — RunPaths output directory contract."""
+
 from __future__ import annotations
 
 from showrunner.paths import RunPaths
