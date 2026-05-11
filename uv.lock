@@ -11,7 +11,7 @@ resolution-markers = [
 [[package]]
 name = "aiservices-core"
 version = "0.1.0"
-source = { editable = "../AIServices/packages/aiservices_core" }
+source = { editable = "aiservices/packages/aiservices_core" }
 dependencies = [
     { name = "numpy" },
     { name = "pillow" },
@@ -78,7 +78,7 @@ wheels = [
 [[package]]
 name = "audio2subtitle"
 version = "0.1.0"
-source = { editable = "../AIServices/packages/audio2subtitle" }
+source = { editable = "aiservices/packages/audio2subtitle" }
 dependencies = [
     { name = "aiservices-core" },
     { name = "mlx-whisper" },
@@ -88,7 +88,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiservices-core", editable = "../AIServices/packages/aiservices_core" },
+    { name = "aiservices-core", editable = "aiservices/packages/aiservices_core" },
     { name = "mlx-whisper", specifier = ">=0.4.3" },
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "typer", specifier = ">=0.12.0" },
@@ -507,7 +507,7 @@ wheels = [
 [[package]]
 name = "image2image"
 version = "0.1.0"
-source = { editable = "../AIServices/packages/image2image" }
+source = { editable = "aiservices/packages/image2image" }
 dependencies = [
     { name = "aiservices-core" },
     { name = "pillow" },
@@ -517,7 +517,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiservices-core", editable = "../AIServices/packages/aiservices_core" },
+    { name = "aiservices-core", editable = "aiservices/packages/aiservices_core" },
     { name = "huggingface-hub", marker = "extra == 'mlx'", specifier = ">=0.20.0" },
     { name = "mlx", marker = "extra == 'mlx'", specifier = ">=0.31.0" },
     { name = "numpy", marker = "extra == 'mlx'", specifier = ">=1.24.0" },
@@ -530,8 +530,8 @@ provides-extras = ["mlx"]
 
 [[package]]
 name = "image2video"
-version = "0.1.0"
-source = { editable = "../AIServices/packages/image2video" }
+version = "1.0.0"
+source = { editable = "aiservices/packages/image2video" }
 dependencies = [
     { name = "aiservices-core" },
     { name = "ltx-pipelines-mlx" },
@@ -542,7 +542,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiservices-core", editable = "../AIServices/packages/aiservices_core" },
+    { name = "aiservices-core", editable = "aiservices/packages/aiservices_core" },
     { name = "ltx-pipelines-mlx", git = "https://github.com/dgrauet/ltx-2-mlx?subdirectory=packages%2Fltx-pipelines-mlx" },
     { name = "pillow", specifier = ">=10.0.0" },
     { name = "pydantic", specifier = ">=2.0.0" },
@@ -2306,10 +2306,9 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiservices-core", editable = "../AIServices/packages/aiservices_core" },
-    { name = "audio2subtitle", editable = "../AIServices/packages/audio2subtitle" },
-    { name = "image2image", editable = "../AIServices/packages/image2image" },
-    { name = "image2video", editable = "../AIServices/packages/image2video" },
+    { name = "audio2subtitle", editable = "aiservices/packages/audio2subtitle" },
+    { name = "image2image", editable = "aiservices/packages/image2image" },
+    { name = "image2video", editable = "aiservices/packages/image2video" },
     { name = "jsonschema", specifier = ">=4.21.0" },
     { name = "ormsgpack", specifier = ">=1.12.2" },
     { name = "pillow", specifier = ">=12.2.0" },
@@ -2318,8 +2317,8 @@ requires-dist = [
     { name = "rich", specifier = ">=15.0.0" },
     { name = "scikit-image", specifier = ">=0.20.0" },
     { name = "structlog", specifier = ">=25.1.0" },
-    { name = "text2image", editable = "../AIServices/packages/text2image" },
-    { name = "text2speech", editable = "../AIServices/packages/text2speech" },
+    { name = "text2image", editable = "aiservices/packages/text2image" },
+    { name = "text2speech", editable = "aiservices/packages/text2speech" },
     { name = "typer", specifier = ">=0.24.2" },
 ]
 
@@ -2365,7 +2364,7 @@ wheels = [
 [[package]]
 name = "text2image"
 version = "0.1.0"
-source = { editable = "../AIServices/packages/text2image" }
+source = { editable = "aiservices/packages/text2image" }
 dependencies = [
     { name = "aiservices-core" },
     { name = "image2image" },
@@ -2377,8 +2376,8 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiservices-core", editable = "../AIServices/packages/aiservices_core" },
-    { name = "image2image", editable = "../AIServices/packages/image2image" },
+    { name = "aiservices-core", editable = "aiservices/packages/aiservices_core" },
+    { name = "image2image", editable = "aiservices/packages/image2image" },
     { name = "numpy", specifier = ">=1.24.0" },
     { name = "pillow", specifier = ">=10.0.0" },
     { name = "pydantic", specifier = ">=2.0.0" },
@@ -2388,7 +2387,7 @@ requires-dist = [
 [[package]]
 name = "text2speech"
 version = "0.1.0"
-source = { editable = "../AIServices/packages/text2speech" }
+source = { editable = "aiservices/packages/text2speech" }
 dependencies = [
     { name = "aiservices-core" },
     { name = "pydantic" },
@@ -2397,7 +2396,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiservices-core", editable = "../AIServices/packages/aiservices_core" },
+    { name = "aiservices-core", editable = "aiservices/packages/aiservices_core" },
     { name = "mlx-audio", marker = "extra == 'mlx'", specifier = ">=0.4.0" },
     { name = "ormsgpack", marker = "extra == 'fish-api'", specifier = ">=1.12.2" },
     { name = "pydantic", specifier = ">=2.0.0" },
