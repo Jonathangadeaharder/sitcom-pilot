@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import json
-import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
+
+import structlog
 
 from showrunner.aiservices_client import AIServicesClient
 from showrunner.beat_prompts import build_beat_prompt
@@ -13,8 +14,9 @@ from showrunner.cast_manifest import CastManifest
 from showrunner.determinism import SeedStrategy
 from showrunner.loader import EpisodeData, SceneData
 from showrunner.paths import RunPaths
+from showrunner.progress import BeatProgressEvent, NullProgressCallback, ProgressCallback
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger()
 
 
 class BeatStatus(StrEnum):
@@ -122,11 +124,16 @@ def _render_beat(
     *,
     max_retries: int = 1,
 ) -> BeatJob:
+    structlog.contextvars.bind_contextvars(
+        scene_id=scene.scene_id,
+        beat_id=job.beat_id,
+        beat_kind=job.kind,
+    )
     for attempt in range(max_retries + 1):
         job.status = BeatStatus.RUNNING
         try:
             if Path(job.image_path).exists():
-                logger.info("Cache hit: %s", job.image_path)
+                logger.info("image cache hit", path=str(job.image_path))
             else:
                 client.text2image(
                     job.prompt,
@@ -136,7 +143,7 @@ def _render_beat(
 
             if job.needs_audio and job.text:
                 if job.audio_path.exists():
-                    logger.info("Cache hit: %s", job.audio_path)
+                    logger.info("audio cache hit", path=str(job.audio_path))
                 else:
                     voice = None
                     char = manifest.get(job.speaker)
@@ -150,7 +157,7 @@ def _render_beat(
                     )
 
             if job.video_path.exists():
-                logger.info("Cache hit: %s", job.video_path)
+                logger.info("video cache hit", path=str(job.video_path))
             elif job.image_path.exists():
                 audio_arg = job.audio_path if job.audio_path.exists() else None
                 client.image2video(
@@ -168,14 +175,13 @@ def _render_beat(
             if attempt == max_retries:
                 job.error = str(exc)
                 job.status = BeatStatus.FAILED
-                logger.error("Beat %s failed: %s", job.beat_id, exc)
+                logger.error("beat render failed", error=str(exc))
                 return job
             logger.warning(
-                "Beat %s attempt %d/%d failed: %s",
-                job.beat_id,
-                attempt + 1,
-                max_retries + 1,
-                exc,
+                "beat render attempt failed",
+                attempt=attempt + 1,
+                max_attempts=max_retries + 1,
+                error=str(exc),
             )
     return job
 
@@ -188,13 +194,35 @@ def render_scene(
     episode: EpisodeData,
     *,
     max_workers: int = 1,
+    progress_callback: ProgressCallback | None = None,
 ) -> SceneReport:
     scene_jobs = [j for j in jobs if j.scene_id == scene.scene_id]
     report = SceneReport(scene_id=scene.scene_id, total_beats=len(scene_jobs))
+    on_progress = progress_callback or NullProgressCallback()
+
+    structlog.contextvars.bind_contextvars(scene_id=scene.scene_id)
 
     if max_workers <= 1:
-        for job in scene_jobs:
+        for idx, job in enumerate(scene_jobs):
+            on_progress(
+                BeatProgressEvent(
+                    scene_id=job.scene_id,
+                    beat_id=job.beat_id,
+                    beat_index=idx,
+                    total_beats=len(scene_jobs),
+                    status="running",
+                )
+            )
             _render_beat(job, client, manifest, episode, scene=scene)
+            on_progress(
+                BeatProgressEvent(
+                    scene_id=job.scene_id,
+                    beat_id=job.beat_id,
+                    beat_index=idx,
+                    total_beats=len(scene_jobs),
+                    status=job.status.value,
+                )
+            )
     else:
         with ThreadPoolExecutor(max_workers=max_workers) as pool:
             futures = {
@@ -202,7 +230,18 @@ def render_scene(
                 for job in scene_jobs
             }
             for fut in as_completed(futures):
+                job = futures[fut]
                 fut.result()
+                idx = next(i for i, j in enumerate(scene_jobs) if j.beat_id == job.beat_id)
+                on_progress(
+                    BeatProgressEvent(
+                        scene_id=job.scene_id,
+                        beat_id=job.beat_id,
+                        beat_index=idx,
+                        total_beats=len(scene_jobs),
+                        status=job.status.value,
+                    )
+                )
 
     for job in scene_jobs:
         if job.status == BeatStatus.DONE:
@@ -225,15 +264,31 @@ def render_episode(
     *,
     episode_id: str = "",
     max_workers: int = 1,
+    progress_callback: ProgressCallback | None = None,
 ) -> list[SceneReport]:
+    structlog.contextvars.bind_contextvars(
+        episode_title=episode.title,
+        episode_id=episode_id or episode.title,
+    )
     jobs = plan_beats(episode, manifest, paths, episode_id=episode_id)
     reports: list[SceneReport] = []
     for scene in episode.scenes:
         scene_jobs = [j for j in jobs if j.scene_id == scene.scene_id]
-        report = render_scene(scene, scene_jobs, client, manifest, episode, max_workers=max_workers)
+        report = render_scene(
+            scene,
+            scene_jobs,
+            client,
+            manifest,
+            episode,
+            max_workers=max_workers,
+            progress_callback=progress_callback,
+        )
         reports.append(report)
         logger.info(
-            "Scene %s: %d/%d beats done", scene.scene_id, report.completed, report.total_beats
+            "scene complete",
+            scene_id=scene.scene_id,
+            completed=report.completed,
+            total=report.total_beats,
         )
     _save_report(paths, reports)
     return reports

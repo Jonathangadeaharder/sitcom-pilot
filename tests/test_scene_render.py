@@ -189,6 +189,70 @@ class TestRenderEpisode:
         assert data[0]["scene_id"] == "001"
 
 
+class TestProgressCallback:
+    def test_render_scene_calls_progress(self, episode, manifest, tmp_path):
+        paths = RunPaths(tmp_path, "test-run")
+        jobs = plan_beats(episode, manifest, paths)
+        client = MagicMock()
+        client.text2image.return_value = tmp_path / "img.png"
+        client.text2speech.return_value = tmp_path / "aud.wav"
+        client.image2video.return_value = tmp_path / "vid.mp4"
+
+        events: list = []
+        report = render_scene(
+            episode.scenes[0],
+            jobs,
+            client,
+            manifest,
+            episode,
+            progress_callback=events.append,
+        )
+        assert report.total_beats == 2
+        assert len(events) == 4
+        assert events[0].status == "running"
+        assert events[1].status == "done"
+        assert events[2].status == "running"
+        assert events[3].status == "done"
+
+    def test_render_episode_calls_progress(self, episode, manifest, tmp_path):
+        paths = RunPaths(tmp_path, "test-run")
+        client = MagicMock()
+        client.text2image.return_value = tmp_path / "img.png"
+        client.text2speech.return_value = tmp_path / "aud.wav"
+        client.image2video.return_value = tmp_path / "vid.mp4"
+
+        events: list = []
+        reports = render_episode(
+            episode,
+            manifest,
+            paths,
+            client,
+            progress_callback=events.append,
+        )
+        assert len(reports) == 1
+        assert len(events) == 4
+        assert events[0].status == "running"
+        assert events[-1].status == "done"
+
+    def test_progress_reports_failure(self, episode, manifest, tmp_path):
+        paths = RunPaths(tmp_path, "test-run")
+        jobs = plan_beats(episode, manifest, paths)
+        client = MagicMock()
+        client.text2image.side_effect = RuntimeError("boom")
+
+        events: list = []
+        report = render_scene(
+            episode.scenes[0],
+            jobs,
+            client,
+            manifest,
+            episode,
+            progress_callback=events.append,
+        )
+        assert report.failed == 2
+        assert all(e.status == "failed" for e in events if e.status != "running")
+
+
 class TestSilentBeatVideo:
     def test_silent_beat_generates_video(self, episode, manifest, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
