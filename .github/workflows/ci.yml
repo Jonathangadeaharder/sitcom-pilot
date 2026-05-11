@@ -35,7 +35,7 @@ jobs:
         run: uv run --python ${{ matrix.python-version }} ruff format --check .
 
       - name: Pyright type check
-        run: uvx pyright src/
+        run: uv run pyright src/
 
       - name: Run tests with coverage
         run: uv run --python ${{ matrix.python-version }} pytest tests/ -q --cov=showrunner --cov-report=term-missing
