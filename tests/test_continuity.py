@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from PIL import Image
+
 from showrunner.continuity import (
     SimilarityResult,
     _ssim_fallback,
@@ -124,3 +126,57 @@ class TestLoadImageGray:
         assert result.mode == "L"
         assert result.size == (10, 10)
         assert result.tobytes() is not None
+
+
+class TestGoldenFrameRegistry:
+    def test_register_and_check(self, golden_registry):
+        golden_registry.register("S02_beat01", threshold=0.8)
+        result = golden_registry.check("S02_beat01")
+        assert result.passed
+
+    def test_unregistered_beat_raises(self, golden_registry):
+        import pytest
+
+        with pytest.raises(KeyError, match="S02_beat99"):
+            golden_registry.check("S02_beat99")
+
+    def test_ssim_regression_detected(self, golden_registry, tmp_path):
+        golden_registry.register("S02_beat01", threshold=0.99)
+        img = Image.new("RGB", (512, 512), color=0)
+        gen_path = tmp_path / "gen.png"
+        img.save(gen_path)
+        result = golden_registry.check("S02_beat01", generated=gen_path)
+        assert not result.passed
+
+    def test_list_beats(self, golden_registry):
+        golden_registry.register("a", threshold=0.7)
+        golden_registry.register("b", threshold=0.8)
+        assert set(golden_registry.list_beats()) == {"a", "b"}
+
+    def test_check_all_returns_all_results(self, golden_registry, tmp_path):
+        golden_registry.register("S02_beat01", threshold=0.1)
+        golden_registry.register("S02_beat04", threshold=0.1)
+        results = golden_registry.check_all(generated_dir=golden_registry.fixtures_dir)
+        assert len(results) == 2
+
+    def test_no_beats_registered_raises(self, golden_registry):
+        import pytest
+
+        with pytest.raises(RuntimeError, match="No golden frames registered"):
+            golden_registry.check_all()
+
+    def test_check_with_custom_generated(self, golden_registry, tmp_path):
+        golden_registry.register("S02_beat01", threshold=0.8)
+        gen_dir = tmp_path / "rendered"
+        gen_dir.mkdir()
+        from shutil import copy2
+
+        copy2(golden_registry.fixtures_dir / "S02_beat01.png", gen_dir / "S02_beat01.png")
+        result = golden_registry.check("S02_beat01", generated=gen_dir / "S02_beat01.png")
+        assert result.passed
+
+    def test_check_all_with_all_pass(self, golden_registry):
+        golden_registry.register("S02_beat01", threshold=0.1)
+        golden_registry.register("S02_beat02", threshold=0.1)
+        results = golden_registry.check_all(generated_dir=golden_registry.fixtures_dir)
+        assert all(r.passed for r in results)

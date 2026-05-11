@@ -64,6 +64,44 @@ def check_continuity(
     )
 
 
+@dataclass(frozen=True)
+class _GoldenEntry:
+    beat_id: str
+    threshold: float
+
+
+class GoldenFrameRegistry:
+    def __init__(self, fixtures_dir: Path | str = ""):
+        self._entries: dict[str, _GoldenEntry] = {}
+        self.fixtures_dir = Path(fixtures_dir) if fixtures_dir else Path("tests/fixtures/golden_frames")
+
+    def register(self, beat_id: str, *, threshold: float = 0.7) -> None:
+        self._entries[beat_id] = _GoldenEntry(beat_id=beat_id, threshold=threshold)
+
+    def check(self, beat_id: str, *, generated: Path | None = None) -> SimilarityResult:
+        entry = self._entries.get(beat_id)
+        if entry is None:
+            raise KeyError(f"Beat '{beat_id}' not registered. Available: {list(self._entries)}")
+        ref = self.fixtures_dir / f"{beat_id}.png"
+        if generated is None:
+            gen = ref
+        else:
+            gen = generated
+        return check_continuity(ref, gen, threshold=entry.threshold)
+
+    def check_all(self, *, generated_dir: Path | None = None) -> list[SimilarityResult]:
+        if not self._entries:
+            raise RuntimeError("No golden frames registered")
+        results: list[SimilarityResult] = []
+        for bid in self._entries:
+            gen = (generated_dir / f"{bid}.png") if generated_dir else None
+            results.append(self.check(bid, generated=gen))
+        return results
+
+    def list_beats(self) -> list[str]:
+        return list(self._entries)
+
+
 def batch_check(
     pairs: list[tuple[Path, Path]],
     threshold: float = 0.7,
