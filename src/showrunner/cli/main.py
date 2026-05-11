@@ -31,15 +31,19 @@ render_app = typer.Typer(help="Render beats, scenes, or full episodes")
 app.add_typer(render_app, name="render")
 
 
-def _setup_logging(verbose: bool = False) -> None:
+def _setup_logging(verbose: bool = False, json_logs: bool = False) -> None:
     level = "DEBUG" if verbose else "INFO"
+    processors = [
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.processors.StackInfoRenderer(),
+    ]
+    if json_logs:
+        processors.append(structlog.processors.JSONRenderer())
+    else:
+        processors.append(structlog.dev.ConsoleRenderer())
     structlog.configure(
-        processors=[
-            structlog.contextvars.merge_contextvars,
-            structlog.processors.add_log_level,
-            structlog.processors.StackInfoRenderer(),
-            structlog.dev.ConsoleRenderer(),
-        ],
+        processors=processors,
         wrapper_class=structlog.make_filtering_bound_logger(level),
         context_class=dict,
         logger_factory=structlog.PrintLoggerFactory(),
@@ -311,13 +315,15 @@ def render_scene(
     scene_id: str = typer.Argument(..., help="Scene ID to render"),
     output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
     max_workers: int = typer.Option(1, "--workers", "-w", help="Parallel workers"),
+    json_logs: bool = typer.Option(False, "--json", help="Output structured JSON logs"),
 ) -> None:
     """Render all beats in a scene."""
-    _setup_logging()
+    _setup_logging(json_logs=json_logs)
 
     from showrunner.aiservices_client import AIServicesClient
     from showrunner.loader import EpisodeLoader
     from showrunner.paths import RunPaths
+    from showrunner.progress import RichRenderProgress
     from showrunner.scene_render import plan_beats, render_scene
 
     loader = EpisodeLoader()
@@ -336,16 +342,16 @@ def render_scene(
     scene_jobs = [j for j in jobs if j.scene_id == scene_id]
     client = AIServicesClient()
 
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TaskProgressColumn(),
-        console=console,
-    ) as progress:
-        task = progress.add_task(f"Rendering scene {scene_id}...", total=len(scene_jobs))
-        report = render_scene(scene, scene_jobs, client, manifest, episode, max_workers=max_workers)
-        progress.update(task, completed=report.completed + report.failed)
+    with RichRenderProgress(console=console) as on_progress:
+        report = render_scene(
+            scene,
+            scene_jobs,
+            client,
+            manifest,
+            episode,
+            max_workers=max_workers,
+            progress_callback=on_progress,
+        )
 
     console.print(f"Scene {scene_id}: [green]{report.completed}[/green]/{report.total_beats} done")
     if report.errors:
@@ -358,13 +364,15 @@ def render_episode_cmd(
     episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
     output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
     max_workers: int = typer.Option(1, "--workers", "-w", help="Parallel workers"),
+    json_logs: bool = typer.Option(False, "--json", help="Output structured JSON logs"),
 ) -> None:
     """Render all beats in an episode."""
-    _setup_logging()
+    _setup_logging(json_logs=json_logs)
 
     from showrunner.aiservices_client import AIServicesClient
     from showrunner.loader import EpisodeLoader
     from showrunner.paths import RunPaths
+    from showrunner.progress import RichRenderProgress
     from showrunner.scene_render import plan_beats, render_episode
 
     loader = EpisodeLoader()
@@ -386,13 +394,15 @@ def render_episode_cmd(
         )
     )
 
-    reports = render_episode(
-        episode,
-        manifest,
-        paths,
-        client,
-        max_workers=max_workers,
-    )
+    with RichRenderProgress(console=console) as on_progress:
+        reports = render_episode(
+            episode,
+            manifest,
+            paths,
+            client,
+            max_workers=max_workers,
+            progress_callback=on_progress,
+        )
 
     total_done = sum(r.completed for r in reports)
     total_failed = sum(r.failed for r in reports)
