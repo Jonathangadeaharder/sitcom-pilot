@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  lint-and-test:
+  quality:
     runs-on: self-hosted
     strategy:
       matrix:
@@ -20,7 +20,7 @@ jobs:
         run: git clone --depth 1 https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Jonathangadeaharder/AIServices.git aiservices
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v4
 
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
@@ -28,14 +28,20 @@ jobs:
       - name: Install dependencies
         run: uv sync --dev
 
-      - name: Ruff check
+      - name: Ruff lint
         run: uv run --python ${{ matrix.python-version }} ruff check .
 
       - name: Ruff format check
         run: uv run --python ${{ matrix.python-version }} ruff format --check .
+
+      - name: Pyright type check
+        run: uv run pyright src/
 
       - name: Run tests with coverage
         run: uv run --python ${{ matrix.python-version }} pytest tests/ -q --cov=showrunner --cov-report=term-missing
 
       - name: Validate episode JSONs
         run: uv run --python ${{ matrix.python-version }} python -m showrunner.validator episode_01.json episode_02.json
+
+      - name: Generate beat plan
+        run: uv run --python ${{ matrix.python-version }} showrunner plan episode_01.json

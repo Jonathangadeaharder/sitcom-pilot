@@ -53,6 +53,7 @@ class ComfyUIClient:
                 last_error = e
                 logger.warning(f"Queue attempt {attempt + 1}/{max_retries} failed: {e}")
                 time.sleep(2**attempt)
+        assert last_error is not None
         raise last_error
 
     def wait_for_completion(

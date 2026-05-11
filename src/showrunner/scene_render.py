@@ -71,9 +71,11 @@ def plan_beats(
         paths.ensure_scene_dirs(scene.scene_id)
         for beat in scene.beats:
             prompt = build_beat_prompt(beat, scene, episode, manifest, episode_id=episode_id)
-            seed = seed_strategy.for_beat(
-                scene.scene_id, beat.beat_id, beat.seed
-            ) if seed_strategy else beat.seed
+            seed = (
+                seed_strategy.for_beat(scene.scene_id, beat.beat_id, beat.seed)
+                if seed_strategy
+                else beat.seed
+            )
             job = BeatJob(
                 scene_id=scene.scene_id,
                 beat_id=beat.beat_id,

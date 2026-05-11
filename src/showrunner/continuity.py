@@ -37,7 +37,7 @@ def _compute_ssim(img_a, img_b) -> float:
     min_w = min(arr_a.shape[1], arr_b.shape[1])
     arr_a = arr_a[:min_h, :min_w]
     arr_b = arr_b[:min_h, :min_w]
-    return float(ssim(arr_a, arr_b))
+    return float(ssim(arr_a, arr_b))  # pyright: ignore[reportArgumentType]
 
 
 def _ssim_fallback(img_a, img_b) -> float:

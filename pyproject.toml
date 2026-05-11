@@ -39,6 +39,7 @@ dev = [
     "pygments<2.19",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
+    "pyright>=1.1.400",
     "ruff>=0.15.0",
 ]
 
@@ -68,6 +69,12 @@ build-backend = "hatchling.build"
 paths_to_mutate = ["src/showrunner/determinism.py", "src/showrunner/beat_prompts.py", "src/showrunner/scene_render.py", "src/showrunner/cast_manifest.py", "src/showrunner/continuity.py"]
 runner = "uv run pytest tests/ -q --no-header -x"
 tests_dir = ["tests/"]
+
+[tool.pyright]
+include = ["src"]
+exclude = ["**/__pycache__", "legacy", "output", "aiservices"]
+typeCheckingMode = "standard"
+pythonVersion = "3.11"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/showrunner", "src/showrunner_utils", "src/showrunner_tests"]
