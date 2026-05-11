@@ -10,6 +10,7 @@ from pathlib import Path
 from showrunner.aiservices_client import AIServicesClient
 from showrunner.beat_prompts import build_beat_prompt
 from showrunner.cast_manifest import CastManifest
+from showrunner.determinism import SeedStrategy
 from showrunner.loader import EpisodeData, SceneData
 from showrunner.paths import RunPaths
 
@@ -63,18 +64,22 @@ def plan_beats(
     paths: RunPaths,
     *,
     episode_id: str = "",
+    seed_strategy: SeedStrategy | None = None,
 ) -> list[BeatJob]:
     jobs: list[BeatJob] = []
     for scene in episode.scenes:
         paths.ensure_scene_dirs(scene.scene_id)
         for beat in scene.beats:
             prompt = build_beat_prompt(beat, scene, episode, manifest, episode_id=episode_id)
+            seed = seed_strategy.for_beat(
+                scene.scene_id, beat.beat_id, beat.seed
+            ) if seed_strategy else beat.seed
             job = BeatJob(
                 scene_id=scene.scene_id,
                 beat_id=beat.beat_id,
                 kind=beat.kind,
                 prompt=prompt,
-                seed=beat.seed,
+                seed=seed,
                 duration_sec=beat.duration_sec,
                 needs_audio=beat.kind == "speech" and bool(beat.text),
                 speaker=beat.speaker,
