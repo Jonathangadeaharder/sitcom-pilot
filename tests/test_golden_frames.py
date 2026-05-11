@@ -127,3 +127,39 @@ class TestGoldenFrameDeterminism:
             for beat in scene.beats:
                 ids.append(beat.beat_id)
         assert len(ids) == len(set(ids)), "Duplicate beat IDs"
+
+
+class TestGoldenFrameRegression:
+    def test_golden_fixtures_exist(self):
+        from showrunner.continuity import GoldenFrameRegistry
+
+        registry = GoldenFrameRegistry()
+        assert registry.fixtures_dir.exists()
+        golden_files = list(registry.fixtures_dir.glob("*.png"))
+        assert len(golden_files) >= 4
+
+    def test_golden_vs_identical_passes(self, golden_registry):
+        golden_registry.register("S02_beat01", threshold=0.9)
+        result = golden_registry.check("S02_beat01")
+        assert result.passed
+        assert result.ssim_score >= 0.9
+
+    def test_golden_vs_altered_fails(self, golden_registry, tmp_path):
+        golden_registry.register("S02_beat01", threshold=0.99)
+        from PIL import Image
+
+        img = Image.new("RGB", (512, 512), color=0)
+        gen_path = tmp_path / "S02_beat01.png"
+        img.save(gen_path)
+        result = golden_registry.check("S02_beat01", generated=gen_path)
+        assert not result.passed
+        assert result.ssim_score < 0.99
+
+    def test_register_all_golden_frames_pass(self, golden_registry):
+        golden_registry.register("S02_beat01", threshold=0.1)
+        golden_registry.register("S02_beat02", threshold=0.1)
+        golden_registry.register("S02_beat03", threshold=0.1)
+        golden_registry.register("S02_beat04", threshold=0.1)
+        results = golden_registry.check_all(generated_dir=golden_registry.fixtures_dir)
+        assert len(results) == 4
+        assert all(r.passed for r in results), [r for r in results if not r.passed]
