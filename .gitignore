@@ -13,8 +13,7 @@ output/
 .venv/
 
 # Local aiservices symlink
-aiservices/
+aiservices
 
 # iCloud duplicate files
 * 2*
-aiservices
