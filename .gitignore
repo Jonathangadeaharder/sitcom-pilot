@@ -7,6 +7,8 @@ output/
 *.mp4
 *.wav
 *.m4a
+mutants/
+aiservices/
 
 .worktrees/
 
