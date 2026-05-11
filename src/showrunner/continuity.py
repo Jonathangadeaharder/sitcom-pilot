@@ -73,7 +73,9 @@ class _GoldenEntry:
 class GoldenFrameRegistry:
     def __init__(self, fixtures_dir: Path | str = ""):
         self._entries: dict[str, _GoldenEntry] = {}
-        self.fixtures_dir = Path(fixtures_dir) if fixtures_dir else Path("tests/fixtures/golden_frames")
+        self.fixtures_dir = (
+            Path(fixtures_dir) if fixtures_dir else Path("tests/fixtures/golden_frames")
+        )
 
     def register(self, beat_id: str, *, threshold: float = 0.7) -> None:
         self._entries[beat_id] = _GoldenEntry(beat_id=beat_id, threshold=threshold)
