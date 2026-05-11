@@ -4,7 +4,10 @@ from unittest.mock import patch
 
 import pytest
 
-from showrunner.assembler import EpisodeAssembler
+try:
+    from showrunner.assembler import EpisodeAssembler
+except ImportError:
+    EpisodeAssembler = None  # mutmut runs from mutants/ with partial source
 from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
 from showrunner.loader import EpisodeLoader
 
@@ -48,6 +51,8 @@ def episode_manifest():
 
 @pytest.fixture
 def assembler(tmp_path):
+    if EpisodeAssembler is None:
+        pytest.skip("EpisodeAssembler not available")
     with patch.object(EpisodeAssembler, "_detect_videotoolbox", return_value=False):
         return EpisodeAssembler(output_dir=tmp_path / "output")
 
