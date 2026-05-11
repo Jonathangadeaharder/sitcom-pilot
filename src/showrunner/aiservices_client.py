@@ -10,6 +10,14 @@ from showrunner.loader import CharacterData, VoiceConfig
 logger = logging.getLogger(__name__)
 
 
+# MLX-optimized providers — hardcoded for v1.0
+_IMAGE_PROVIDER = "text2image.mlx"
+_IMAGE_EDIT_PROVIDER = "image2image.mlx"
+_VIDEO_PROVIDER = "image2video.mlx"
+_TTS_PROVIDER = "text2speech.fish_mlx"
+_ASR_PROVIDER = "audio2subtitle.mlx"
+
+
 class AIServicesClient:
     """Unified facade over AIServices provider packages.
 
@@ -19,20 +27,7 @@ class AIServicesClient:
     unavailable.
     """
 
-    def __init__(
-        self,
-        image_provider: str = "text2image.mlx",
-        image_edit_provider: str = "image2image.mlx",
-        video_provider: str = "image2video.mlx",
-        tts_provider: str = "text2speech.fish_mlx",
-        asr_provider: str | None = "audio2subtitle.mlx",
-        subprocess_fallback: bool = True,
-    ):
-        self._image_provider = image_provider
-        self._image_edit_provider = image_edit_provider
-        self._video_provider = video_provider
-        self._tts_provider = tts_provider
-        self._asr_provider = asr_provider
+    def __init__(self, subprocess_fallback: bool = True):
         self._subprocess_fallback = subprocess_fallback
 
     def text2image(
@@ -62,7 +57,7 @@ class AIServicesClient:
                 negative_prompt=negative_prompt,
                 guidance_scale=guidance_scale,
                 num_inference_steps=num_inference_steps,
-                provider_name=self._image_provider,
+                provider_name=_IMAGE_PROVIDER,
             )
         except ImportError:
             pass
@@ -110,7 +105,7 @@ class AIServicesClient:
                 negative_prompt=negative_prompt,
                 guidance_scale=guidance_scale,
                 num_inference_steps=num_inference_steps,
-                provider_name=self._image_edit_provider,
+                provider_name=_IMAGE_EDIT_PROVIDER,
             )
         except ImportError:
             pass
@@ -162,7 +157,7 @@ class AIServicesClient:
                 num_frames=num_frames,
                 num_inference_steps=num_inference_steps,
                 fps=fps,
-                provider_name=self._video_provider,
+                provider_name=_VIDEO_PROVIDER,
             )
         except ImportError:
             pass
@@ -219,7 +214,7 @@ class AIServicesClient:
                 tone=tone,
                 effect=effect,
                 reference_audio=voice.clone_from if voice else None,
-                provider_name=self._tts_provider,
+                provider_name=_TTS_PROVIDER,
             )
         except ImportError:
             pass
@@ -248,21 +243,20 @@ class AIServicesClient:
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
 
-        if self._asr_provider:
-            try:
-                from audio2subtitle.client import generate
+        try:
+            from audio2subtitle.client import generate
 
-                return generate(
-                    audio_path,
-                    output,
-                    language=language,
-                    output_format=output_format,
-                    provider_name=self._asr_provider,
-                )
-            except ImportError:
-                pass
-            except Exception as exc:
-                logger.warning("audio2subtitle Python API failed: %s", exc)
+            return generate(
+                audio_path,
+                output,
+                language=language,
+                output_format=output_format,
+                provider_name=_ASR_PROVIDER,
+            )
+        except ImportError:
+            pass
+        except Exception as exc:
+            logger.warning("audio2subtitle Python API failed: %s", exc)
 
         if self._subprocess_fallback:
             return self._cli_audio2subtitle(
@@ -289,14 +283,13 @@ class AIServicesClient:
     def discover_capabilities(self) -> dict[str, list[str]]:
         caps: dict[str, list[str]] = {}
         for op, reg_name in [
-            ("text2image", self._image_provider),
-            ("image2image", self._image_edit_provider),
-            ("image2video", self._video_provider),
-            ("text2speech", self._tts_provider),
+            ("text2image", _IMAGE_PROVIDER),
+            ("image2image", _IMAGE_EDIT_PROVIDER),
+            ("image2video", _VIDEO_PROVIDER),
+            ("text2speech", _TTS_PROVIDER),
         ]:
             caps[op] = [reg_name]
-        if self._asr_provider:
-            caps["audio2subtitle"] = [self._asr_provider]
+        caps["audio2subtitle"] = [_ASR_PROVIDER]
         return caps
 
     # ------------------------------------------------------------------
@@ -313,8 +306,6 @@ class AIServicesClient:
             prompt,
             "--output",
             str(output_path),
-            "--provider",
-            self._image_provider,
             "--width",
             str(_div8(width)),
             "--height",
@@ -351,8 +342,6 @@ class AIServicesClient:
             prompt,
             "--output",
             str(output_path),
-            "--provider",
-            self._image_edit_provider,
             "--strength",
             str(strength),
             "--guidance",
@@ -379,8 +368,6 @@ class AIServicesClient:
             prompt,
             "--output",
             str(output_path),
-            "--provider",
-            self._video_provider,
             "--width",
             str(_div8(width)),
             "--height",
@@ -405,8 +392,6 @@ class AIServicesClient:
             text,
             "--output",
             str(output_path),
-            "--provider",
-            self._tts_provider,
         ]
         if voice_id:
             cmd += ["--voice-id", voice_id]
@@ -428,8 +413,6 @@ class AIServicesClient:
             "--output",
             str(output_path),
         ]
-        if self._asr_provider:
-            cmd += ["--provider", self._asr_provider]
         _run_cli(cmd)
         return Path(output_path)
 
