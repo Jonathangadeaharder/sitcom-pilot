@@ -17,3 +17,6 @@ aiservices
 
 # iCloud duplicate files
 * 2*
+
+# Local aiservices packages (checked out separately)
+aiservices/
