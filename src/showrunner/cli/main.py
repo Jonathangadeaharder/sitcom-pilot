@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 import json
 import shutil
 import subprocess
@@ -516,11 +517,20 @@ def doctor() -> None:
     # Python packages
     for pkg in ["structlog", "rich", "typer", "pydantic", "jsonschema"]:
         try:
-            mod = __import__(pkg)
-            ver = getattr(mod, "__version__", "installed")
+            importlib.import_module(pkg)
+            ver = importlib.metadata.version(pkg)
             checks.append((pkg, True, ver))
-        except ImportError:
+        except (ImportError, importlib.metadata.PackageNotFoundError):
             checks.append((pkg, False, "not installed"))
+
+    # Config files
+    config_checks = [
+        ("pyproject.toml", Path("pyproject.toml")),
+        ("Episode schema", Path("schemas/episode_v2.schema.json")),
+    ]
+    for label, path in config_checks:
+        ok = path.exists()
+        checks.append((label, ok, str(path.resolve()) if ok else "not found"))
 
     table = Table(title="Dependency Check")
     table.add_column("Dependency", style="cyan")
