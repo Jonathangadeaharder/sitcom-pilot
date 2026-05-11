@@ -9,6 +9,7 @@ output/
 *.m4a
 
 .worktrees/
+aiservices/
 
 .venv/
 

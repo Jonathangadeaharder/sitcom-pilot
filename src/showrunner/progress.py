@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import types
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -93,7 +94,7 @@ class RichRenderProgress:
         self._console = console
 
     def __enter__(self) -> ProgressCallback:
-        from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
+        from rich.progress import BarColumn, Progress, SpinnerColumn, TaskID, TaskProgressColumn, TextColumn
 
         self._progress = Progress(
             SpinnerColumn(),
@@ -103,12 +104,17 @@ class RichRenderProgress:
             console=self._console,
         )
         self._progress.__enter__()
-        self._tasks: dict[str, int] = {}
+        self._tasks: dict[str, TaskID] = {}
         self._beat_index: dict[str, int] = {}
         return self._on_event
 
-    def __exit__(self, *args: object) -> None:
-        self._progress.__exit__(*args)
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: types.TracebackType | None,
+    ) -> None:
+        self._progress.__exit__(exc_type, exc_val, exc_tb)
 
     def _on_event(self, event: BeatProgressEvent) -> None:
         task_id = self._tasks.get(event.scene_id)
