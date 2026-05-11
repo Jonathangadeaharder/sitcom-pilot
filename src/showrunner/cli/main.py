@@ -284,6 +284,10 @@ def render_beat(
         raise typer.Exit(code=1)
 
     scene = _find_scene(episode, target.scene_id)
+    if scene is None:
+        err_console.print(f"[red]Scene '{target.scene_id}' not found.[/red]")
+        raise typer.Exit(code=1)
+
     client = AIServicesClient()
 
     with Progress(
@@ -518,9 +522,11 @@ def doctor() -> None:
     for pkg in ["structlog", "rich", "typer", "pydantic", "jsonschema"]:
         try:
             importlib.import_module(pkg)
-            ver = importlib.metadata.version(pkg)
+            from importlib.metadata import version as _pkg_version
+
+            ver = _pkg_version(pkg)
             checks.append((pkg, True, ver))
-        except (ImportError, importlib.metadata.PackageNotFoundError):
+        except (ImportError, ModuleNotFoundError):
             checks.append((pkg, False, "not installed"))
 
     # Config files
