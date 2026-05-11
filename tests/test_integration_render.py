@@ -10,6 +10,7 @@ from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRe
 from showrunner.loader import EpisodeLoader
 from showrunner.paths import RunPaths
 from showrunner.scene_render import BeatStatus, plan_beats, render_episode, render_scene
+from showrunner.validator import EpisodeValidator
 
 EPISODE_02 = Path(__file__).resolve().parent.parent / "episode_02.json"
 
@@ -55,6 +56,11 @@ def _write_dummy(path):
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_bytes(b"\x00" * 16)
     return p
+
+
+def _read_episode_02_data():
+    with open(EPISODE_02) as f:
+        return json.load(f)
 
 
 class TestPlanBeats:
@@ -141,3 +147,67 @@ class TestRenderEpisode:
             if str(c[0][1]) == str(first_job.image_path)
         ]
         assert len(text2img_calls) == 0
+
+
+class TestIntegrationRenderScene001:
+    """Integration test: load → validate → plan → render → verify for scene 001."""
+
+    def test_full_pipeline(self, episode_02, manifest_02, paths, mock_client):
+        data = _read_episode_02_data()
+        validator = EpisodeValidator()
+        errors = validator.validate(data)
+        assert not errors, f"Validation errors: {errors}"
+
+        jobs = plan_beats(episode_02, manifest_02, paths, episode_id="002")
+        scene = episode_02.scenes[0]
+        scene_jobs = [j for j in jobs if j.scene_id == "001"]
+
+        report = render_scene(scene, scene_jobs, mock_client, manifest_02, episode_02)
+
+        assert report.scene_id == "001"
+        assert report.completed == len(scene.beats)
+        assert report.failed == 0
+
+        for j in scene_jobs:
+            assert j.image_path.exists(), f"Missing image for {j.beat_id}"
+            assert j.image_path.stat().st_size > 0, f"Empty image for {j.beat_id}"
+            assert j.beat_id.startswith("001_b")
+            assert j.scene_id == "001"
+
+    def test_speech_beats_have_audio_output(self, episode_02, manifest_02, paths, mock_client):
+        jobs = plan_beats(episode_02, manifest_02, paths, episode_id="002")
+        scene = episode_02.scenes[0]
+        scene_jobs = [j for j in jobs if j.scene_id == "001"]
+
+        render_scene(scene, scene_jobs, mock_client, manifest_02, episode_02)
+
+        for j in scene_jobs:
+            if j.needs_audio:
+                assert j.audio_path.exists(), f"Missing audio for speech beat {j.beat_id}"
+                assert j.audio_path.stat().st_size > 0, f"Empty audio for {j.beat_id}"
+                assert j.speaker == "maya"
+                assert j.text
+            else:
+                assert not j.audio_path.exists(), f"Silent beat {j.beat_id} has audio"
+
+    def test_scene_001_beat_seeds_correct(self, episode_02, manifest_02, paths, mock_client):
+        jobs = plan_beats(episode_02, manifest_02, paths, episode_id="002")
+        scene = episode_02.scenes[0]
+        scene_jobs = [j for j in jobs if j.scene_id == "001"]
+
+        for j, beat in zip(scene_jobs, scene.beats):
+            assert j.seed == beat.seed, f"{j.beat_id}: seed mismatch"
+            assert j.beat_id == beat.beat_id
+            assert j.kind == beat.kind
+
+    def test_validation_rejects_bad_schema(self):
+        data = _read_episode_02_data()
+        validator = EpisodeValidator()
+        errors = validator.validate(data)
+        assert not errors
+
+        bad = dict(data)
+        bad["schema_version"] = "1.5"
+        errors = validator.validate(bad)
+        assert errors
+        assert any("schema_version" in e for e in errors)
