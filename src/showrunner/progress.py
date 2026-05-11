@@ -94,7 +94,14 @@ class RichRenderProgress:
         self._console = console
 
     def __enter__(self) -> ProgressCallback:
-        from rich.progress import BarColumn, Progress, SpinnerColumn, TaskID, TaskProgressColumn, TextColumn
+        from rich.progress import (
+            BarColumn,
+            Progress,
+            SpinnerColumn,
+            TaskID,
+            TaskProgressColumn,
+            TextColumn,
+        )
 
         self._progress = Progress(
             SpinnerColumn(),
