@@ -10,6 +10,11 @@ output/
 
 .worktrees/
 
+.venv/
+
+# Local aiservices symlink
+aiservices/
+
 # iCloud duplicate files
 * 2*
 aiservices
