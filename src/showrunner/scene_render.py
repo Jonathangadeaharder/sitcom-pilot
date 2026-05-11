@@ -265,12 +265,13 @@ def render_episode(
     episode_id: str = "",
     max_workers: int = 1,
     progress_callback: ProgressCallback | None = None,
+    jobs: list[BeatJob] | None = None,
 ) -> list[SceneReport]:
     structlog.contextvars.bind_contextvars(
         episode_title=episode.title,
         episode_id=episode_id or episode.title,
     )
-    jobs = plan_beats(episode, manifest, paths, episode_id=episode_id)
+    jobs = jobs if jobs is not None else plan_beats(episode, manifest, paths, episode_id=episode_id)
     reports: list[SceneReport] = []
     for scene in episode.scenes:
         scene_jobs = [j for j in jobs if j.scene_id == scene.scene_id]
