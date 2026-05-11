@@ -10,8 +10,10 @@ output/
 
 .worktrees/
 
+.venv/
+
+# Local aiservices symlink
+aiservices
+
 # iCloud duplicate files
 * 2*
-
-# AIServices packages (sibling dependency, not in git repo)
-aiservices/

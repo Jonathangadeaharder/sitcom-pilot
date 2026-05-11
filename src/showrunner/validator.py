@@ -74,7 +74,7 @@ class EpisodeValidator:
         try:
             with open(_SCHEMA_PATH) as f:
                 schema = json.load(f)
-            validator = jsonschema.Draft202012Validator(schema)
+            validator = jsonschema.Draft202012Validator(schema)  # pyright: ignore[reportPossiblyUnboundVariable]
             return [str(e.message) for e in validator.iter_errors(data)]
         except Exception as exc:
             return [f"JSON Schema validation error: {exc}"]
