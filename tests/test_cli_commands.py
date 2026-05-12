@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -137,30 +138,79 @@ class TestPlan:
 
 
 class TestBootstrap:
-    @patch("showrunner.aiservices_client.AIServicesClient")
-    def test_bootstrap_generates_refs(self, mock_client_cls, tmp_path: Path):
-        mock_client = MagicMock()
-        mock_client.text2image.return_value = Path("/tmp/ref.png")
-        mock_client_cls.return_value = mock_client
-
-        ep = _write_episode(tmp_path)
-        out = tmp_path / "output"
-        result = runner.invoke(app, ["bootstrap", str(ep), "--output-dir", str(out)])
+    def test_creates_correct_structure(self, tmp_path: Path):
+        old = Path.cwd()
+        try:
+            os.chdir(tmp_path)
+            result = runner.invoke(app, ["bootstrap", "my-episode"])
+        finally:
+            os.chdir(old)
         assert result.exit_code == 0
-        assert "Bootstrap complete" in result.output
-        manifest_path = out / "bootstrap" / "cast_manifest.json"
-        assert manifest_path.exists()
+        d = tmp_path / "my-episode"
+        assert d.is_dir()
+        assert (d / "episode.json").is_file()
+        assert (d / "scenes").is_dir()
+        assert (d / "output").is_dir()
+        assert (d / "assets").is_dir()
 
-    @patch("showrunner.aiservices_client.AIServicesClient")
-    def test_bootstrap_handles_failure(self, mock_client_cls, tmp_path: Path):
-        mock_client = MagicMock()
-        mock_client.text2image.side_effect = RuntimeError("boom")
-        mock_client_cls.return_value = mock_client
-
-        ep = _write_episode(tmp_path)
-        out = tmp_path / "output"
-        result = runner.invoke(app, ["bootstrap", str(ep), "--output-dir", str(out)])
+    def test_writes_valid_json_that_passes_validate(self, tmp_path: Path):
+        old = Path.cwd()
+        try:
+            os.chdir(tmp_path)
+            result = runner.invoke(app, ["bootstrap", "my-episode"])
+        finally:
+            os.chdir(old)
         assert result.exit_code == 0
+        ep = tmp_path / "my-episode" / "episode.json"
+        result2 = runner.invoke(app, ["validate", str(ep)])
+        assert result2.exit_code == 0
+        assert "OK" in result2.output
+
+    def test_force_overwrites(self, tmp_path: Path):
+        d = tmp_path / "my-episode"
+        d.mkdir()
+        (d / "old.txt").write_text("old")
+        old = Path.cwd()
+        try:
+            os.chdir(tmp_path)
+            result = runner.invoke(app, ["bootstrap", "my-episode", "--force"])
+        finally:
+            os.chdir(old)
+        assert result.exit_code == 0
+        assert not (d / "old.txt").exists()
+        assert (d / "episode.json").is_file()
+
+    def test_no_assets_omits_assets_dir(self, tmp_path: Path):
+        old = Path.cwd()
+        try:
+            os.chdir(tmp_path)
+            result = runner.invoke(app, ["bootstrap", "my-episode", "--no-assets"])
+        finally:
+            os.chdir(old)
+        assert result.exit_code == 0
+        d = tmp_path / "my-episode"
+        assert d.is_dir()
+        assert (d / "scenes").is_dir()
+        assert (d / "output").is_dir()
+        assert not (d / "assets").exists()
+
+    def test_invalid_name_rejected(self, tmp_path: Path):
+        old = Path.cwd()
+        try:
+            os.chdir(tmp_path)
+            result = runner.invoke(app, ["bootstrap", "my/episode"])
+        finally:
+            os.chdir(old)
+        assert result.exit_code == 1
+        assert "/" in result.output or "Error" in result.output
+
+        old = Path.cwd()
+        try:
+            os.chdir(tmp_path)
+            result2 = runner.invoke(app, ["bootstrap", "my\\episode"])
+        finally:
+            os.chdir(old)
+        assert result2.exit_code == 1
 
 
 # ---------------------------------------------------------------------------

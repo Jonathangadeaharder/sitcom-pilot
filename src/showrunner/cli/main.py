@@ -131,91 +131,77 @@ def plan(
 
 @app.command()
 def bootstrap(
-    episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
-    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
+    project_name: str = typer.Argument(..., help="Name of the episode project"),
+    force: bool = typer.Option(False, "--force", help="Overwrite existing project directory"),
+    no_assets: bool = typer.Option(False, "--no-assets", help="Skip creating assets directory"),
 ) -> None:
-    """Generate reference images and voice samples for cast."""
-    _setup_logging()
+    """Create a new episode project scaffold."""
+    if "/" in project_name or "\\" in project_name:
+        err_console.print("[red]Error:[/red] Project name must not contain '/' or '\\\\'")
+        raise typer.Exit(code=1)
 
-    from showrunner.aiservices_client import AIServicesClient
-    from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
-    from showrunner.loader import EpisodeLoader
-
-    loader = EpisodeLoader()
-    episode = loader.load(Path(episode_path))
-
-    out = _resolve_output_dir(output_dir) / "bootstrap"
-    out.mkdir(parents=True, exist_ok=True)
-
-    client = AIServicesClient()
-    manifest = CastManifest()
-
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TaskProgressColumn(),
-        console=console,
-    ) as progress:
-        char_task = progress.add_task("Generating character refs...", total=len(episode.cast))
-
-        for slug, char in episode.cast.items():
-            ref_dir = out / "cast" / slug
-            ref_dir.mkdir(parents=True, exist_ok=True)
-
-            refs = CharacterRef()
-            if char.visual:
-                front_path = ref_dir / "front.png"
-                try:
-                    client.text2image(
-                        f"{char.visual}, front view, character reference sheet",
-                        front_path,
-                    )
-                    refs = CharacterRef(front=str(front_path.relative_to(out.parent)))
-                except Exception as exc:
-                    logger.warning("Failed to generate ref image", character=slug, error=str(exc))
-
-            if char.voice and char.voice.clone_from:
-                voice_dir = out / "voices" / slug
-                voice_dir.mkdir(parents=True, exist_ok=True)
-                src = Path(char.voice.clone_from)
-                if src.exists():
-                    dst = voice_dir / src.name
-                    shutil.copy2(src, dst)
-
-            manifest.add(
-                CharacterProfile(
-                    name=char.name or slug,
-                    slug=slug,
-                    visual=char.visual,
-                    refs=refs,
-                    voice=char.voice,
-                )
-            )
-            progress.advance(char_task)
-
-        env_task = progress.add_task(
-            "Generating environment refs...", total=len(episode.environments)
+    project_dir = Path(project_name)
+    if project_dir.exists() and not force:
+        err_console.print(
+            f"[red]Error:[/red] '{project_name}' already exists. Use --force to overwrite."
         )
-        for env_name, env_data in episode.environments.items():
-            env_dir = out / "environments" / env_name
-            env_dir.mkdir(parents=True, exist_ok=True)
-            if env_data.style or env_data.trigger_word:
-                ref_path = env_dir / "reference.png"
-                try:
-                    prompt = (
-                        f"{env_data.style or env_data.trigger_word}, establishing shot, sitcom set"
-                    )
-                    client.text2image(prompt, ref_path, width=1280, height=720)
-                except Exception as exc:
-                    logger.warning(
-                        "Failed to generate env ref", environment=env_name, error=str(exc)
-                    )
-            progress.advance(env_task)
+        raise typer.Exit(code=1)
 
-    manifest_path = out / "cast_manifest.json"
-    manifest.save(manifest_path)
-    console.print(f"\n[green]Bootstrap complete.[/green] Manifest saved to {manifest_path}")
+    if force and project_dir.exists():
+        shutil.rmtree(project_dir)
+
+    project_dir.mkdir(parents=True)
+
+    episode = {
+        "show": "Buffering",
+        "season": 1,
+        "episode": 1,
+        "title": project_name,
+        "schema_version": "2.0",
+        "cast": {
+            "protagonist": {
+                "name": "Protagonist",
+                "visual": "A person with a determined expression",
+            },
+        },
+        "environments": {
+            "default": {
+                "trigger_word": "A simple room",
+            },
+        },
+        "scenes": [
+            {
+                "scene_id": "001",
+                "environment": "default",
+                "characters_present": ["protagonist"],
+                "beats": [
+                    {
+                        "beat_id": "001_b00",
+                        "kind": "silent",
+                        "action": "The scene opens",
+                    },
+                ],
+            },
+        ],
+    }
+
+    (project_dir / "episode.json").write_text(json.dumps(episode, indent=2) + "\n")
+    (project_dir / "scenes").mkdir()
+    (project_dir / "output").mkdir()
+    if not no_assets:
+        (project_dir / "assets").mkdir()
+
+    console.print(f"[green]Created[/green] {project_name}/")
+    console.print("  episode.json")
+    console.print("  scenes/")
+    console.print("  output/")
+    if not no_assets:
+        console.print("  assets/")
+    console.print()
+    console.print("Next steps:")
+    console.print(f"  1. Edit [bold]{project_name}/episode.json[/bold]")
+    console.print(f"  2. Run [bold]showrunner validate {project_name}/episode.json[/bold]")
+    console.print(f"  3. Run [bold]showrunner plan {project_name}/episode.json[/bold]")
 
 
 # ---------------------------------------------------------------------------
