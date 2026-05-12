@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 from typer.testing import CliRunner
 
 from showrunner.cli.main import app
+from showrunner.commands.doctor import CheckResult
 
 runner = CliRunner()
 
@@ -378,18 +379,19 @@ class TestShowcase:
 
 
 class TestDoctor:
-    @patch("shutil.which", return_value="/usr/bin/ffmpeg")
-    @patch("subprocess.run")
-    def test_doctor_all_ok(self, mock_run, mock_which):
-        mock_run.return_value = MagicMock(stdout="ffmpeg version 6.0")
-        result = runner.invoke(app, ["doctor"])
+    def test_doctor_all_ok(self):
+        with patch("showrunner.commands.doctor.run_all") as mock_run:
+            mock_run.return_value = [CheckResult("all", True, "ok")]
+            result = runner.invoke(app, ["doctor"])
         assert result.exit_code == 0
-        assert "All dependencies OK" in result.output
+        assert "[PASS]" in result.output
 
-    @patch("shutil.which", return_value=None)
-    def test_doctor_missing_ffmpeg(self, mock_which):
-        result = runner.invoke(app, ["doctor"])
+    def test_doctor_missing_ffmpeg(self):
+        with patch("showrunner.commands.doctor.run_all") as mock_run:
+            mock_run.return_value = [CheckResult("ffmpeg", False, "not found")]
+            result = runner.invoke(app, ["doctor"])
         assert result.exit_code == 1
+        assert "[FAIL]" in result.output
 
 
 # ---------------------------------------------------------------------------

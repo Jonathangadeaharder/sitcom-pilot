@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-import importlib
 import json
 import shutil
-import subprocess
-import sys
 from pathlib import Path
 
 import structlog
@@ -606,69 +603,21 @@ def showcase(
 
 
 @app.command()
-def doctor() -> None:
-    """Check dependencies (ffmpeg, MLX providers, etc.)."""
-    checks = []
+def doctor(
+    json_output: bool = typer.Option(False, "--json", help="Output JSON"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show details"),
+) -> None:
+    """Check system prerequisites for the showrunner pipeline."""
+    from showrunner.commands.doctor import print_report, report_json, run_all
 
-    # ffmpeg
-    ffmpeg_path = shutil.which("ffmpeg")
-    if ffmpeg_path:
-        result = subprocess.run([ffmpeg_path, "-version"], capture_output=True, text=True)
-        version_line = result.stdout.split("\n")[0] if result.stdout else "unknown"
-        checks.append(("ffmpeg", True, version_line))
+    results = run_all()
+    if json_output:
+        console.print(report_json(results))
     else:
-        checks.append(("ffmpeg", False, "not found"))
+        print_report(results, verbose=verbose)
 
-    # ffprobe
-    checks.append(
-        ("ffprobe", shutil.which("ffprobe") is not None, shutil.which("ffprobe") or "not found")
-    )
-
-    # Python
-    checks.append(("Python", True, sys.version.split()[0]))
-
-    # Provider CLIs
-    for cmd_name in ["text2image", "image2image", "image2video", "text2speech"]:
-        found = shutil.which(cmd_name)
-        checks.append((cmd_name, found is not None, found or "not found"))
-
-    # Python packages
-    for pkg in ["structlog", "rich", "typer", "pydantic", "jsonschema"]:
-        try:
-            importlib.import_module(pkg)
-            from importlib.metadata import version as _pkg_version
-
-            ver = _pkg_version(pkg)
-            checks.append((pkg, True, ver))
-        except (ImportError, ModuleNotFoundError):
-            checks.append((pkg, False, "not installed"))
-
-    # Config files
-    config_checks = [
-        ("pyproject.toml", Path("pyproject.toml")),
-        ("Episode schema", Path("schemas/episode_v2.schema.json")),
-    ]
-    for label, path in config_checks:
-        ok = path.exists()
-        checks.append((label, ok, str(path.resolve()) if ok else "not found"))
-
-    table = Table(title="Dependency Check")
-    table.add_column("Dependency", style="cyan")
-    table.add_column("Status", justify="center")
-    table.add_column("Detail")
-
-    all_ok = True
-    for name, ok, detail in checks:
-        status = "[green]OK[/green]" if ok else "[red]MISSING[/red]"
-        if not ok:
-            all_ok = False
-        table.add_row(name, status, detail)
-
-    console.print(table)
-    if not all_ok:
-        err_console.print("\n[yellow]Some dependencies are missing.[/yellow]")
+    if not all(r.passed for r in results):
         raise typer.Exit(code=1)
-    console.print("\n[green]All dependencies OK.[/green]")
 
 
 # ---------------------------------------------------------------------------
