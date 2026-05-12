@@ -81,7 +81,7 @@ class TestValidate:
         ep = _write_episode(tmp_path)
         result = runner.invoke(app, ["validate", str(ep)])
         assert result.exit_code == 0
-        assert "OK" in result.output
+        assert "Valid:" in result.output
 
     def test_invalid_episode_missing_cast(self, tmp_path: Path):
         bad = {"schema_version": "2.0", "show": "X", "title": "Y", "environments": {}, "scenes": []}

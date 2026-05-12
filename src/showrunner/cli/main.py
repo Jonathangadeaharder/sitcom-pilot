@@ -76,13 +76,22 @@ def validate(
     strict: bool = typer.Option(False, "--strict", help="Enable strict business-rule checks"),
 ) -> None:
     """Validate an episode JSON file against the v2 schema."""
-    validator = EpisodeValidator()
-    errors = validator.validate_file(Path(episode_path), strict=strict)
-    if errors:
+    from showrunner.commands.validate import validate_episode as pydantic_validate
+
+    ep_path = Path(episode_path)
+    valid, errors = pydantic_validate(ep_path)
+    if not valid:
         for error in errors:
             err_console.print(f"[red]Error:[/red] {error}")
         raise typer.Exit(code=1)
-    console.print(f"[green]OK[/green]  {episode_path}")
+    if strict:
+        validator = EpisodeValidator()
+        strict_errors = validator.validate_file(ep_path, strict=True)
+        if strict_errors:
+            for error in strict_errors:
+                err_console.print(f"[red]Error:[/red] {error}")
+            raise typer.Exit(code=1)
+    console.print(f"[green]Valid:[/green] {episode_path}")
 
 
 # ---------------------------------------------------------------------------
