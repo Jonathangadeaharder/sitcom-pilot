@@ -5,9 +5,12 @@ from pathlib import Path
 import pytest
 
 from showrunner.determinism import (
+    DeterminismConfig,
     SeedStrategy,
     compute_manifest_hash,
+    compute_manifest_hash_from_dict,
     compute_run_fingerprint,
+    derive_seed,
     resolve_seed,
 )
 
@@ -216,3 +219,78 @@ class TestComputeRunFingerprint:
         h1 = compute_run_fingerprint([a, b])
         h2 = compute_run_fingerprint([b, a])
         assert h1 == h2
+
+
+class TestDeterminismConfig:
+    def test_create_with_seed_only(self):
+        cfg = DeterminismConfig(seed=42)
+        assert cfg.seed == 42
+        assert cfg.deterministic is False
+
+    def test_create_with_deterministic(self):
+        cfg = DeterminismConfig(seed=99, deterministic=True)
+        assert cfg.seed == 99
+        assert cfg.deterministic is True
+
+    def test_frozen(self):
+        cfg = DeterminismConfig(seed=1)
+        with pytest.raises(AttributeError):
+            cfg.seed = 2  # type: ignore  # testing frozen constraint
+
+    def test_different_seeds_not_equal(self):
+        a = DeterminismConfig(seed=1)
+        b = DeterminismConfig(seed=2)
+        assert a != b
+
+
+class TestDeriveSeed:
+    def test_reproducible(self):
+        h = "abcdef1234567890"
+        assert derive_seed(h) == derive_seed(h)
+
+    def test_returns_positive_int(self):
+        h = "0000000000000000"
+        s = derive_seed(h)
+        assert isinstance(s, int)
+        assert s >= 0
+
+    def test_different_hashes_give_different_seeds(self):
+        a = derive_seed("aaaaaaaaaaaaaaaa")
+        b = derive_seed("bbbbbbbbbbbbbbbb")
+        assert a != b
+
+    def test_first_8_hex_digits_used(self):
+        h = "deadbeefcafebabe"
+        assert derive_seed(h) == int("deadbeef", 16)
+
+    def test_short_hash_works(self):
+        h = "ff"
+        assert derive_seed(h) == 255
+
+
+class TestComputeManifestHashFromDict:
+    def test_deterministic(self):
+        ep = {"title": "Test", "scenes": []}
+        h1 = compute_manifest_hash_from_dict(ep)
+        h2 = compute_manifest_hash_from_dict(ep)
+        assert h1 == h2
+
+    def test_different_episodes_different_hash(self):
+        a = compute_manifest_hash_from_dict({"title": "Alpha"})
+        b = compute_manifest_hash_from_dict({"title": "Beta"})
+        assert a != b
+
+    def test_key_order_independent(self):
+        ep1 = {"title": "X", "scenes": []}
+        ep2 = {"scenes": [], "title": "X"}
+        assert compute_manifest_hash_from_dict(ep1) == compute_manifest_hash_from_dict(ep2)
+
+    def test_returns_hex_string(self):
+        h = compute_manifest_hash_from_dict({"title": "T"})
+        assert isinstance(h, str)
+        assert len(h) == 64
+        int(h, 16)
+
+    def test_empty_dict_works(self):
+        h = compute_manifest_hash_from_dict({})
+        assert len(h) == 64
