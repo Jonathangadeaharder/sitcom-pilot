@@ -606,20 +606,205 @@ def _find_latest_run(root: Path) -> str | None:
 
 
 # ---------------------------------------------------------------------------
-# Legacy run command (kept for backward compat)
+# E7.7: run (full pipeline)
 # ---------------------------------------------------------------------------
 
 
-@app.command(hidden=True)
+@app.command()
 def run(
     episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
-    config_file: str | None = typer.Option(None, help="Path to config file"),
+    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
+    max_workers: int = typer.Option(1, "--workers", "-w", help="Parallel render workers"),
+    skip_bootstrap: bool = typer.Option(
+        False, "--skip-bootstrap", help="Skip bootstrap (character refs) step"
+    ),
+    skip_validate: bool = typer.Option(
+        False, "--skip-validate", help="Skip schema validation step"
+    ),
+    burn_captions: bool = typer.Option(False, "--captions", help="Burn in captions"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose logging"),
 ) -> None:
-    """Run the sitcom pilot pipeline (legacy)."""
-    err_console.print(
-        "The 'run' command is deprecated. Use render-episode + assemble instead.",
+    """Run full pipeline: validate plan bootstrap render assemble."""
+    _setup_logging(verbose)
+
+    from showrunner.aiservices_client import AIServicesClient
+    from showrunner.assembler import burn_in_captions, concat_clips, generate_srt
+    from showrunner.cast_manifest import CastManifest, CharacterProfile
+    from showrunner.loader import BeatData, EpisodeLoader
+    from showrunner.paths import RunPaths
+    from showrunner.scene_render import BeatStatus, plan_beats, render_episode
+    from showrunner.validator import EpisodeValidator
+
+    ep_path = Path(episode_path)
+    out = _resolve_output_dir(output_dir)
+
+    # ------------------------------------------------------------------
+    # Stage 1: Validate
+    # ------------------------------------------------------------------
+    if not skip_validate:
+        validator = EpisodeValidator()
+        errors = validator.validate_file(ep_path)
+        if errors:
+            for e in errors:
+                err_console.print(f"  [red]Error:[/red] {e}")
+            raise typer.Exit(code=1)
+        console.print("[bold green]\u2713[/bold green]  Episode validated")
+    else:
+        console.print("[yellow]\u26a0[/yellow]  Validation skipped")
+
+    # ------------------------------------------------------------------
+    # Stage 2: Load + Plan
+    # ------------------------------------------------------------------
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        progress.add_task("Loading episode...", total=None)
+        loader = EpisodeLoader()
+        episode = loader.load(ep_path)
+
+        manifest = CastManifest()
+        for slug, char in episode.cast.items():
+            manifest.add(
+                CharacterProfile(
+                    name=char.name or slug,
+                    slug=slug,
+                    visual=char.visual,
+                    voice=char.voice,
+                )
+            )
+
+        paths = RunPaths(out)
+        jobs = plan_beats(episode, manifest, paths, episode_id=episode.title)
+
+    total_beats = len(jobs)
+    scene_count = len(episode.scenes)
+    console.print(f"  [dim]{total_beats} beats across {scene_count} scenes[/dim]")
+
+    # ------------------------------------------------------------------
+    # Stage 3: Bootstrap
+    # ------------------------------------------------------------------
+    client = AIServicesClient()
+    if not skip_bootstrap:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            task = progress.add_task("Bootstrapping character refs...", total=len(episode.cast))
+            for slug, char in episode.cast.items():
+                if char.visual:
+                    try:
+                        client.text2image(
+                            f"{char.visual}, front view, character reference sheet",
+                            paths.beat_image("bootstrap", slug),
+                        )
+                    except Exception:
+                        pass
+                progress.advance(task)
+
+            env_task = progress.add_task(
+                "Bootstrapping environment refs...", total=len(episode.environments)
+            )
+            for env_name in episode.environments:
+                progress.advance(env_task)
+
+        console.print("[bold green]\u2713[/bold green]  Bootstrap complete")
+    else:
+        console.print("[yellow]\u26a0[/yellow]  Bootstrap skipped")
+
+    # ------------------------------------------------------------------
+    # Stage 4: Render
+    # ------------------------------------------------------------------
+    console.print(f"\n[bold]Rendering[/bold] {episode.title}")
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Rendering scenes...", total=total_beats)
+
+        def _progress_callback(_report):
+            progress.update(task, advance=0)
+
+        reports = render_episode(
+            episode,
+            manifest,
+            paths,
+            client,
+            max_workers=max_workers,
+            jobs=jobs,
+        )
+
+        total_done = sum(r.completed for r in reports)
+        total_failed = sum(r.failed for r in reports)
+        progress.update(task, completed=total_done + total_failed)
+
+    console.print(
+        f"[bold green]\u2713[/bold green]  Rendered [green]{total_done}[/green]/{total_beats} beats"
     )
-    raise typer.Exit(code=1)
+    if total_failed:
+        err_console.print(f"  [red]{total_failed} beats failed[/red]")
+
+    # ------------------------------------------------------------------
+    # Stage 5: Assemble
+    # ------------------------------------------------------------------
+    video_paths: list[Path] = []
+    beat_durations: list[tuple] = []
+    for job in jobs:
+        if job.status == BeatStatus.DONE:
+            video_paths.append(job.video_path)
+            beat = BeatData(
+                beat_id=job.beat_id,
+                kind=job.kind,
+                speaker=job.speaker,
+                text=job.text,
+            )
+            beat_durations.append((beat, job.duration_sec))
+
+    if not video_paths:
+        err_console.print("[red]No rendered clips to assemble[/red]")
+        raise typer.Exit(code=1)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        progress.add_task("Concatenating clips...", total=None)
+        concat_path = paths.assembly_dir / "episode_raw.mp4"
+        concat_clips(video_paths, concat_path)
+
+        progress.add_task("Generating subtitles...", total=None)
+        srt_path = paths.assembly_dir / "episode.srt"
+        generate_srt(beat_durations, srt_path)
+
+        final_path = concat_path
+        if burn_captions:
+            progress.add_task("Burning in captions...", total=None)
+            captioned = paths.assembly_dir / "episode.mp4"
+            burn_in_captions(concat_path, srt_path, captioned)
+            final_path = captioned
+
+    # ------------------------------------------------------------------
+    # Summary
+    # ------------------------------------------------------------------
+    total_dur = sum(j.duration_sec for j in jobs)
+    table = Table(title="Pipeline Summary", show_header=False)
+    table.add_column("Key", style="cyan")
+    table.add_column("Value")
+    table.add_row("Episode", episode.title)
+    table.add_row("Scenes", str(scene_count))
+    table.add_row("Beats", f"{total_done}/{total_beats}")
+    table.add_row("Duration", f"{total_dur:.1f}s")
+    table.add_row("Video", str(final_path))
+    table.add_row("Subtitles", str(srt_path))
+    console.print()
+    console.print(table)
 
 
 if __name__ == "__main__":

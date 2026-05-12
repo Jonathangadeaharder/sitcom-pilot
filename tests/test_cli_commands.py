@@ -303,16 +303,105 @@ class TestDoctor:
 
 
 # ---------------------------------------------------------------------------
-# E7.7: Legacy run command
+# E7.7: run (full pipeline)
 # ---------------------------------------------------------------------------
 
 
-class TestLegacyRun:
-    def test_run_command_deprecated(self, tmp_path: Path):
+class TestRun:
+    @patch("showrunner.assembler.generate_srt")
+    @patch("showrunner.assembler.concat_clips")
+    @patch("showrunner.aiservices_client.AIServicesClient")
+    def test_run_validates_and_renders(
+        self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path
+    ):
+        mock_client = MagicMock()
+        mock_client.text2image.return_value = Path("/tmp/img.png")
+        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
+        mock_client_cls.return_value = mock_client
+        mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
+        mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
+
         ep = _write_episode(tmp_path)
-        result = runner.invoke(app, ["run", str(ep)])
+        out = tmp_path / "output"
+        result = runner.invoke(
+            app,
+            ["run", str(ep), "--output-dir", str(out), "--skip-bootstrap"],
+        )
+        assert result.exit_code == 0
+        assert "Episode validated" in result.output
+        assert "Bootstrap skipped" in result.output
+        assert "Rendered" in result.output
+        assert "Pipeline Summary" in result.output
+
+    def test_run_fails_invalid_episode(self, tmp_path: Path):
+        bad = tmp_path / "bad.json"
+        bad.write_text("{invalid")
+        result = runner.invoke(app, ["run", str(bad), "--skip-bootstrap"])
         assert result.exit_code == 1
-        assert "deprecated" in result.output.lower()
+
+    @patch("showrunner.assembler.generate_srt")
+    @patch("showrunner.assembler.concat_clips")
+    @patch("showrunner.aiservices_client.AIServicesClient")
+    def test_run_bootstrap_skipped(
+        self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path
+    ):
+        mock_client = MagicMock()
+        mock_client.text2image.return_value = Path("/tmp/img.png")
+        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
+        mock_client_cls.return_value = mock_client
+        mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
+        mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
+
+        ep = _write_episode(tmp_path)
+        out = tmp_path / "output"
+        result = runner.invoke(
+            app, ["run", str(ep), "--output-dir", str(out), "--skip-bootstrap"]
+        )
+        assert "Bootstrap skipped" in result.output
+        assert result.exit_code == 0
+
+    @patch("showrunner.assembler.generate_srt")
+    @patch("showrunner.assembler.concat_clips")
+    @patch("showrunner.aiservices_client.AIServicesClient")
+    def test_run_skip_validate(
+        self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path
+    ):
+        mock_client = MagicMock()
+        mock_client.text2image.return_value = Path("/tmp/img.png")
+        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
+        mock_client_cls.return_value = mock_client
+        mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
+        mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
+
+        ep = _write_episode(tmp_path)
+        out = tmp_path / "output"
+        result = runner.invoke(
+            app,
+            ["run", str(ep), "--output-dir", str(out), "--skip-validate", "--skip-bootstrap"],
+        )
+        assert "Validation skipped" in result.output
+        assert result.exit_code == 0
+
+    @patch("showrunner.assembler.generate_srt")
+    @patch("showrunner.assembler.concat_clips")
+    @patch("showrunner.aiservices_client.AIServicesClient")
+    def test_run_verbose(
+        self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path
+    ):
+        mock_client = MagicMock()
+        mock_client.text2image.return_value = Path("/tmp/img.png")
+        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
+        mock_client_cls.return_value = mock_client
+        mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
+        mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
+
+        ep = _write_episode(tmp_path)
+        out = tmp_path / "output"
+        result = runner.invoke(
+            app,
+            ["run", str(ep), "--output-dir", str(out), "--skip-bootstrap", "--verbose"],
+        )
+        assert result.exit_code == 0
 
 
 # ---------------------------------------------------------------------------
