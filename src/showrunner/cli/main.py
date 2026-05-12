@@ -512,6 +512,86 @@ def assemble(
 
 
 # ---------------------------------------------------------------------------
+# E9.4: showcase
+# ---------------------------------------------------------------------------
+
+
+@app.command()
+def showcase(
+    episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
+    scene: str = typer.Option("007", "--scene", help="Scene ID or 1-based index"),
+    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
+    run_id: str | None = typer.Option(None, "--run-id", help="Specific run ID"),
+) -> None:
+    """Extract a scene clip + thumbnail from a render run."""
+    _setup_logging()
+
+    from showrunner.assembler import concat_clips, extract_thumbnail
+    from showrunner.loader import EpisodeLoader
+    from showrunner.paths import RunPaths
+    from showrunner.scene_render import plan_beats
+
+    loader = EpisodeLoader()
+    episode = loader.load(Path(episode_path))
+
+    root = _resolve_output_dir(output_dir)
+    if run_id:
+        paths = RunPaths(root, run_id=run_id)
+    else:
+        latest = _find_latest_run(root)
+        if latest is None:
+            err_console.print("[red]No runs found in output directory.[/red]")
+            raise typer.Exit(code=1)
+        paths = RunPaths(root, run_id=latest)
+
+    manifest = _build_manifest(episode)
+    jobs = plan_beats(episode, manifest, paths)
+
+    # Resolve scene: try as scene_id first, then as 1-based index
+    target_scene = _find_scene(episode, scene)
+    if target_scene is None:
+        try:
+            idx = int(scene) - 1
+            if 0 <= idx < len(episode.scenes):
+                target_scene = episode.scenes[idx]
+            else:
+                err_console.print(
+                    f"[red]Scene index '{scene}' out of range (1-{len(episode.scenes)}).[/red]"
+                )
+                raise typer.Exit(code=1)
+        except ValueError:
+            err_console.print(f"[red]Scene '{scene}' not found.[/red]")
+            raise typer.Exit(code=1)
+
+    scene_id = target_scene.scene_id
+    scene_jobs = [j for j in jobs if j.scene_id == scene_id]
+    video_paths = [j.video_path for j in scene_jobs if j.video_path.exists()]
+
+    if not video_paths:
+        err_console.print(f"[red]No rendered clips found for scene '{scene_id}'.[/red]")
+        raise typer.Exit(code=1)
+
+    showcase_dir = paths.run_dir / "showcase"
+    showcase_dir.mkdir(parents=True, exist_ok=True)
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        clip_path = showcase_dir / f"{scene_id}.mp4"
+        progress.add_task(f"Concatenating scene {scene_id} clips...", total=None)
+        concat_clips(video_paths, clip_path)
+
+        thumb_path = showcase_dir / f"{scene_id}.jpg"
+        progress.add_task("Extracting thumbnail...", total=None)
+        extract_thumbnail(clip_path, thumb_path)
+
+    console.print(f"\n[green]Showcase clip:[/green] {clip_path}")
+    console.print(f"[green]Thumbnail:[/green] {thumb_path}")
+
+
+# ---------------------------------------------------------------------------
 # E7.6: doctor
 # ---------------------------------------------------------------------------
 
