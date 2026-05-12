@@ -12,6 +12,9 @@ active code under `src/`.
 | `retired/orchestrator.py`     | `src/sitcom_pilot/cli/main.py`        |
 | `retired/assembler.py`        | `src/sitcom_pilot/assembler.py`       |
 
+Workflow templates `flux2_t2i_shot.json` and `flux2_i2i_refine.json` (in
+`retired/workflows/`) have been retired alongside `flux2_generator.py`.
+
 All other retired files (`voice_generator.py`, `script.py`,
 `ltx_video_generator.py`, `setup_voices.py`, `flux2_generator.py`,
 `video_generator_v2.py`, `utterance_pipeline.py`, `sitcom_generator.py`,
