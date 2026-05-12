@@ -740,15 +740,15 @@ def run(
     from showrunner.aiservices_client import AIServicesClient
     from showrunner.assembler import burn_in_captions, concat_clips, generate_srt
     from showrunner.cast_manifest import CastManifest, CharacterProfile
-    from showrunner.loader import BeatData, EpisodeLoader
-    from showrunner.paths import RunPaths
-    from showrunner.scene_render import BeatStatus, plan_beats, render_episode
     from showrunner.determinism import (
         DeterminismConfig,
         SeedStrategy,
         compute_manifest_hash_from_dict,
         derive_seed,
     )
+    from showrunner.loader import BeatData, EpisodeLoader
+    from showrunner.paths import RunPaths
+    from showrunner.scene_render import BeatStatus, plan_beats, render_episode
     from showrunner.validator import EpisodeValidator
 
     ep_path = Path(episode_path)
@@ -771,11 +771,6 @@ def run(
     # ------------------------------------------------------------------
     # Stage 2: Determinism setup
     # ------------------------------------------------------------------
-    from showrunner.determinism import (
-        DeterminismConfig,
-        compute_manifest_hash_from_dict,
-        derive_seed,
-    )
 
     json_data = _load_episode(ep_path)
     manifest_hash = compute_manifest_hash_from_dict(json_data)
