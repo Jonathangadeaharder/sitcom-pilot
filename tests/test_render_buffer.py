@@ -49,12 +49,25 @@ def episode():
                 environment="office",
                 characters_present=["maya"],
                 beats=[
-                    BeatData(beat_id="001_001", kind="speech", speaker="maya",
-                             text="Hello!", seed=42, duration_sec=3.0),
-                    BeatData(beat_id="001_002", kind="silent", action="thinks",
-                             seed=43, duration_sec=2.0),
-                    BeatData(beat_id="001_003", kind="speech", speaker="maya",
-                             text="World!", seed=44, duration_sec=3.0),
+                    BeatData(
+                        beat_id="001_001",
+                        kind="speech",
+                        speaker="maya",
+                        text="Hello!",
+                        seed=42,
+                        duration_sec=3.0,
+                    ),
+                    BeatData(
+                        beat_id="001_002", kind="silent", action="thinks", seed=43, duration_sec=2.0
+                    ),
+                    BeatData(
+                        beat_id="001_003",
+                        kind="speech",
+                        speaker="maya",
+                        text="World!",
+                        seed=44,
+                        duration_sec=3.0,
+                    ),
                 ],
             ),
             SceneData(
@@ -62,8 +75,14 @@ def episode():
                 environment="office",
                 characters_present=["maya"],
                 beats=[
-                    BeatData(beat_id="002_001", kind="speech", speaker="maya",
-                             text="Scene two!", seed=45, duration_sec=3.0),
+                    BeatData(
+                        beat_id="002_001",
+                        kind="speech",
+                        speaker="maya",
+                        text="Scene two!",
+                        seed=45,
+                        duration_sec=3.0,
+                    ),
                 ],
             ),
         ],
@@ -155,8 +174,12 @@ class TestRenderEpisodeBuffered:
         paths = RunPaths(tmp_path, "test-run")
         paths.ensure_dirs()
         reports = render_episode_buffered(
-            episode, manifest, paths, mock_client,
-            buffer_size=2, max_workers=4,
+            episode,
+            manifest,
+            paths,
+            mock_client,
+            buffer_size=2,
+            max_workers=4,
         )
         assert len(reports) == 2
         assert reports[0].completed == 3
