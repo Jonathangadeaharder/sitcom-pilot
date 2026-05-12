@@ -44,6 +44,10 @@ jobs:
       - name: Run tests with coverage
         run: uv run --python ${{ matrix.python-version }} pytest tests/ -q --cov=showrunner --cov-report=term-missing
 
+      - name: Mutation testing (Python 3.11 only)
+        if: matrix.python-version == '3.11'
+        run: uv run mutmut run
+
       - name: Validate episode JSONs
         run: uv run --python ${{ matrix.python-version }} python -m showrunner.validator episode_01.json episode_02.json
 

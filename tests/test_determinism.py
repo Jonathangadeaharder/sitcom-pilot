@@ -7,6 +7,7 @@ import pytest
 from showrunner.determinism import (
     DeterminismConfig,
     SeedStrategy,
+    _file_hash,
     compute_manifest_hash,
     compute_manifest_hash_from_dict,
     compute_run_fingerprint,
@@ -43,8 +44,12 @@ class TestResolveSeed:
 
 class TestSeedStrategy:
     def test_requires_episode_id(self):
-        with pytest.raises(ValueError, match="episode_id must be non-empty"):
+        with pytest.raises(ValueError, match="^episode_id must be non-empty$"):
             SeedStrategy("")
+
+    def test_default_base_seed_is_zero(self):
+        s = SeedStrategy("S01E02")
+        assert s.base_seed == 0
 
     def test_for_beat_deterministic(self):
         s = SeedStrategy("S01E02", base_seed=42)
@@ -166,6 +171,19 @@ class TestComputeManifestHash:
         h = compute_manifest_hash(episode, manifest, episode_path="/nonexistent/path.json")
         assert len(h) == 64
 
+    def test_file_hash_returns_empty_for_missing_file(self):
+        assert _file_hash("/nonexistent/path.json") == ""
+
+    def test_episode_path_default_is_empty(self, episode_manifest):
+        episode, manifest = episode_manifest
+        h_default = compute_manifest_hash(episode, manifest)
+        h_explicit = compute_manifest_hash(episode, manifest, episode_path="")
+        assert h_default == h_explicit
+        episode, manifest = episode_manifest
+        h1 = compute_manifest_hash(episode, manifest, episode_path="")
+        h2 = compute_manifest_hash(episode, manifest, episode_path="")
+        assert h1 == h2
+
     def test_episode_path_with_file_changes_hash(self, episode_manifest, tmp_path):
         episode, manifest = episode_manifest
         ep = tmp_path / "episode.json"
@@ -219,6 +237,22 @@ class TestComputeRunFingerprint:
         h1 = compute_run_fingerprint([a, b])
         h2 = compute_run_fingerprint([b, a])
         assert h1 == h2
+
+    def test_continues_after_nonexistent_path(self, tmp_path):
+        a = tmp_path / "a.txt"
+        a.write_text("content")
+        h = compute_run_fingerprint([Path("/nonexistent/file.txt"), a])
+        assert len(h) == 64
+        assert h == compute_run_fingerprint([a])
+
+    def test_does_not_break_on_nonexistent_path(self, tmp_path):
+        a = tmp_path / "a.txt"
+        b = tmp_path / "b.txt"
+        a.write_text("first")
+        b.write_text("second")
+        all_files = compute_run_fingerprint([a, Path("/nonexistent/file.txt"), b])
+        middle_skipped = compute_run_fingerprint([a, b])
+        assert all_files == middle_skipped
 
 
 class TestDeterminismConfig:
