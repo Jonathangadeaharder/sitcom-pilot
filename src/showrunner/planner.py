@@ -14,6 +14,8 @@ _STRATEGY: dict[str, str] = {
     "transition": "video_transition",
 }
 
+_SUPPORTED_KINDS = frozenset(_STRATEGY)
+
 
 def plan_episode(episode_json: dict) -> list[BeatPlan]:
     beats: list[BeatPlan] = []
@@ -24,10 +26,13 @@ def plan_episode(episode_json: dict) -> list[BeatPlan]:
         scene_beats = scene.get("beats", [])
         beat_count = len(scene_beats)
         target_duration = scene.get("target_duration_sec", scene.get("target_seconds", 60))
-        budget_per_beat = target_duration / beat_count if beat_count > 0 else 3.0
+        budget_per_beat = max(target_duration / beat_count, 0.1) if beat_count > 0 else 3.0
 
         for b in scene_beats:
             kind = b.get("kind", "silent")
+            if kind not in _SUPPORTED_KINDS:
+                beat_id = b.get("beat_id", f"scene#{scene.get('scene_id', '?')}:beat#{beat_number + 1}")
+                raise ValueError(f"Unsupported beat kind '{kind}' for beat {beat_id}")
             beat_number += 1
             duration = b.get("duration_sec", budget_per_beat)
             description = _build_description(kind, b)
@@ -38,8 +43,8 @@ def plan_episode(episode_json: dict) -> list[BeatPlan]:
                     type=kind,
                     description=description,
                     duration_seconds=duration,
-                    estimated_cost=_COST_PER_SECOND.get(kind, 0.01) * duration,
-                    rendering_strategy=_STRATEGY.get(kind, "text2image"),
+                    estimated_cost=_COST_PER_SECOND[kind] * duration,
+                    rendering_strategy=_STRATEGY[kind],
                 )
             )
 

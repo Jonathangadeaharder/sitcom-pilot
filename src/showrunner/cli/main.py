@@ -116,7 +116,11 @@ def plan(
             err_console.print(f"[red]Error:[/red] {error}")
         raise typer.Exit(code=1)
 
-    plan = plan_episode(data)
+    try:
+        plan = plan_episode(data)
+    except Exception as exc:
+        err_console.print(f"[red]Error:[/red] Failed to plan episode: {exc}")
+        raise typer.Exit(code=1)
 
     output = [b.model_dump() for b in plan]
     json.dump(output, sys.stdout, indent=2)
