@@ -69,14 +69,15 @@ class TestGenerateSrt:
     def test_single_beat(self):
         beats = [
             BeatData(
-                beat_id="1", kind="speech", speaker="Maya",
-                text="Hello world", duration_sec=3.0,
+                beat_id="1",
+                kind="speech",
+                speaker="Maya",
+                text="Hello world",
+                duration_sec=3.0,
             ),
         ]
         result = generate_srt(beats)
-        assert result == (
-            "1\n00:00:00,000 --> 00:00:03,000\nMaya: Hello world\n"
-        )
+        assert result == ("1\n00:00:00,000 --> 00:00:03,000\nMaya: Hello world\n")
 
     def test_multiple_beats_sequential_numbering(self):
         beats = [
@@ -107,8 +108,11 @@ class TestGenerateSrt:
         )
         beats = [
             BeatData(
-                beat_id="1", kind="speech", speaker="Maya",
-                text=text, duration_sec=6.0,
+                beat_id="1",
+                kind="speech",
+                speaker="Maya",
+                text=text,
+                duration_sec=6.0,
             ),
         ]
         result = generate_srt(beats, max_chars=42)
@@ -159,8 +163,11 @@ class TestGenerateSrt:
     def test_text_with_newlines_sanitized(self):
         beats = [
             BeatData(
-                beat_id="1", kind="speech", speaker="Maya",
-                text="Line one\nLine two\r\nLine three", duration_sec=3.0,
+                beat_id="1",
+                kind="speech",
+                speaker="Maya",
+                text="Line one\nLine two\r\nLine three",
+                duration_sec=3.0,
             ),
         ]
         result = generate_srt(beats)

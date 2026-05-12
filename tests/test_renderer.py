@@ -1,18 +1,17 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-
-from showrunner.comfyui_client import ComfyUIClient
-from showrunner.loader import (
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.loader import (
     CharacterData,
     EnvironmentData,
     EpisodeData,
     SceneData,
     ShotData,
 )
-from showrunner.node_map import NodeMap
-from showrunner.prompts import PromptBuilder
-from showrunner.renderer import ShotRenderer
+from sitcom_pilot.node_map import NodeMap
+from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.renderer import ShotRenderer
 
 
 @pytest.fixture
@@ -21,13 +20,17 @@ def episode():
         title="Test",
         cast={"Jerry": CharacterData(profile="jerry_v2", trigger_word="jry_guy")},
         environments={"Apt": EnvironmentData(profile="apt_v1", trigger_word="apartment")},
-        scenes=[SceneData(
-            scene_id="S01", environment="Apt", characters_present=["Jerry"],
-            shots=[
-                ShotData("S01_SH01", "wide shot", "standing", "sitting", 42, "a.wav"),
-                ShotData("S01_SH02", "close up", "smiling", "frowning", 99, "b.wav"),
-            ],
-        )],
+        scenes=[
+            SceneData(
+                scene_id="S01",
+                environment="Apt",
+                characters_present=["Jerry"],
+                shots=[
+                    ShotData("S01_SH01", "wide shot", "standing", "sitting", 42, "a.wav"),
+                    ShotData("S01_SH02", "close up", "smiling", "frowning", 99, "b.wav"),
+                ],
+            )
+        ],
     )
 
 
@@ -128,10 +131,14 @@ def multi_char_episode():
             "C": CharacterData(profile="c_v1", trigger_word="ccc"),
         },
         environments={"Room": EnvironmentData(profile="room_v1", trigger_word="room")},
-        scenes=[SceneData(
-            scene_id="S01", environment="Room", characters_present=["A", "B", "C"],
-            shots=[ShotData("S01_SH01", "wide", "standing", "sitting", 1, "a.wav")],
-        )],
+        scenes=[
+            SceneData(
+                scene_id="S01",
+                environment="Room",
+                characters_present=["A", "B", "C"],
+                shots=[ShotData("S01_SH01", "wide", "standing", "sitting", 1, "a.wav")],
+            )
+        ],
     )
 
 
@@ -154,9 +161,12 @@ def test_render_shot_injects_multiple_character_loras(multi_char_episode, mock_c
         "43": {"inputs": {"lora_name": ""}},
     }
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), node_map=node_map)
-    shot = multi_char_episode.scenes[0].shots[0]
-    scene = multi_char_episode.scenes[0]
-    renderer.render_shot(shot, scene, multi_char_episode, template)
+    renderer.render_shot(
+        multi_char_episode.scenes[0].shots[0],
+        multi_char_episode.scenes[0],
+        multi_char_episode,
+        template,
+    )
     call_args = mock_client.queue_prompt.call_args[0][0]
     assert call_args["41"]["inputs"]["lora_name"] == "a_v1.safetensors"
     assert call_args["42"]["inputs"]["lora_name"] == "b_v1.safetensors"
@@ -165,8 +175,12 @@ def test_render_shot_injects_multiple_character_loras(multi_char_episode, mock_c
 
 def test_render_shot_uses_node_map_for_injection(episode, mock_client):
     custom_map = NodeMap(
-        start_prompt="100", end_prompt="200", audio="300",
-        seed="400", env_profile="500", char_profiles=["600"],
+        start_prompt="100",
+        end_prompt="200",
+        audio="300",
+        seed="400",
+        env_profile="500",
+        char_profiles=["600"],
     )
     mock_client.queue_prompt.return_value = "pid"
     mock_client.wait_for_completion.return_value = True
@@ -203,8 +217,12 @@ def test_render_shot_retries_on_server_crash(episode, mock_client, node_map):
         "41": {"inputs": {"lora_name": ""}},
     }
     renderer = ShotRenderer(
-        client=mock_client, builder=PromptBuilder(), node_map=node_map,
-        crash_recovery=True, server_cmd=["python", "main.py"], server_cwd="/opt/comfyui",
+        client=mock_client,
+        builder=PromptBuilder(),
+        node_map=node_map,
+        crash_recovery=True,
+        server_cmd=["python", "main.py"],
+        server_cwd="/opt/comfyui",
     )
     result = renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
     assert result.success is True
@@ -237,17 +255,24 @@ def test_render_shot_char_profiles_overflow(mock_client):
             "B": CharacterData(profile="b_v1", trigger_word="bbb"),
         },
         environments={"Room": EnvironmentData(profile="room_v1", trigger_word="room")},
-        scenes=[SceneData(
-            scene_id="S01", environment="Room", characters_present=["A", "B"],
-            shots=[ShotData("S01_SH01", "wide", "a", "b", 1, "a.wav")],
-        )],
+        scenes=[
+            SceneData(
+                scene_id="S01",
+                environment="Room",
+                characters_present=["A", "B"],
+                shots=[ShotData("S01_SH01", "wide", "a", "b", 1, "a.wav")],
+            )
+        ],
     )
     mock_client.queue_prompt.return_value = "pid"
     mock_client.wait_for_completion.return_value = True
     template = {
-        "6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}},
-        "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}},
-        "40": {"inputs": {"lora_name": ""}}, "41": {"inputs": {"lora_name": ""}},
+        "6": {"inputs": {"text": ""}},
+        "12": {"inputs": {"text": ""}},
+        "25": {"inputs": {"audio": ""}},
+        "3": {"inputs": {"seed": 0}},
+        "40": {"inputs": {"lora_name": ""}},
+        "41": {"inputs": {"lora_name": ""}},
     }
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), node_map=single_char_map)
     renderer.render_shot(multi_ep.scenes[0].shots[0], multi_ep.scenes[0], multi_ep, template)
@@ -260,13 +285,20 @@ def test_render_shot_crash_recovery_raises_after_max_retries(episode, mock_clien
     mock_client.is_server_running.return_value = False
     mock_client.ensure_server_running = MagicMock()
     template = {
-        "6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}},
-        "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}},
-        "40": {"inputs": {"lora_name": ""}}, "41": {"inputs": {"lora_name": ""}},
+        "6": {"inputs": {"text": ""}},
+        "12": {"inputs": {"text": ""}},
+        "25": {"inputs": {"audio": ""}},
+        "3": {"inputs": {"seed": 0}},
+        "40": {"inputs": {"lora_name": ""}},
+        "41": {"inputs": {"lora_name": ""}},
     }
     renderer = ShotRenderer(
-        client=mock_client, builder=PromptBuilder(), node_map=node_map,
-        crash_recovery=True, server_cmd=["python", "main.py"], server_cwd="/opt",
+        client=mock_client,
+        builder=PromptBuilder(),
+        node_map=node_map,
+        crash_recovery=True,
+        server_cmd=["python", "main.py"],
+        server_cwd="/opt",
         max_crash_retries=2,
     )
     with patch("time.sleep"):
@@ -290,21 +322,26 @@ def test_render_shot_no_env_data(mock_client):
         title="NoEnv",
         cast={"X": CharacterData(profile="x_v1", trigger_word="xxx")},
         environments={},
-        scenes=[SceneData(
-            scene_id="S01", environment="NonExistent", characters_present=["X"],
-            shots=[ShotData("S01_SH01", "wide", "a", "b", 1, "a.wav")],
-        )],
+        scenes=[
+            SceneData(
+                scene_id="S01",
+                environment="NonExistent",
+                characters_present=["X"],
+                shots=[ShotData("S01_SH01", "wide", "a", "b", 1, "a.wav")],
+            )
+        ],
     )
     mock_client.queue_prompt.return_value = "pid"
     mock_client.wait_for_completion.return_value = True
     template = {
-        "6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}},
-        "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}},
+        "6": {"inputs": {"text": ""}},
+        "12": {"inputs": {"text": ""}},
+        "25": {"inputs": {"audio": ""}},
+        "3": {"inputs": {"seed": 0}},
         "41": {"inputs": {"lora_name": ""}},
     }
     renderer = ShotRenderer(
-        client=mock_client, builder=PromptBuilder(),
-        node_map=NodeMap(env_profile="40"),
+        client=mock_client, builder=PromptBuilder(), node_map=NodeMap(env_profile="40")
     )
     result = renderer.render_shot(ep.scenes[0].shots[0], ep.scenes[0], ep, template)
     assert result.success is True
@@ -351,21 +388,23 @@ def test_render_shot_retries_calls_ensure_server_with_correct_args(episode, mock
     mock_client.is_server_running.return_value = False
     mock_client.ensure_server_running = MagicMock()
     template = {
-        "6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}},
-        "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}},
-        "40": {"inputs": {"lora_name": ""}}, "41": {"inputs": {"lora_name": ""}},
+        "6": {"inputs": {"text": ""}},
+        "12": {"inputs": {"text": ""}},
+        "25": {"inputs": {"audio": ""}},
+        "3": {"inputs": {"seed": 0}},
+        "40": {"inputs": {"lora_name": ""}},
+        "41": {"inputs": {"lora_name": ""}},
     }
     renderer = ShotRenderer(
-        client=mock_client, builder=PromptBuilder(), node_map=node_map,
-        crash_recovery=True, server_cmd=["python", "main.py"],
+        client=mock_client,
+        builder=PromptBuilder(),
+        node_map=node_map,
+        crash_recovery=True,
+        server_cmd=["python", "main.py"],
         server_cwd="/opt/comfyui",
     )
-    result = renderer.render_shot(
-        episode.scenes[0].shots[0], episode.scenes[0], episode, template
-    )
-    mock_client.ensure_server_running.assert_called_once_with(
-        ["python", "main.py"], "/opt/comfyui",
-    )
+    result = renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
+    mock_client.ensure_server_running.assert_called_once_with(["python", "main.py"], "/opt/comfyui")
     assert result.success is True
 
 
@@ -375,18 +414,22 @@ def test_render_shot_crash_recovery_skips_restart_when_server_up(episode, mock_c
     mock_client.is_server_running.return_value = True
     mock_client.ensure_server_running = MagicMock()
     template = {
-        "6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}},
-        "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}},
-        "40": {"inputs": {"lora_name": ""}}, "41": {"inputs": {"lora_name": ""}},
+        "6": {"inputs": {"text": ""}},
+        "12": {"inputs": {"text": ""}},
+        "25": {"inputs": {"audio": ""}},
+        "3": {"inputs": {"seed": 0}},
+        "40": {"inputs": {"lora_name": ""}},
+        "41": {"inputs": {"lora_name": ""}},
     }
     renderer = ShotRenderer(
-        client=mock_client, builder=PromptBuilder(), node_map=node_map,
-        crash_recovery=True, server_cmd=["python", "main.py"],
+        client=mock_client,
+        builder=PromptBuilder(),
+        node_map=node_map,
+        crash_recovery=True,
+        server_cmd=["python", "main.py"],
         server_cwd="/opt/comfyui",
     )
-    result = renderer.render_shot(
-        episode.scenes[0].shots[0], episode.scenes[0], episode, template
-    )
+    result = renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
     assert result.success is True
     mock_client.ensure_server_running.assert_not_called()
 
@@ -396,14 +439,21 @@ def test_render_shot_crash_recovery_raises_correct_exception(episode, mock_clien
     mock_client.is_server_running.return_value = False
     mock_client.ensure_server_running = MagicMock()
     template = {
-        "6": {"inputs": {"text": ""}}, "12": {"inputs": {"text": ""}},
-        "25": {"inputs": {"audio": ""}}, "3": {"inputs": {"seed": 0}},
-        "40": {"inputs": {"lora_name": ""}}, "41": {"inputs": {"lora_name": ""}},
+        "6": {"inputs": {"text": ""}},
+        "12": {"inputs": {"text": ""}},
+        "25": {"inputs": {"audio": ""}},
+        "3": {"inputs": {"seed": 0}},
+        "40": {"inputs": {"lora_name": ""}},
+        "41": {"inputs": {"lora_name": ""}},
     }
     renderer = ShotRenderer(
-        client=mock_client, builder=PromptBuilder(), node_map=node_map,
-        crash_recovery=True, server_cmd=["python", "main.py"],
-        server_cwd="/opt", max_crash_retries=2,
+        client=mock_client,
+        builder=PromptBuilder(),
+        node_map=node_map,
+        crash_recovery=True,
+        server_cmd=["python", "main.py"],
+        server_cwd="/opt",
+        max_crash_retries=2,
     )
     with patch("time.sleep"):
         with pytest.raises(ConnectionError) as exc_info:
@@ -417,13 +467,15 @@ def test_inject_workflow_with_minimal_template(mock_client):
     ep = EpisodeData(
         title="T",
         cast={"X": CharacterData(profile="x_v1", trigger_word="xxx")},
-        environments={
-            "R": EnvironmentData(profile="r_v1", trigger_word="room")
-        },
-        scenes=[SceneData(
-            scene_id="S1", environment="R", characters_present=["X"],
-            shots=[ShotData("S1_SH1", "wide", "a", "b", 7, "aud.wav")],
-        )],
+        environments={"R": EnvironmentData(profile="r_v1", trigger_word="room")},
+        scenes=[
+            SceneData(
+                scene_id="S1",
+                environment="R",
+                characters_present=["X"],
+                shots=[ShotData("S1_SH1", "wide", "a", "b", 7, "aud.wav")],
+            )
+        ],
     )
     mock_client.queue_prompt.return_value = "pid"
     mock_client.wait_for_completion.return_value = True

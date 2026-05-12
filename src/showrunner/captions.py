@@ -26,7 +26,7 @@ def split_text_for_subtitles(text: str, max_chars: int = 42) -> list[str]:
             text = text[max_chars:]
         else:
             chunks.append(text[:split_at].strip())
-            text = text[split_at + 1:]
+            text = text[split_at + 1 :]
     return chunks
 
 
