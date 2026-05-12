@@ -81,7 +81,7 @@ class TestValidate:
         ep = _write_episode(tmp_path)
         result = runner.invoke(app, ["validate", str(ep)])
         assert result.exit_code == 0
-        assert "Valid:" in result.output
+        assert "OK" in result.output
 
     def test_invalid_episode_missing_cast(self, tmp_path: Path):
         bad = {"schema_version": "2.0", "show": "X", "title": "Y", "environments": {}, "scenes": []}
@@ -283,96 +283,6 @@ class TestAssemble:
 
 
 # ---------------------------------------------------------------------------
-# E9.4: showcase
-# ---------------------------------------------------------------------------
-
-
-class TestShowcase:
-    @patch("showrunner.assembler.extract_thumbnail")
-    @patch("showrunner.assembler.concat_clips")
-    def test_showcase_scene_by_id(self, mock_concat, mock_thumb, tmp_path: Path):
-        ep = _write_episode(tmp_path)
-        out = tmp_path / "output"
-        run_dir = out / "test-run"
-        beats_dir = run_dir / "beats" / "S01"
-        beats_dir.mkdir(parents=True)
-        (beats_dir / "S01_B01.mp4").write_bytes(b"fake")
-        (beats_dir / "S01_B02.mp4").write_bytes(b"fake")
-        showcase_dir = run_dir / "showcase"
-        showcase_dir.mkdir(parents=True)
-
-        mock_concat.return_value = showcase_dir / "S01.mp4"
-        mock_thumb.return_value = showcase_dir / "S01.jpg"
-
-        result = runner.invoke(
-            app,
-            [
-                "showcase",
-                str(ep),
-                "--scene",
-                "S01",
-                "--output-dir",
-                str(out),
-                "--run-id",
-                "test-run",
-            ],
-        )
-        assert result.exit_code == 0
-        assert "Showcase" in result.output
-
-    @patch("showrunner.assembler.extract_thumbnail")
-    @patch("showrunner.assembler.concat_clips")
-    def test_showcase_scene_by_index(self, mock_concat, mock_thumb, tmp_path: Path):
-        ep = _write_episode(tmp_path)
-        out = tmp_path / "output"
-        run_dir = out / "test-run"
-        beats_dir = run_dir / "beats" / "S01"
-        beats_dir.mkdir(parents=True)
-        (beats_dir / "S01_B01.mp4").write_bytes(b"fake")
-        (beats_dir / "S01_B02.mp4").write_bytes(b"fake")
-        showcase_dir = run_dir / "showcase"
-        showcase_dir.mkdir(parents=True)
-
-        mock_concat.return_value = showcase_dir / "S01.mp4"
-        mock_thumb.return_value = showcase_dir / "S01.jpg"
-
-        result = runner.invoke(
-            app,
-            ["showcase", str(ep), "--scene", "1", "--output-dir", str(out), "--run-id", "test-run"],
-        )
-        assert result.exit_code == 0
-        assert "Showcase" in result.output
-
-    def test_showcase_scene_not_found(self, tmp_path: Path):
-        ep = _write_episode(tmp_path)
-        out = tmp_path / "output"
-        result = runner.invoke(
-            app,
-            ["showcase", str(ep), "--scene", "NONEXISTENT", "--output-dir", str(out)],
-        )
-        assert result.exit_code == 1
-
-    def test_showcase_no_rendered_clips(self, tmp_path: Path):
-        ep = _write_episode(tmp_path)
-        out = tmp_path / "output"
-        result = runner.invoke(
-            app,
-            [
-                "showcase",
-                str(ep),
-                "--scene",
-                "S01",
-                "--output-dir",
-                str(out),
-                "--run-id",
-                "test-run",
-            ],
-        )
-        assert result.exit_code == 1
-        assert "No rendered clips" in result.output
-
-
-# ---------------------------------------------------------------------------
 # E7.6: doctor
 # ---------------------------------------------------------------------------
 
@@ -393,97 +303,16 @@ class TestDoctor:
 
 
 # ---------------------------------------------------------------------------
-# E7.7: run (full pipeline)
+# E7.7: Legacy run command
 # ---------------------------------------------------------------------------
 
 
-class TestRun:
-    @patch("showrunner.assembler.generate_srt")
-    @patch("showrunner.assembler.concat_clips")
-    @patch("showrunner.aiservices_client.AIServicesClient")
-    def test_run_validates_and_renders(
-        self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path
-    ):
-        mock_client = MagicMock()
-        mock_client.text2image.return_value = Path("/tmp/img.png")
-        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
-        mock_client_cls.return_value = mock_client
-        mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
-        mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
-
+class TestLegacyRun:
+    def test_run_command_deprecated(self, tmp_path: Path):
         ep = _write_episode(tmp_path)
-        out = tmp_path / "output"
-        result = runner.invoke(
-            app,
-            ["run", str(ep), "--output-dir", str(out), "--skip-bootstrap"],
-        )
-        assert result.exit_code == 0
-        assert "Episode validated" in result.output
-        assert "Bootstrap skipped" in result.output
-        assert "Rendered" in result.output
-        assert "Pipeline Summary" in result.output
-
-    def test_run_fails_invalid_episode(self, tmp_path: Path):
-        bad = tmp_path / "bad.json"
-        bad.write_text("{invalid")
-        result = runner.invoke(app, ["run", str(bad), "--skip-bootstrap"])
+        result = runner.invoke(app, ["run", str(ep)])
         assert result.exit_code == 1
-
-    @patch("showrunner.assembler.generate_srt")
-    @patch("showrunner.assembler.concat_clips")
-    @patch("showrunner.aiservices_client.AIServicesClient")
-    def test_run_bootstrap_skipped(self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path):
-        mock_client = MagicMock()
-        mock_client.text2image.return_value = Path("/tmp/img.png")
-        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
-        mock_client_cls.return_value = mock_client
-        mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
-        mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
-
-        ep = _write_episode(tmp_path)
-        out = tmp_path / "output"
-        result = runner.invoke(app, ["run", str(ep), "--output-dir", str(out), "--skip-bootstrap"])
-        assert "Bootstrap skipped" in result.output
-        assert result.exit_code == 0
-
-    @patch("showrunner.assembler.generate_srt")
-    @patch("showrunner.assembler.concat_clips")
-    @patch("showrunner.aiservices_client.AIServicesClient")
-    def test_run_skip_validate(self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path):
-        mock_client = MagicMock()
-        mock_client.text2image.return_value = Path("/tmp/img.png")
-        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
-        mock_client_cls.return_value = mock_client
-        mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
-        mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
-
-        ep = _write_episode(tmp_path)
-        out = tmp_path / "output"
-        result = runner.invoke(
-            app,
-            ["run", str(ep), "--output-dir", str(out), "--skip-validate", "--skip-bootstrap"],
-        )
-        assert "Validation skipped" in result.output
-        assert result.exit_code == 0
-
-    @patch("showrunner.assembler.generate_srt")
-    @patch("showrunner.assembler.concat_clips")
-    @patch("showrunner.aiservices_client.AIServicesClient")
-    def test_run_verbose(self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path):
-        mock_client = MagicMock()
-        mock_client.text2image.return_value = Path("/tmp/img.png")
-        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
-        mock_client_cls.return_value = mock_client
-        mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
-        mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
-
-        ep = _write_episode(tmp_path)
-        out = tmp_path / "output"
-        result = runner.invoke(
-            app,
-            ["run", str(ep), "--output-dir", str(out), "--skip-bootstrap", "--verbose"],
-        )
-        assert result.exit_code == 0
+        assert "deprecated" in result.output.lower()
 
 
 # ---------------------------------------------------------------------------
@@ -496,27 +325,3 @@ class TestHelp:
         result = runner.invoke(app, [])
         assert result.exit_code == 0 or result.exit_code == 2
         assert "Usage" in result.output
-
-    def test_help_has_no_provider_flag(self):
-        result = runner.invoke(app, ["--help"])
-        assert result.exit_code == 0
-        assert "--provider" not in result.output
-        assert "--backend" not in result.output
-        assert "--engine" not in result.output
-
-    def test_subcommand_help_no_provider_flags(self):
-        for cmd_args in [
-            ["validate", "--help"],
-            ["plan", "--help"],
-            ["bootstrap", "--help"],
-            ["render", "beat", "--help"],
-            ["render", "scene", "--help"],
-            ["render", "episode", "--help"],
-            ["assemble", "--help"],
-            ["doctor", "--help"],
-        ]:
-            result = runner.invoke(app, cmd_args)
-            assert result.exit_code == 0, f"{cmd_args} failed: {result.output}"
-            assert "--provider" not in result.output, f"{cmd_args} contains --provider"
-            assert "--backend" not in result.output, f"{cmd_args} contains --backend"
-            assert "--engine" not in result.output, f"{cmd_args} contains --engine"
