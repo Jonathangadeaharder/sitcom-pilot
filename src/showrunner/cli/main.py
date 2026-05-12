@@ -743,6 +743,12 @@ def run(
     from showrunner.loader import BeatData, EpisodeLoader
     from showrunner.paths import RunPaths
     from showrunner.scene_render import BeatStatus, plan_beats, render_episode
+    from showrunner.determinism import (
+        DeterminismConfig,
+        SeedStrategy,
+        compute_manifest_hash_from_dict,
+        derive_seed,
+    )
     from showrunner.validator import EpisodeValidator
 
     ep_path = Path(episode_path)
@@ -771,7 +777,7 @@ def run(
         derive_seed,
     )
 
-    json_data = json.loads(ep_path.read_text())
+    json_data = _load_episode(ep_path)
     manifest_hash = compute_manifest_hash_from_dict(json_data)
     effective_seed = seed if seed is not None else derive_seed(manifest_hash)
     det_config = DeterminismConfig(seed=effective_seed, deterministic=deterministic)
@@ -804,8 +810,9 @@ def run(
                 )
             )
 
+        seed_strategy = SeedStrategy(episode.title, base_seed=effective_seed)
         paths = RunPaths(out)
-        jobs = plan_beats(episode, manifest, paths, episode_id=episode.title)
+        jobs = plan_beats(episode, manifest, paths, episode_id=episode.title, seed_strategy=seed_strategy)
 
     total_beats = len(jobs)
     scene_count = len(episode.scenes)
