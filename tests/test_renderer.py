@@ -2,17 +2,17 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from showrunner.comfyui_client import ComfyUIClient
-from showrunner.loader import (
+from sitcom_pilot.comfyui_client import ComfyUIClient
+from sitcom_pilot.loader import (
     CharacterData,
     EnvironmentData,
     EpisodeData,
     SceneData,
     ShotData,
 )
-from showrunner.node_map import NodeMap
-from showrunner.prompts import PromptBuilder
-from showrunner.renderer import ShotRenderer
+from sitcom_pilot.node_map import NodeMap
+from sitcom_pilot.prompts import PromptBuilder
+from sitcom_pilot.renderer import ShotRenderer
 
 
 @pytest.fixture
@@ -244,7 +244,7 @@ def test_render_shot_crash_recovery_disabled_raises(episode, mock_client, node_m
     renderer = ShotRenderer(client=mock_client, builder=PromptBuilder(), node_map=node_map)
     with pytest.raises(ConnectionError):
         renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
-    assert mock_client.queue_prompt.call_count >= 1
+    assert mock_client.queue_prompt.call_count == 1
 
 
 def test_render_shot_char_profiles_overflow(mock_client):
@@ -460,7 +460,7 @@ def test_render_shot_crash_recovery_raises_correct_exception(episode, mock_clien
         with pytest.raises(ConnectionError) as exc_info:
             renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
     assert "refused" in str(exc_info.value)
-    assert mock_client.queue_prompt.call_count >= 1
+    assert mock_client.queue_prompt.call_count == 2
 
 
 def test_inject_workflow_with_minimal_template(mock_client):
