@@ -1,0 +1,75 @@
+root: true
+
+exclude:
+  - __pycache__/**
+  - .git/**
+  - .venv/**
+  - "*.egg-info/**"
+  - .pytest_cache/**
+  - .ruff_cache/**
+  - .mypy_cache/**
+  - output/**
+  - legacy/**
+
+rules:
+  max-depth:
+    max: 5
+    exemptions:
+      - ".git/**"
+      - "**/__pycache__/**"
+
+  max-files-in-dir:
+    max: 30
+    exemptions:
+      - ".git/**"
+
+  max-subdirs:
+    max: 15
+    exemptions:
+      - ".git/**"
+
+  naming-convention:
+    style: "snake_case"
+    apply-to:
+      - "**/*.py"
+    exemptions:
+      - "**/__pycache__/**"
+      - ".git/**"
+      - "README.md"
+      - "LICENSE"
+
+  file-existence:
+    "README.md":
+      rule: "exists:1"
+      exemptions:
+        - "src/**"
+        - "tests/**"
+        - "schemas/**"
+        - "scripts/**"
+        - "workflows/**"
+        - "docs/**"
+    "pyproject.toml":
+      rule: "exists:1"
+      exemptions:
+        - "src/**"
+        - "tests/**"
+        - "schemas/**"
+
+  disallowed-patterns:
+    - "*.tmp"
+    - "*.bak"
+    - ".DS_Store"
+    - "*.pyc"
+    - "*.pyo"
+
+  test-adjacency:
+    pattern: "separate"
+    test-dir: "tests"
+    file-patterns:
+      - "**/*.py"
+    exemptions:
+      - "**/__init__.py"
+      - "**/conftest.py"
+      - "scripts/**"
+      - "schemas/**"
+      - "workflows/**"
