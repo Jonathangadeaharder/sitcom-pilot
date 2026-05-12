@@ -18,7 +18,6 @@ _STRATEGY: dict[str, Literal["text2image", "voice_clone+video", "video_transitio
 
 _SUPPORTED_KINDS = frozenset(_STRATEGY)
 
-
 def plan_episode(episode_json: dict) -> list[BeatPlan]:
     beats: list[BeatPlan] = []
     beat_number = 0
