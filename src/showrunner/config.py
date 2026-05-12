@@ -42,11 +42,6 @@ if _PYDANTIC_AVAILABLE:
         cooldown_seconds: float = Field(default=0.0)  # pyright: ignore[reportPossiblyUnboundVariable]
         max_crash_retries: int = Field(default=3)  # pyright: ignore[reportPossiblyUnboundVariable]
 
-        # Providers
-        image_provider: str = Field(default="mlx-flux")  # pyright: ignore[reportPossiblyUnboundVariable]
-        video_provider: str = Field(default="mlx-ltx")  # pyright: ignore[reportPossiblyUnboundVariable]
-        tts_provider: str = Field(default="mlx-audio")  # pyright: ignore[reportPossiblyUnboundVariable]
-        asr_provider: str | None = Field(default=None)  # pyright: ignore[reportPossiblyUnboundVariable]
 
 else:
     # Minimal fallback when pydantic-settings is not installed
@@ -58,10 +53,6 @@ else:
                 "run_id": os.environ.get("SITCOM_RUN_ID", ""),
                 "cooldown_seconds": float(os.environ.get("SITCOM_COOLDOWN_SECONDS", "0.0")),
                 "max_crash_retries": int(os.environ.get("SITCOM_MAX_CRASH_RETRIES", "3")),
-                "image_provider": os.environ.get("SITCOM_IMAGE_PROVIDER", "mlx-flux"),
-                "video_provider": os.environ.get("SITCOM_VIDEO_PROVIDER", "mlx-ltx"),
-                "tts_provider": os.environ.get("SITCOM_TTS_PROVIDER", "mlx-audio"),
-                "asr_provider": os.environ.get("SITCOM_ASR_PROVIDER") or None,
             }
             for k, v in {**defaults, **kwargs}.items():
                 setattr(self, k, v)
@@ -74,8 +65,4 @@ else:
                 run_id=os.environ.get("SITCOM_RUN_ID", ""),
                 cooldown_seconds=float(os.environ.get("SITCOM_COOLDOWN_SECONDS", "0.0")),
                 max_crash_retries=int(os.environ.get("SITCOM_MAX_CRASH_RETRIES", "3")),
-                image_provider=os.environ.get("SITCOM_IMAGE_PROVIDER", "mlx-flux"),
-                video_provider=os.environ.get("SITCOM_VIDEO_PROVIDER", "mlx-ltx"),
-                tts_provider=os.environ.get("SITCOM_TTS_PROVIDER", "mlx-audio"),
-                asr_provider=os.environ.get("SITCOM_ASR_PROVIDER") or None,
             )

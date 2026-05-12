@@ -414,3 +414,27 @@ class TestHelp:
         result = runner.invoke(app, [])
         assert result.exit_code == 0 or result.exit_code == 2
         assert "Usage" in result.output
+
+    def test_help_has_no_provider_flag(self):
+        result = runner.invoke(app, ["--help"])
+        assert result.exit_code == 0
+        assert "--provider" not in result.output
+        assert "--backend" not in result.output
+        assert "--engine" not in result.output
+
+    def test_subcommand_help_no_provider_flags(self):
+        for cmd_args in [
+            ["validate", "--help"],
+            ["plan", "--help"],
+            ["bootstrap", "--help"],
+            ["render", "beat", "--help"],
+            ["render", "scene", "--help"],
+            ["render", "episode", "--help"],
+            ["assemble", "--help"],
+            ["doctor", "--help"],
+        ]:
+            result = runner.invoke(app, cmd_args)
+            assert result.exit_code == 0, f"{cmd_args} failed: {result.output}"
+            assert "--provider" not in result.output, f"{cmd_args} contains --provider"
+            assert "--backend" not in result.output, f"{cmd_args} contains --backend"
+            assert "--engine" not in result.output, f"{cmd_args} contains --engine"

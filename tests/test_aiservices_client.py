@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -9,22 +10,33 @@ from showrunner.aiservices_client import AIServicesClient, _build_speech_tags, _
 from showrunner.loader import VoiceConfig
 
 
+def _mock_aiservice_package(name: str):
+    """Create real submodule so `from pkg.client import generate` works."""
+    import types
+
+    pkg_mod = types.ModuleType(name)
+    pkg_mod.__path__ = [name]
+    client_mod = types.ModuleType(f"{name}.client")
+    client_mod.generate = MagicMock()
+    sys.modules[name] = pkg_mod
+    sys.modules[f"{name}.client"] = client_mod
+
+
+@pytest.fixture(autouse=True)
+def _mock_aiservice_packages():
+    for pkg in ["text2image", "image2image", "image2video", "text2speech", "audio2subtitle"]:
+        if pkg not in sys.modules:
+            _mock_aiservice_package(pkg)
+
+
 @pytest.fixture
 def client():
-    return AIServicesClient(
-        image_provider="text2image.mlx",
-        image_edit_provider="image2image.mlx",
-        video_provider="image2video.mlx",
-        tts_provider="text2speech.fish_mlx",
-        subprocess_fallback=True,
-    )
+    return AIServicesClient(subprocess_fallback=True)
 
 
 @pytest.fixture
 def client_no_fallback():
-    return AIServicesClient(
-        subprocess_fallback=False,
-    )
+    return AIServicesClient(subprocess_fallback=False)
 
 
 class TestDiv8:
@@ -57,71 +69,72 @@ class TestBuildSpeechTags:
 class TestText2Image:
     def test_python_api_success(self, client, tmp_path):
         mock_result = tmp_path / "out.png"
-        with patch("text2image.client.generate", return_value=mock_result) as mock_gen:
-            result = client.text2image("a cat", tmp_path / "out.png", seed=42)
-            assert isinstance(result, Path)
-            mock_gen.assert_called_once()
+        gen = sys.modules["text2image.client"].generate
+        gen.return_value = mock_result
+        result = client.text2image("a cat", tmp_path / "out.png", seed=42)
+        assert isinstance(result, Path)
+        gen.assert_called_once()
 
     @patch("showrunner.aiservices_client._run_cli")
     def test_subprocess_fallback(self, mock_cli, client, tmp_path):
-        with patch("text2image.client.generate", side_effect=ImportError):
-            result = client.text2image("a cat", tmp_path / "out.png", seed=42)
-            assert isinstance(result, Path)
-            mock_cli.assert_called_once()
+        sys.modules["text2image.client"].generate.side_effect = ImportError
+        result = client.text2image("a cat", tmp_path / "out.png", seed=42)
+        assert isinstance(result, Path)
+        mock_cli.assert_called_once()
 
     def test_no_fallback_raises(self, client_no_fallback, tmp_path):
-        with patch("text2image.client.generate", side_effect=ImportError):
-            with pytest.raises(RuntimeError, match="no provider"):
-                client_no_fallback.text2image("a cat", tmp_path / "out.png")
+        sys.modules["text2image.client"].generate.side_effect = ImportError
+        with pytest.raises(RuntimeError, match="no provider"):
+            client_no_fallback.text2image("a cat", tmp_path / "out.png")
 
 
 class TestImage2Image:
     @patch("showrunner.aiservices_client._run_cli")
     def test_subprocess_fallback(self, mock_cli, client, tmp_path):
-        with patch("image2image.client.generate", side_effect=ImportError):
-            result = client.image2image(
-                tmp_path / "input.png", "edit this", tmp_path / "out.png", seed=42
-            )
-            assert isinstance(result, Path)
-            mock_cli.assert_called_once()
+        sys.modules["image2image.client"].generate.side_effect = ImportError
+        result = client.image2image(
+            tmp_path / "input.png", "edit this", tmp_path / "out.png", seed=42
+        )
+        assert isinstance(result, Path)
+        mock_cli.assert_called_once()
 
 
 class TestImage2Video:
     @patch("showrunner.aiservices_client._run_cli")
     def test_subprocess_fallback(self, mock_cli, client, tmp_path):
-        with patch("image2video.client.generate", side_effect=ImportError):
-            result = client.image2video(
-                tmp_path / "input.png", "animate this", tmp_path / "out.mp4", seed=42
-            )
-            assert isinstance(result, Path)
-            mock_cli.assert_called_once()
+        sys.modules["image2video.client"].generate.side_effect = ImportError
+        result = client.image2video(
+            tmp_path / "input.png", "animate this", tmp_path / "out.mp4", seed=42
+        )
+        assert isinstance(result, Path)
+        mock_cli.assert_called_once()
 
     @patch("showrunner.aiservices_client._mux_audio")
     @patch("showrunner.aiservices_client._run_cli")
     def test_audio_mux(self, mock_cli, mock_mux, client, tmp_path):
         mock_mux.return_value = tmp_path / "out.mp4"
-        with patch("image2video.client.generate", side_effect=ImportError):
-            result = client.image2video(
-                tmp_path / "input.png",
-                "animate",
-                tmp_path / "out.mp4",
-                audio_path=tmp_path / "audio.wav",
-                seed=42,
-            )
-            assert isinstance(result, Path)
-            mock_mux.assert_called_once()
+        sys.modules["image2video.client"].generate.side_effect = ImportError
+        result = client.image2video(
+            tmp_path / "input.png",
+            "animate",
+            tmp_path / "out.mp4",
+            audio_path=tmp_path / "audio.wav",
+            seed=42,
+        )
+        assert isinstance(result, Path)
+        mock_mux.assert_called_once()
 
 
 class TestText2Speech:
     @patch("showrunner.aiservices_client._run_cli")
     def test_subprocess_fallback(self, mock_cli, client, tmp_path):
         voice = VoiceConfig(provider="mlx-audio", voice_id="maya_v1", seed=42, temperature=0.8)
-        with patch("text2speech.client.generate", side_effect=ImportError):
-            result = client.text2speech(
-                "Hello world", tmp_path / "out.wav", voice=voice, emotion="happy"
-            )
-            assert isinstance(result, Path)
-            mock_cli.assert_called_once()
+        sys.modules["text2speech.client"].generate.side_effect = ImportError
+        result = client.text2speech(
+            "Hello world", tmp_path / "out.wav", voice=voice, emotion="happy"
+        )
+        assert isinstance(result, Path)
+        mock_cli.assert_called_once()
 
     def test_character_voice_extraction(self, client, tmp_path):
         from showrunner.loader import CharacterData
@@ -130,10 +143,10 @@ class TestText2Speech:
             name="Maya",
             voice=VoiceConfig(provider="mlx-audio", voice_id="maya_v1", clone_from="ref.wav"),
         )
-        with patch("text2speech.client.generate", side_effect=ImportError):
-            with patch("showrunner.aiservices_client._run_cli"):
-                result = client.text2speech("Hi", tmp_path / "out.wav", character=char)
-                assert isinstance(result, Path)
+        sys.modules["text2speech.client"].generate.side_effect = ImportError
+        with patch("showrunner.aiservices_client._run_cli"):
+            result = client.text2speech("Hi", tmp_path / "out.wav", character=char)
+            assert isinstance(result, Path)
 
 
 class TestEstimateCost:
@@ -154,52 +167,30 @@ class TestDiscoverCapabilities:
         assert "image2image" in caps
         assert "image2video" in caps
         assert "text2speech" in caps
-
-    def test_asr_optional(self):
-        client = AIServicesClient(asr_provider="whisper.mlx")
-        caps = client.discover_capabilities()
         assert "audio2subtitle" in caps
-
-    def test_no_asr(self):
-        client = AIServicesClient(asr_provider=None)
-        caps = client.discover_capabilities()
-        assert "audio2subtitle" not in caps
 
 
 class TestOutputDirCreation:
     @patch("showrunner.aiservices_client._run_cli")
     def test_creates_parent_dirs(self, mock_cli, client, tmp_path):
         deep = tmp_path / "a" / "b" / "c" / "out.png"
-        with patch("text2image.client.generate", side_effect=ImportError):
-            client.text2image("test", deep)
-            assert deep.parent.exists()
+        sys.modules["text2image.client"].generate.side_effect = ImportError
+        client.text2image("test", deep)
+        assert deep.parent.exists()
 
 
 class TestAudio2Subtitle:
     @patch("showrunner.aiservices_client._run_cli")
     def test_subprocess_fallback(self, mock_cli, client, tmp_path):
-        with patch("audio2subtitle.client.generate", side_effect=ImportError):
-            result = client.audio2subtitle(tmp_path / "audio.wav", tmp_path / "out.srt")
-            assert isinstance(result, Path)
-            mock_cli.assert_called_once()
+        sys.modules["audio2subtitle.client"].generate.side_effect = ImportError
+        result = client.audio2subtitle(tmp_path / "audio.wav", tmp_path / "out.srt")
+        assert isinstance(result, Path)
+        mock_cli.assert_called_once()
 
     def test_no_fallback_raises(self, client_no_fallback, tmp_path):
-        with patch("audio2subtitle.client.generate", side_effect=ImportError):
-            with pytest.raises(RuntimeError, match="no provider"):
-                client_no_fallback.audio2subtitle(tmp_path / "audio.wav", tmp_path / "out.srt")
+        sys.modules["audio2subtitle.client"].generate.side_effect = ImportError
+        with pytest.raises(RuntimeError, match="no provider"):
+            client_no_fallback.audio2subtitle(tmp_path / "audio.wav", tmp_path / "out.srt")
 
 
-class TestDefaultProviders:
-    def test_tts_default_is_fish_mlx(self):
-        c = AIServicesClient()
-        assert c._tts_provider == "text2speech.fish_mlx"
 
-    def test_asr_default_is_mlx(self):
-        c = AIServicesClient()
-        assert c._asr_provider == "audio2subtitle.mlx"
-
-    def test_discover_capabilities_includes_asr(self):
-        c = AIServicesClient()
-        caps = c.discover_capabilities()
-        assert "audio2subtitle" in caps
-        assert caps["audio2subtitle"] == ["audio2subtitle.mlx"]
