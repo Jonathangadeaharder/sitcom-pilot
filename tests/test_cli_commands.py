@@ -283,6 +283,84 @@ class TestAssemble:
 
 
 # ---------------------------------------------------------------------------
+# E9.4: showcase
+# ---------------------------------------------------------------------------
+
+
+class TestShowcase:
+    @patch("showrunner.assembler.extract_thumbnail")
+    @patch("showrunner.assembler.concat_clips")
+    def test_showcase_scene_by_id(self, mock_concat, mock_thumb, tmp_path: Path):
+        ep = _write_episode(tmp_path)
+        out = tmp_path / "output"
+        run_dir = out / "test-run"
+        beats_dir = run_dir / "beats" / "S01"
+        beats_dir.mkdir(parents=True)
+        (beats_dir / "S01_B01.mp4").write_bytes(b"fake")
+        (beats_dir / "S01_B02.mp4").write_bytes(b"fake")
+        showcase_dir = run_dir / "showcase"
+        showcase_dir.mkdir(parents=True)
+
+        mock_concat.return_value = showcase_dir / "S01.mp4"
+        mock_thumb.return_value = showcase_dir / "S01.jpg"
+
+        result = runner.invoke(
+            app,
+            [
+                "showcase", str(ep), "--scene", "S01",
+                "--output-dir", str(out), "--run-id", "test-run",
+            ],
+        )
+        assert result.exit_code == 0
+        assert "Showcase" in result.output
+
+    @patch("showrunner.assembler.extract_thumbnail")
+    @patch("showrunner.assembler.concat_clips")
+    def test_showcase_scene_by_index(self, mock_concat, mock_thumb, tmp_path: Path):
+        ep = _write_episode(tmp_path)
+        out = tmp_path / "output"
+        run_dir = out / "test-run"
+        beats_dir = run_dir / "beats" / "S01"
+        beats_dir.mkdir(parents=True)
+        (beats_dir / "S01_B01.mp4").write_bytes(b"fake")
+        (beats_dir / "S01_B02.mp4").write_bytes(b"fake")
+        showcase_dir = run_dir / "showcase"
+        showcase_dir.mkdir(parents=True)
+
+        mock_concat.return_value = showcase_dir / "S01.mp4"
+        mock_thumb.return_value = showcase_dir / "S01.jpg"
+
+        result = runner.invoke(
+            app,
+            ["showcase", str(ep), "--scene", "1", "--output-dir", str(out), "--run-id", "test-run"],
+        )
+        assert result.exit_code == 0
+        assert "Showcase" in result.output
+
+    def test_showcase_scene_not_found(self, tmp_path: Path):
+        ep = _write_episode(tmp_path)
+        out = tmp_path / "output"
+        result = runner.invoke(
+            app,
+            ["showcase", str(ep), "--scene", "NONEXISTENT", "--output-dir", str(out)],
+        )
+        assert result.exit_code == 1
+
+    def test_showcase_no_rendered_clips(self, tmp_path: Path):
+        ep = _write_episode(tmp_path)
+        out = tmp_path / "output"
+        result = runner.invoke(
+            app,
+            [
+                "showcase", str(ep), "--scene", "S01",
+                "--output-dir", str(out), "--run-id", "test-run",
+            ],
+        )
+        assert result.exit_code == 1
+        assert "No rendered clips" in result.output
+
+
+# ---------------------------------------------------------------------------
 # E7.6: doctor
 # ---------------------------------------------------------------------------
 
