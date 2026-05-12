@@ -76,13 +76,22 @@ def validate(
     strict: bool = typer.Option(False, "--strict", help="Enable strict business-rule checks"),
 ) -> None:
     """Validate an episode JSON file against the v2 schema."""
-    validator = EpisodeValidator()
-    errors = validator.validate_file(Path(episode_path), strict=strict)
-    if errors:
+    from showrunner.commands.validate import validate_episode as pydantic_validate
+
+    ep_path = Path(episode_path)
+    valid, errors = pydantic_validate(ep_path)
+    if not valid:
         for error in errors:
             err_console.print(f"[red]Error:[/red] {error}")
         raise typer.Exit(code=1)
-    console.print(f"[green]OK[/green]  {episode_path}")
+    if strict:
+        validator = EpisodeValidator()
+        strict_errors = validator.validate_file(ep_path, strict=True)
+        if strict_errors:
+            for error in strict_errors:
+                err_console.print(f"[red]Error:[/red] {error}")
+            raise typer.Exit(code=1)
+    console.print(f"[green]Valid:[/green] {episode_path}")
 
 
 # ---------------------------------------------------------------------------
@@ -93,63 +102,25 @@ def validate(
 @app.command()
 def plan(
     episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Show full prompts"),
 ) -> None:
-    """Show beat plan with prompts (dry run)."""
-    _setup_logging(verbose)
-
-    from showrunner.cast_manifest import CastManifest
-    from showrunner.loader import EpisodeLoader
-    from showrunner.scene_render import plan_beats
+    """Plan beats for an episode and output as JSON."""
+    from showrunner.planner import plan_episode
+    from showrunner.validator import EpisodeValidator
 
     data = _load_episode(Path(episode_path))
 
-    loader = EpisodeLoader()
-    episode = loader.load(Path(episode_path))
+    validator = EpisodeValidator()
+    errors = validator.validate(data)
+    if errors:
+        for error in errors:
+            err_console.print(f"[red]Error:[/red] {error}")
+        raise typer.Exit(code=1)
 
-    manifest = CastManifest()
-    for slug, char in episode.cast.items():
-        from showrunner.cast_manifest import CharacterProfile
+    plan = plan_episode(data)
 
-        manifest.add(
-            CharacterProfile(
-                name=char.name or slug,
-                slug=slug,
-                visual=char.visual,
-                role="",
-            )
-        )
-
-    from showrunner.paths import RunPaths
-
-    paths = RunPaths(Path("output"))
-    jobs = plan_beats(episode, manifest, paths, episode_id=data.get("title", ""))
-
-    table = Table(title=f"Beat Plan: {episode.title}")
-    table.add_column("Scene", style="cyan")
-    table.add_column("Beat", style="green")
-    table.add_column("Kind", style="magenta")
-    table.add_column("Duration", justify="right")
-    table.add_column("Speaker", style="yellow")
-    if verbose:
-        table.add_column("Prompt", max_width=60)
-
-    for job in jobs:
-        row = [
-            job.scene_id,
-            job.beat_id,
-            job.kind,
-            f"{job.duration_sec:.1f}s",
-            job.speaker or "-",
-        ]
-        if verbose:
-            row.append(job.prompt[:80])
-        table.add_row(*row)
-
-    console.print(table)
-    console.print(f"\nTotal beats: [bold]{len(jobs)}[/bold]")
-    total_dur = sum(j.duration_sec for j in jobs)
-    console.print(f"Total duration: [bold]{total_dur:.1f}s[/bold]")
+    output = [b.model_dump() for b in plan]
+    json.dump(output, sys.stdout, indent=2)
+    sys.stdout.write("\n")
 
 
 # ---------------------------------------------------------------------------
