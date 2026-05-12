@@ -191,6 +191,3 @@ class TestAudio2Subtitle:
         sys.modules["audio2subtitle.client"].generate.side_effect = ImportError
         with pytest.raises(RuntimeError, match="no provider"):
             client_no_fallback.audio2subtitle(tmp_path / "audio.wav", tmp_path / "out.srt")
-
-
-

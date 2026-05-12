@@ -7,37 +7,6 @@ from showrunner.commands.validate import validate_episode
 
 
 def test_valid_episode_returns_true():
-    data = {
-        "show": "Buffering",
-        "season": 1,
-        "episode": 2,
-        "title": "Test Episode",
-        "schema_version": "2.0",
-        "cast": {
-            "maya": {
-                "name": "Maya Chen",
-                "visual": "East Asian woman",
-            }
-        },
-        "environments": {
-            "living_room": {
-                "trigger_word": "Living room",
-            }
-        },
-        "scenes": [
-            {
-                "scene_id": "001",
-                "environment": "living_room",
-                "characters_present": ["maya"],
-                "beats": [
-                    {
-                        "beat_id": "001_b00",
-                        "kind": "silent",
-                    }
-                ],
-            }
-        ],
-    }
     path = Path(__file__).parent / "fixtures" / "valid-episode.json"
     valid, errors = validate_episode(path)
     assert valid
@@ -77,7 +46,14 @@ def test_missing_show_returns_false(tmp_path):
         "schema_version": "2.0",
         "cast": {},
         "environments": {},
-        "scenes": [{"scene_id": "001", "environment": "x", "characters_present": ["a"], "beats": [{"beat_id": "b1", "kind": "silent"}]}],
+        "scenes": [
+            {
+                "scene_id": "001",
+                "environment": "x",
+                "characters_present": ["a"],
+                "beats": [{"beat_id": "b1", "kind": "silent"}],
+            }
+        ],
     }
     path = tmp_path / "missing_show.json"
     path.write_text(json.dumps(data))
@@ -95,7 +71,14 @@ def test_invalid_field_type_returns_false(tmp_path):
         "schema_version": "2.0",
         "cast": {},
         "environments": {},
-        "scenes": [{"scene_id": "001", "environment": "x", "characters_present": ["a"], "beats": [{"beat_id": "b1", "kind": "silent"}]}],
+        "scenes": [
+            {
+                "scene_id": "001",
+                "environment": "x",
+                "characters_present": ["a"],
+                "beats": [{"beat_id": "b1", "kind": "silent"}],
+            }
+        ],
     }
     path = tmp_path / "bad_type.json"
     path.write_text(json.dumps(data))
@@ -210,7 +193,14 @@ def test_invalid_schema_version_returns_false(tmp_path):
         "schema_version": "1.0",
         "cast": {},
         "environments": {},
-        "scenes": [{"scene_id": "001", "environment": "x", "characters_present": ["a"], "beats": [{"beat_id": "b1", "kind": "silent"}]}],
+        "scenes": [
+            {
+                "scene_id": "001",
+                "environment": "x",
+                "characters_present": ["a"],
+                "beats": [{"beat_id": "b1", "kind": "silent"}],
+            }
+        ],
     }
     path = tmp_path / "bad_version.json"
     path.write_text(json.dumps(data))
