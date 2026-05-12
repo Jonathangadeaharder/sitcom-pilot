@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from sitcom_pilot.comfyui_client import ComfyUIClient
 from sitcom_pilot.loader import (
     CharacterData,
