@@ -31,7 +31,10 @@ def plan_episode(episode_json: dict) -> list[BeatPlan]:
         for b in scene_beats:
             kind = b.get("kind", "silent")
             if kind not in _SUPPORTED_KINDS:
-                beat_id = b.get("beat_id", f"scene#{scene.get('scene_id', '?')}:beat#{beat_number + 1}")
+                beat_id = b.get(
+                    "beat_id",
+                    f"scene#{scene.get('scene_id', '?')}:beat#{beat_number + 1}",
+                )
                 raise ValueError(f"Unsupported beat kind '{kind}' for beat {beat_id}")
             beat_number += 1
             duration = b.get("duration_sec", budget_per_beat)
