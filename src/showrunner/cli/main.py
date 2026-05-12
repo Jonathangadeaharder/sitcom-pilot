@@ -812,7 +812,11 @@ def run(
 
         seed_strategy = SeedStrategy(episode.title, base_seed=effective_seed)
         paths = RunPaths(out)
-        jobs = plan_beats(episode, manifest, paths, episode_id=episode.title, seed_strategy=seed_strategy)
+        jobs = plan_beats(
+                    episode, manifest, paths,
+                    episode_id=episode.title,
+                    seed_strategy=seed_strategy,
+                )
 
     total_beats = len(jobs)
     scene_count = len(episode.scenes)
