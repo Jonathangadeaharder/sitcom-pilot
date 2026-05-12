@@ -692,6 +692,12 @@ def run(
         False, "--skip-validate", help="Skip schema validation step"
     ),
     burn_captions: bool = typer.Option(False, "--captions", help="Burn in captions"),
+    seed: int | None = typer.Option(
+        None, "--seed", help="Override seed for deterministic generation"
+    ),
+    deterministic: bool = typer.Option(
+        False, "--deterministic", help="Enable strict deterministic mode"
+    ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose logging"),
 ) -> None:
     """Run full pipeline: validate plan bootstrap render assemble."""
@@ -700,6 +706,12 @@ def run(
     from showrunner.aiservices_client import AIServicesClient
     from showrunner.assembler import burn_in_captions, concat_clips, generate_srt
     from showrunner.cast_manifest import CastManifest, CharacterProfile
+    from showrunner.determinism import (
+        DeterminismConfig,
+        SeedStrategy,
+        compute_manifest_hash_from_dict,
+        derive_seed,
+    )
     from showrunner.loader import BeatData, EpisodeLoader
     from showrunner.paths import RunPaths
     from showrunner.scene_render import BeatStatus, plan_beats, render_episode
@@ -723,7 +735,21 @@ def run(
         console.print("[yellow]\u26a0[/yellow]  Validation skipped")
 
     # ------------------------------------------------------------------
-    # Stage 2: Load + Plan
+    # Stage 2: Determinism setup
+    # ------------------------------------------------------------------
+
+    json_data = _load_episode(ep_path)
+    manifest_hash = compute_manifest_hash_from_dict(json_data)
+    effective_seed = seed if seed is not None else derive_seed(manifest_hash)
+    det_config = DeterminismConfig(seed=effective_seed, deterministic=deterministic)
+    structlog.contextvars.bind_contextvars(
+        det_seed=det_config.seed, det_mode=det_config.deterministic
+    )
+    if deterministic:
+        console.print(f"  [dim]Deterministic mode: seed={effective_seed}[/dim]")
+
+    # ------------------------------------------------------------------
+    # Stage 3: Load + Plan
     # ------------------------------------------------------------------
     with Progress(
         SpinnerColumn(),
@@ -745,15 +771,20 @@ def run(
                 )
             )
 
+        seed_strategy = SeedStrategy(episode.title, base_seed=effective_seed)
         paths = RunPaths(out)
-        jobs = plan_beats(episode, manifest, paths, episode_id=episode.title)
+        jobs = plan_beats(
+                    episode, manifest, paths,
+                    episode_id=episode.title,
+                    seed_strategy=seed_strategy,
+                )
 
     total_beats = len(jobs)
     scene_count = len(episode.scenes)
     console.print(f"  [dim]{total_beats} beats across {scene_count} scenes[/dim]")
 
     # ------------------------------------------------------------------
-    # Stage 3: Bootstrap
+    # Stage 4: Bootstrap
     # ------------------------------------------------------------------
     client = AIServicesClient()
     if not skip_bootstrap:
@@ -785,7 +816,7 @@ def run(
         console.print("[yellow]\u26a0[/yellow]  Bootstrap skipped")
 
     # ------------------------------------------------------------------
-    # Stage 4: Render
+    # Stage 5: Render
     # ------------------------------------------------------------------
     console.print(f"\n[bold]Rendering[/bold] {episode.title}")
 
@@ -821,7 +852,7 @@ def run(
         err_console.print(f"  [red]{total_failed} beats failed[/red]")
 
     # ------------------------------------------------------------------
-    # Stage 5: Assemble
+    # Stage 6: Assemble
     # ------------------------------------------------------------------
     video_paths: list[Path] = []
     beat_durations: list[tuple] = []

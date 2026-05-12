@@ -92,7 +92,41 @@ def resolve_seed(
 
 
 # ---------------------------------------------------------------------------
-# Manifest hashing — hash of ALL inputs for reproducible render
+# DeterminismConfig — top-level determinism settings
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class DeterminismConfig:
+    """Global determinism settings for a render run."""
+
+    seed: int
+    deterministic: bool = False
+
+
+# ---------------------------------------------------------------------------
+# derive_seed — convert hash to int seed
+# ---------------------------------------------------------------------------
+
+
+def derive_seed(manifest_hash: str) -> int:
+    """First 8 hex characters (4 bytes) of SHA-256 hex string as a positive int."""
+    return int(manifest_hash[:8], 16)
+
+
+# ---------------------------------------------------------------------------
+# compute_manifest_hash (dict overload) — quick hash from raw JSON
+# ---------------------------------------------------------------------------
+
+
+def compute_manifest_hash_from_dict(episode_json: dict) -> str:
+    """SHA-256 of canonical JSON representation of an episode dict."""
+    payload = json.dumps(episode_json, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(payload.encode()).hexdigest()
+
+
+# ---------------------------------------------------------------------------
+# Manifest hashing — full render-graph hash
 # ---------------------------------------------------------------------------
 
 
