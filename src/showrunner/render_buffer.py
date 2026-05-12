@@ -150,9 +150,7 @@ def _flush_beat(job: BeatJob, paths: RunPaths) -> None:
             buf_path.unlink(missing_ok=True)
 
 
-def _record_beat(
-    reports: dict[str, SceneReport], job: BeatJob
-) -> None:
+def _record_beat(reports: dict[str, SceneReport], job: BeatJob) -> None:
     report = reports.get(job.scene_id)
     if report is None:
         return
