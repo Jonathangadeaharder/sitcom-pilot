@@ -365,6 +365,9 @@ def render_episode_cmd(
     output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
     max_workers: int = typer.Option(1, "--workers", "-w", help="Parallel workers"),
     json_logs: bool = typer.Option(False, "--json", help="Output structured JSON logs"),
+    buffer: int | None = typer.Option(
+        None, "--buffer", "-b", help="Buffer N beats ahead (default: sequential)"
+    ),
 ) -> None:
     """Render all beats in an episode."""
     _setup_logging(json_logs=json_logs)
@@ -373,6 +376,7 @@ def render_episode_cmd(
     from showrunner.loader import EpisodeLoader
     from showrunner.paths import RunPaths
     from showrunner.progress import RichRenderProgress
+    from showrunner.render_buffer import render_episode_buffered
     from showrunner.scene_render import plan_beats, render_episode
 
     loader = EpisodeLoader()
@@ -391,18 +395,29 @@ def render_episode_cmd(
         Panel(
             f"Rendering [bold]{episode.title}[/bold]\n"
             f"{total_beats} beats across {scene_count} scenes"
+            + (f" (buffer={buffer})" if buffer else "")
         )
     )
 
-    with RichRenderProgress(console=console) as on_progress:
-        reports = render_episode(
+    if buffer:
+        reports = render_episode_buffered(
             episode,
             manifest,
             paths,
             client,
-            max_workers=max_workers,
-            progress_callback=on_progress,
+            buffer_size=buffer,
+            max_workers=max(4, buffer + 1),
         )
+    else:
+        with RichRenderProgress(console=console) as on_progress:
+            reports = render_episode(
+                episode,
+                manifest,
+                paths,
+                client,
+                max_workers=max_workers,
+                progress_callback=on_progress,
+            )
 
     total_done = sum(r.completed for r in reports)
     total_failed = sum(r.failed for r in reports)
