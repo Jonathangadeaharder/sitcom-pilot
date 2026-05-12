@@ -1,8 +1,8 @@
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from showrunner.aiservices_client import AIServicesClient
-from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
+from showrunner.cast_manifest import CastManifest, CharacterProfile
 from showrunner.loader import BeatData, CharacterData, EnvironmentData, EpisodeData, SceneData
 from showrunner.silent_renderer import render_silent_beat
 
