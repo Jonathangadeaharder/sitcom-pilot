@@ -34,7 +34,7 @@ class RenderConfig(BaseModel):
 
 class Beat(BaseModel):
     beat_id: str = Field(min_length=1)
-    kind: str = Field(pattern=r"^(speech|silent)$")
+    kind: str = Field(pattern=r"^(speech|silent|transition)$")
     camera: str = ""
     action: str = ""
     seed: int | None = None
