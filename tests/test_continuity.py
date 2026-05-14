@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
 from PIL import Image
 
 from showrunner.continuity import (
@@ -126,6 +127,13 @@ class TestLoadImageGray:
         assert result.mode == "L"
         assert result.size == (10, 10)
         assert result.tobytes() is not None
+
+
+@pytest.fixture
+def golden_registry():
+    from showrunner.continuity import GoldenFrameRegistry
+
+    return GoldenFrameRegistry()
 
 
 class TestGoldenFrameRegistry:

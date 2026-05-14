@@ -635,22 +635,21 @@ class TestPlanEpisode:
         assert beats[0].duration_seconds == pytest.approx(10.0)
         assert beats[1].duration_seconds == pytest.approx(10.0)
 
-    def test_unknown_beat_kind_uses_default_cost_and_strategy(self):
-        beats = plan_episode(
-            {
-                "scenes": [
-                    {
-                        "scene_id": "001",
-                        "target_seconds": 10,
-                        "beats": [
-                            {"beat_id": "001_b00", "kind": "mystery", "action": "unknown"},
-                        ],
-                    },
-                ],
-            }
-        )
-        assert beats[0].rendering_strategy == "text2image"
-        assert beats[0].estimated_cost == 0.01 * beats[0].duration_seconds
+    def test_unknown_beat_kind_raises_value_error(self):
+        with pytest.raises(ValueError, match="Unsupported beat kind 'mystery'"):
+            plan_episode(
+                {
+                    "scenes": [
+                        {
+                            "scene_id": "001",
+                            "target_seconds": 10,
+                            "beats": [
+                                {"beat_id": "001_b00", "kind": "mystery", "action": "unknown"},
+                            ],
+                        },
+                    ],
+                }
+            )
 
     def test_speech_beat_without_speaker_omits_prefix(self):
         beats = plan_episode(
@@ -761,7 +760,7 @@ class TestPlanEpisode:
                         "scene_id": "001",
                         "target_seconds": 10,
                         "beats": [
-                            {"beat_id": "001_b00", "kind": "custom", "action": "custom action"},
+                            {"beat_id": "001_b00", "kind": "silent", "action": "custom action"},
                         ],
                     },
                 ],
