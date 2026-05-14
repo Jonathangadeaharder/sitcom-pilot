@@ -19,6 +19,7 @@ dependencies = [
     "rich>=15.0.0",
     "typer>=0.24.2",
     # AIServices packages (clean client interfaces)
+    "aiservices-core",
     "text2image",
     "image2image",
     "image2video",
@@ -31,6 +32,7 @@ members = ["aiservices/packages/*"]
 exclude = ["aiservices/packages/text2video"]
 
 [tool.uv.sources]
+aiservices-core = { workspace = true }
 text2image = { workspace = true }
 image2image = { workspace = true }
 image2video = { workspace = true }
