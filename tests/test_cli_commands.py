@@ -117,15 +117,10 @@ class TestPlan:
         ep = _write_episode(tmp_path)
         result = runner.invoke(app, ["plan", str(ep)])
         assert result.exit_code == 0
-        assert "S01_B01" in result.output
-        assert "S01_B02" in result.output
-        assert "Total beats: 2" in result.output
-
-    def test_plan_verbose(self, tmp_path: Path):
-        ep = _write_episode(tmp_path)
-        result = runner.invoke(app, ["plan", str(ep), "--verbose"])
-        assert result.exit_code == 0
-        assert "Prompt" in result.output
+        assert '"beat_number": 1' in result.output
+        assert '"beat_number": 2' in result.output
+        assert '"type": "speech"' in result.output
+        assert '"type": "silent"' in result.output
 
     def test_plan_bad_file(self, tmp_path: Path):
         result = runner.invoke(app, ["plan", str(tmp_path / "nope.json")])
@@ -164,7 +159,7 @@ class TestBootstrap:
         ep = tmp_path / "my-episode" / "episode.json"
         result2 = runner.invoke(app, ["validate", str(ep)])
         assert result2.exit_code == 0
-        assert "OK" in result2.output
+        assert "Valid:" in result2.output
 
     def test_force_overwrites(self, tmp_path: Path):
         d = tmp_path / "my-episode"

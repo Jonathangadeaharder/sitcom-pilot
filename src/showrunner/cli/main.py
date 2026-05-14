@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import sys
 from pathlib import Path
 
 import structlog
@@ -709,10 +710,12 @@ def run(
         seed_strategy = SeedStrategy(episode.title, base_seed=effective_seed)
         paths = RunPaths(out)
         jobs = plan_beats(
-                    episode, manifest, paths,
-                    episode_id=episode.title,
-                    seed_strategy=seed_strategy,
-                )
+            episode,
+            manifest,
+            paths,
+            episode_id=episode.title,
+            seed_strategy=seed_strategy,
+        )
 
     total_beats = len(jobs)
     scene_count = len(episode.scenes)

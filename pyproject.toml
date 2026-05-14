@@ -19,6 +19,7 @@ dependencies = [
     "rich>=15.0.0",
     "typer>=0.24.2",
     # AIServices packages (clean client interfaces)
+    "aiservices-core",
     "text2image",
     "image2image",
     "image2video",
@@ -26,12 +27,17 @@ dependencies = [
     "audio2subtitle",
 ]
 
+[tool.uv.workspace]
+members = ["aiservices/packages/*"]
+exclude = ["aiservices/packages/text2video"]
+
 [tool.uv.sources]
-text2image = { path = "aiservices/packages/text2image", editable = true }
-image2image = { path = "aiservices/packages/image2image", editable = true }
-image2video = { path = "aiservices/packages/image2video", editable = true }
-text2speech = { path = "aiservices/packages/text2speech", editable = true }
-audio2subtitle = { path = "aiservices/packages/audio2subtitle", editable = true }
+aiservices-core = { workspace = true }
+text2image = { workspace = true }
+image2image = { workspace = true }
+image2video = { workspace = true }
+text2speech = { workspace = true }
+audio2subtitle = { workspace = true }
 
 [dependency-groups]
 dev = [

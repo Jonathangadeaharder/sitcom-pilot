@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 from showrunner.schemas.beat_plan import BeatPlan
 
 _COST_PER_SECOND: dict[str, float] = {
@@ -8,7 +10,7 @@ _COST_PER_SECOND: dict[str, float] = {
     "transition": 0.02,
 }
 
-_STRATEGY: dict[str, str] = {
+_STRATEGY: dict[str, Literal["text2image", "voice_clone+video", "video_transition"]] = {
     "silent": "text2image",
     "speech": "voice_clone+video",
     "transition": "video_transition",
