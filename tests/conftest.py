@@ -3,9 +3,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from sitcom_pilot.assembler import EpisodeAssembler
-from sitcom_pilot.cast_manifest import CastManifest, CharacterProfile, CharacterRef
-from sitcom_pilot.loader import EpisodeLoader
+
+from showrunner.assembler import EpisodeAssembler
+from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
+from showrunner.loader import EpisodeLoader
 
 sys.path  # ensure imported before use below
 
