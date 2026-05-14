@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-<<<<<<< HEAD
+
 from showrunner.cast_manifest import CastManifest, CharacterProfile
 from showrunner.determinism import SeedStrategy
 from showrunner.loader import (
@@ -561,187 +561,215 @@ class TestPlanEpisode:
         assert beats == []
 
     def test_scene_missing_target_duration_uses_default_60(self):
-        beats = plan_episode({
-            "scenes": [
-                {
-                    "scene_id": "001",
-                    "beats": [
-                        {"beat_id": "001_b00", "kind": "silent", "action": "beat"},
-                    ],
-                },
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {
+                        "scene_id": "001",
+                        "beats": [
+                            {"beat_id": "001_b00", "kind": "silent", "action": "beat"},
+                        ],
+                    },
+                ],
+            }
+        )
         assert beats[0].duration_seconds == 60.0
 
     def test_beat_without_kind_defaults_to_silent(self):
-        beats = plan_episode({
-            "scenes": [
-                {
-                    "scene_id": "001",
-                    "target_seconds": 10,
-                    "beats": [
-                        {"beat_id": "001_b00", "action": "beat with no kind"},
-                    ],
-                },
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {
+                        "scene_id": "001",
+                        "target_seconds": 10,
+                        "beats": [
+                            {"beat_id": "001_b00", "action": "beat with no kind"},
+                        ],
+                    },
+                ],
+            }
+        )
         assert beats[0].type == "silent"
 
     def test_scene_with_empty_beats_list_skips_gracefully(self):
-        beats = plan_episode({
-            "scenes": [
-                {"scene_id": "001", "target_seconds": 10, "beats": []},
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {"scene_id": "001", "target_seconds": 10, "beats": []},
+                ],
+            }
+        )
         assert beats == []
 
     def test_target_duration_sec_takes_precedence(self):
-        beats = plan_episode({
-            "scenes": [
-                {
-                    "scene_id": "001",
-                    "target_duration_sec": 30,
-                    "target_seconds": 60,
-                    "beats": [
-                        {"beat_id": "001_b00", "kind": "silent", "action": "a"},
-                        {"beat_id": "001_b01", "kind": "silent", "action": "b"},
-                    ],
-                },
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {
+                        "scene_id": "001",
+                        "target_duration_sec": 30,
+                        "target_seconds": 60,
+                        "beats": [
+                            {"beat_id": "001_b00", "kind": "silent", "action": "a"},
+                            {"beat_id": "001_b01", "kind": "silent", "action": "b"},
+                        ],
+                    },
+                ],
+            }
+        )
         assert beats[0].duration_seconds == pytest.approx(15.0)
         assert beats[1].duration_seconds == pytest.approx(15.0)
 
     def test_beat_without_duration_sec_uses_budget(self):
-        beats = plan_episode({
-            "scenes": [
-                {
-                    "scene_id": "001",
-                    "target_seconds": 20,
-                    "beats": [
-                        {"beat_id": "001_b00", "kind": "silent", "action": "a"},
-                        {"beat_id": "001_b01", "kind": "silent", "action": "b"},
-                    ],
-                },
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {
+                        "scene_id": "001",
+                        "target_seconds": 20,
+                        "beats": [
+                            {"beat_id": "001_b00", "kind": "silent", "action": "a"},
+                            {"beat_id": "001_b01", "kind": "silent", "action": "b"},
+                        ],
+                    },
+                ],
+            }
+        )
         assert beats[0].duration_seconds == pytest.approx(10.0)
         assert beats[1].duration_seconds == pytest.approx(10.0)
 
     def test_unknown_beat_kind_uses_default_cost_and_strategy(self):
-        beats = plan_episode({
-            "scenes": [
-                {
-                    "scene_id": "001",
-                    "target_seconds": 10,
-                    "beats": [
-                        {"beat_id": "001_b00", "kind": "mystery", "action": "unknown"},
-                    ],
-                },
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {
+                        "scene_id": "001",
+                        "target_seconds": 10,
+                        "beats": [
+                            {"beat_id": "001_b00", "kind": "mystery", "action": "unknown"},
+                        ],
+                    },
+                ],
+            }
+        )
         assert beats[0].rendering_strategy == "text2image"
         assert beats[0].estimated_cost == 0.01 * beats[0].duration_seconds
 
     def test_speech_beat_without_speaker_omits_prefix(self):
-        beats = plan_episode({
-            "scenes": [
-                {
-                    "scene_id": "001",
-                    "target_seconds": 10,
-                    "beats": [
-                        {"beat_id": "001_b00", "kind": "speech", "text": "Hello"},
-                    ],
-                },
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {
+                        "scene_id": "001",
+                        "target_seconds": 10,
+                        "beats": [
+                            {"beat_id": "001_b00", "kind": "speech", "text": "Hello"},
+                        ],
+                    },
+                ],
+            }
+        )
         assert beats[0].description == "Hello"
 
     def test_speech_beat_without_text_falls_back_to_action(self):
-        beats = plan_episode({
-            "scenes": [
-                {
-                    "scene_id": "001",
-                    "target_seconds": 10,
-                    "beats": [
-                        {
-                            "beat_id": "001_b00", "kind": "speech",
-                            "speaker": "bob", "action": "Bob nods"
-                        },
-                    ],
-                },
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {
+                        "scene_id": "001",
+                        "target_seconds": 10,
+                        "beats": [
+                            {
+                                "beat_id": "001_b00",
+                                "kind": "speech",
+                                "speaker": "bob",
+                                "action": "Bob nods",
+                            },
+                        ],
+                    },
+                ],
+            }
+        )
         assert beats[0].description == "Bob nods"
 
     def test_speech_beat_without_text_or_action_returns_empty(self):
-        beats = plan_episode({
-            "scenes": [
-                {
-                    "scene_id": "001",
-                    "target_seconds": 10,
-                    "beats": [
-                        {"beat_id": "001_b00", "kind": "speech", "speaker": "bob"},
-                    ],
-                },
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {
+                        "scene_id": "001",
+                        "target_seconds": 10,
+                        "beats": [
+                            {"beat_id": "001_b00", "kind": "speech", "speaker": "bob"},
+                        ],
+                    },
+                ],
+            }
+        )
         assert beats[0].description == ""
 
     def test_silent_beat_without_action_returns_empty(self):
-        beats = plan_episode({
-            "scenes": [
-                {
-                    "scene_id": "001",
-                    "target_seconds": 10,
-                    "beats": [
-                        {"beat_id": "001_b00", "kind": "silent"},
-                    ],
-                },
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {
+                        "scene_id": "001",
+                        "target_seconds": 10,
+                        "beats": [
+                            {"beat_id": "001_b00", "kind": "silent"},
+                        ],
+                    },
+                ],
+            }
+        )
         assert beats[0].description == ""
 
     def test_transition_beat_uses_camera_when_no_description(self):
-        beats = plan_episode({
-            "scenes": [
-                {
-                    "scene_id": "001",
-                    "target_seconds": 10,
-                    "beats": [
-                        {"beat_id": "001_b00", "kind": "transition", "camera": "fade out"},
-                    ],
-                },
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {
+                        "scene_id": "001",
+                        "target_seconds": 10,
+                        "beats": [
+                            {"beat_id": "001_b00", "kind": "transition", "camera": "fade out"},
+                        ],
+                    },
+                ],
+            }
+        )
         assert beats[0].description == "fade out"
 
     def test_transition_without_description_or_camera_returns_empty(self):
-        beats = plan_episode({
-            "scenes": [
-                {
-                    "scene_id": "001",
-                    "target_seconds": 10,
-                    "beats": [
-                        {"beat_id": "001_b00", "kind": "transition"},
-                    ],
-                },
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {
+                        "scene_id": "001",
+                        "target_seconds": 10,
+                        "beats": [
+                            {"beat_id": "001_b00", "kind": "transition"},
+                        ],
+                    },
+                ],
+            }
+        )
         assert beats[0].description == ""
 
     def test_fallback_beat_kind_uses_action_field(self):
-        beats = plan_episode({
-            "scenes": [
-                {
-                    "scene_id": "001",
-                    "target_seconds": 10,
-                    "beats": [
-                        {"beat_id": "001_b00", "kind": "custom", "action": "custom action"},
-                    ],
-                },
-            ],
-        })
+        beats = plan_episode(
+            {
+                "scenes": [
+                    {
+                        "scene_id": "001",
+                        "target_seconds": 10,
+                        "beats": [
+                            {"beat_id": "001_b00", "kind": "custom", "action": "custom action"},
+                        ],
+                    },
+                ],
+            }
+        )
         assert beats[0].description == "custom action"
 
     def test_one_scene_one_beat(self, one_scene_one_beat):
