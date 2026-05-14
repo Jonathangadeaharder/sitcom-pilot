@@ -50,3 +50,13 @@ def episode_manifest():
 def assembler(tmp_path):
     with patch.object(EpisodeAssembler, "_detect_videotoolbox", return_value=False):
         return EpisodeAssembler(output_dir=tmp_path / "output")
+
+
+@pytest.fixture
+def golden_registry():
+    from showrunner.continuity import GoldenFrameRegistry
+
+    base = Path(__file__).resolve().parent
+    return GoldenFrameRegistry(
+        fixtures_dir=base / "fixtures" / "golden_frames",
+    )

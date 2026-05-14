@@ -3,8 +3,11 @@ from __future__ import annotations
 from pathlib import Path
 
 try:
-    from pydantic import Field
-    from pydantic_settings import BaseSettings, SettingsConfigDict
+    from pydantic import Field  # pyright: ignore[reportPossiblyUnboundVariable]
+    from pydantic_settings import (  # pyright: ignore[reportPossiblyUnboundVariable]
+        BaseSettings,
+        SettingsConfigDict,
+    )
 
     _PYDANTIC_AVAILABLE = True
 except ImportError:
@@ -14,7 +17,7 @@ import os
 
 if _PYDANTIC_AVAILABLE:
 
-    class PipelineConfig(BaseSettings):
+    class PipelineConfig(BaseSettings):  # pyright: ignore[reportPossiblyUnboundVariable, reportRedeclaration]
         """Runtime configuration for the Sitcom Pilot pipeline.
 
         Values are read (in priority order) from:
@@ -23,40 +26,40 @@ if _PYDANTIC_AVAILABLE:
         3. The defaults defined below
         """
 
-        model_config = SettingsConfigDict(
+        model_config = SettingsConfigDict(  # pyright: ignore[reportPossiblyUnboundVariable]
             env_prefix="SITCOM_",
             env_file=".env",
             env_file_encoding="utf-8",
             extra="ignore",
         )
 
-        comfyui_url: str = Field(
+        comfyui_url: str = Field(  # pyright: ignore[reportPossiblyUnboundVariable]
             default="http://127.0.0.1:8188",
             description="Base URL of the running ComfyUI server.",
         )
 
-        output_dir: Path = Field(
+        output_dir: Path = Field(  # pyright: ignore[reportPossiblyUnboundVariable]
             default=Path("output"),
             description="Root directory for all pipeline output artefacts.",
         )
-        run_id: str = Field(
+        run_id: str = Field(  # pyright: ignore[reportPossiblyUnboundVariable]
             default="",
             description="Unique identifier for this run (auto-generated if empty).",
         )
 
-        cooldown_seconds: float = Field(
+        cooldown_seconds: float = Field(  # pyright: ignore[reportPossiblyUnboundVariable]
             default=0.0,
             description="Pause between consecutive shots (seconds).",
         )
-        max_crash_retries: int = Field(
+        max_crash_retries: int = Field(  # pyright: ignore[reportPossiblyUnboundVariable]
             default=3,
             description="Number of times to retry a shot after a ComfyUI crash.",
         )
 
-        image_provider: str = Field(default="mlx-flux")
-        video_provider: str = Field(default="mlx-ltx")
-        tts_provider: str = Field(default="mlx-audio")
-        asr_provider: str | None = Field(default=None)
+        image_provider: str = Field(default="mlx-flux")  # pyright: ignore[reportPossiblyUnboundVariable]
+        video_provider: str = Field(default="mlx-ltx")  # pyright: ignore[reportPossiblyUnboundVariable]
+        tts_provider: str = Field(default="mlx-audio")  # pyright: ignore[reportPossiblyUnboundVariable]
+        asr_provider: str | None = Field(default=None)  # pyright: ignore[reportPossiblyUnboundVariable]
 
 
 else:
