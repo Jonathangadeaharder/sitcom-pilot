@@ -5,7 +5,6 @@ from pathlib import Path
 
 import pytest
 
-
 from showrunner.cast_manifest import CastManifest, CharacterProfile
 from showrunner.determinism import SeedStrategy
 from showrunner.loader import (
@@ -16,6 +15,7 @@ from showrunner.loader import (
     VoiceConfig,
 )
 from showrunner.paths import RunPaths
+from showrunner.planner import plan_episode
 from showrunner.scene_render import BeatJob, BeatStatus, SceneReport, allocate_durations, plan_beats
 
 
@@ -439,9 +439,6 @@ class TestAllocateDurations:
         assert sum(j.duration_sec for j in result) == pytest.approx(15.0)
 
 
-from showrunner.planner import plan_episode
-
-
 @pytest.fixture
 def episode_01_path() -> Path:
     return Path(__file__).parent.parent / "episode_01.json"
@@ -847,4 +844,3 @@ class TestPlanEpisode:
             assert b.duration_seconds > 0
             assert b.estimated_cost >= 0
             assert b.rendering_strategy in ("text2image", "voice_clone+video", "video_transition")
-
