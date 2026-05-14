@@ -116,7 +116,6 @@ class ShotRenderer:
                 if not self._client.is_server_running():
                     logger.info("Server appears down, restarting...")
                     self._client.ensure_server_running(self._server_cmd, self._server_cwd)
-        assert last_error is not None
         raise last_error
 
     def render_scene(
