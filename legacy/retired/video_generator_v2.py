@@ -9,8 +9,8 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from showrunner.loader import EpisodeLoader  # noqa: E402
-from showrunner.prompts import PromptBuilder  # noqa: E402
+from showrunner.loader import EpisodeLoader
+from showrunner.prompts import PromptBuilder
 
 PROJECT_ROOT = Path(__file__).parent
 OUTPUT_DIR = PROJECT_ROOT / "output" / "s01e02"
