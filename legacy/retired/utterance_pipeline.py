@@ -24,7 +24,7 @@ _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from voice_generator_v3 import (  # noqa: E402
+from voice_generator_v3 import (
     build_fish_text,
     check_fish_api,
     synthesize_line,
@@ -48,7 +48,7 @@ HEIGHT = 512
 PAUSE_BETWEEN_LINES = 0.5
 PAUSE_BETWEEN_SHOTS = 1.0
 
-import platform as _platform  # noqa: E402
+import platform as _platform
 
 _VIDEO_ENCODER = "h264_videotoolbox" if _platform.system() == "Darwin" else "libx264"
 

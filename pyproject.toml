@@ -52,6 +52,7 @@ showrunner = "showrunner.cli.main:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "--cov=showrunner --cov-branch --cov-report=term-missing"
 
 [tool.ruff]
 line-length = 100
@@ -75,7 +76,7 @@ paths_to_mutate = [
     "src/showrunner/manifest.py",
     "src/showrunner/determinism.py",
 ]
-runner = "uv run pytest -x --no-header -q"
+runner = "uv run pytest -x --no-header -q --no-cov"
 tests_dir = ["tests/test_planner.py", "tests/test_manifest.py", "tests/test_determinism.py"]
 also_copy = ["src/showrunner", "episode_01.json", "episode_02.json"]
 backup = false

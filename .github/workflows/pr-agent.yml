@@ -1,0 +1,35 @@
+name: PR-Agent
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: write
+
+jobs:
+  pr-agent:
+    if: vars.ENABLE_PR_AGENT == 'true' && github.event.issue.pull_request != null
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install PR-Agent
+        run: |
+          uv python install 3.13
+          uv tool install pr-agent
+
+      - name: Run PR-Agent
+        run: |
+          pr-agent --pr_url "${{ github.event.issue.pull_request.url }}" \
+            --openai.key "${{ secrets.LM_STUDIO_API_KEY }}" \
+            --openai.api_base "http://localhost:1234/v1" \
+            --config.model "openai/qwen3.6-27b-mlx" \
+            --config.fallback_models "[]"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
