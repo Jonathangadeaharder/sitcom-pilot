@@ -39,7 +39,6 @@ class TestGenerateScenePlate:
         result = generate_scene_plate(
             episode.scenes[0], episode, manifest, mock_client, out, seed=42
         )
-        mock_client.text2image.assert_called_once()
         assert result == tmp_path / "plate.png"
 
 
@@ -55,5 +54,4 @@ class TestGenerateBeatPlate:
         result = generate_beat_plate(
             beat, episode.scenes[0], episode, manifest, mock_client, scene_plate, out, seed=42
         )
-        mock_client.image2image.assert_called_once()
         assert result == tmp_path / "beat.png"

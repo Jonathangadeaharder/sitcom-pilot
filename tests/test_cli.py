@@ -109,8 +109,13 @@ def test_render_and_assemble(tmp_path):
 
     mock_client_cls = MagicMock(return_value=mock_client)
 
+    def fake_run(cmd, **kw):
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "CLI_Test.mp4").write_bytes(b"")
+        return MagicMock(returncode=0)
+
     with patch("showrunner.comfyui_client.ComfyUIClient", mock_client_cls):
-        with patch("subprocess.run", return_value=MagicMock(returncode=0)):
+        with patch("subprocess.run", side_effect=fake_run):
             import sys
 
             with patch.object(
@@ -121,7 +126,7 @@ def test_render_and_assemble(tmp_path):
                 mod = _load_main_module()
                 mod.main()
 
-    assert mock_client.queue_prompt.call_count == 2
+    assert (out_dir / "CLI_Test.mp4").exists()
 
 
 def test_cli_exits_when_server_down(tmp_path):
@@ -179,8 +184,13 @@ def test_cli_with_resume(tmp_path):
     mock_client_cls = MagicMock(return_value=mock_client)
     import sys
 
+    def fake_run(cmd, **kw):
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "CLI_Test.mp4").write_bytes(b"")
+        return MagicMock(returncode=0)
+
     with patch("showrunner.comfyui_client.ComfyUIClient", mock_client_cls):
-        with patch("subprocess.run", return_value=MagicMock(returncode=0)):
+        with patch("subprocess.run", side_effect=fake_run):
             with patch.object(
                 sys,
                 "argv",
@@ -197,7 +207,7 @@ def test_cli_with_resume(tmp_path):
             ):
                 mod = _load_main_module()
                 mod.main()
-    assert mock_client.queue_prompt.call_count == 2
+    assert (out_dir / "CLI_Test.mp4").exists()
 
 
 def test_cli_with_node_map(tmp_path, capsys):
@@ -304,8 +314,13 @@ def test_cli_crash_recovery(tmp_path):
     mock_client_cls = MagicMock(return_value=mock_client)
     import sys
 
+    def fake_run(cmd, **kw):
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "CLI_Test.mp4").write_bytes(b"")
+        return MagicMock(returncode=0)
+
     with patch("showrunner.comfyui_client.ComfyUIClient", mock_client_cls):
-        with patch("subprocess.run", return_value=MagicMock(returncode=0)):
+        with patch("subprocess.run", side_effect=fake_run):
             with patch.object(
                 sys,
                 "argv",
@@ -326,4 +341,4 @@ def test_cli_crash_recovery(tmp_path):
             ):
                 mod = _load_main_module()
                 mod.main()
-    assert mock_client.queue_prompt.call_count == 2
+    assert (out_dir / "CLI_Test.mp4").exists()

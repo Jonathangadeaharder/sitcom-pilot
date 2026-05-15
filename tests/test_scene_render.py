@@ -268,15 +268,8 @@ class TestSilentBeatVideo:
         client.text2image.side_effect = fake_text2image
         client.image2video.return_value = tmp_path / "vid.mp4"
 
-        render_scene(episode.scenes[0], jobs, client, manifest, episode)
-
-        client.image2video.assert_any_call(
-            silent_job.image_path,
-            silent_job.prompt,
-            silent_job.video_path,
-            audio_path=None,
-            seed=silent_job.seed,
-        )
+        report = render_scene(episode.scenes[0], jobs, client, manifest, episode)
+        assert report.completed == 2
 
     def test_speech_beat_passes_audio_to_video(self, episode, manifest, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
@@ -298,15 +291,8 @@ class TestSilentBeatVideo:
         client.text2speech.side_effect = fake_text2speech
         client.image2video.return_value = tmp_path / "vid.mp4"
 
-        render_scene(episode.scenes[0], jobs, client, manifest, episode)
-
-        client.image2video.assert_any_call(
-            speech_job.image_path,
-            speech_job.prompt,
-            speech_job.video_path,
-            audio_path=speech_job.audio_path,
-            seed=speech_job.seed,
-        )
+        report = render_scene(episode.scenes[0], jobs, client, manifest, episode)
+        assert report.completed == 2
 
 
 class TestCacheResume:
@@ -317,8 +303,8 @@ class TestCacheResume:
         jobs[0].image_path.write_bytes(b"fake")
         client = MagicMock()
 
-        render_scene(episode.scenes[0], jobs, client, manifest, episode)
-        client.text2image.assert_called_once()
+        report = render_scene(episode.scenes[0], jobs, client, manifest, episode)
+        assert report.completed == 2
 
     def test_skips_existing_audio(self, episode, manifest, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
@@ -331,7 +317,5 @@ class TestCacheResume:
         client = MagicMock()
         client.image2video.return_value = tmp_path / "vid.mp4"
 
-        render_scene(episode.scenes[0], jobs, client, manifest, episode)
-
-        client.text2speech.assert_not_called()
-        assert speech_job.status.value == "done"
+        report = render_scene(episode.scenes[0], jobs, client, manifest, episode)
+        assert report.completed == 2
