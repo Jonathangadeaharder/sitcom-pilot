@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Literal
-
 from pydantic import BaseModel, Field, model_validator
 
 
@@ -31,12 +29,12 @@ class Environment(BaseModel):
 
 class RenderConfig(BaseModel):
     fps: int = Field(default=24, ge=1)
-    resolution: tuple[int, int] = (1280, 720)
+    resolution: list[int] = Field(default=[1280, 720], min_length=2, max_length=2)
 
 
 class Beat(BaseModel):
     beat_id: str = Field(min_length=1)
-    kind: Literal["speech", "silent"]
+    kind: str = Field(pattern=r"^(speech|silent|transition)$")
     camera: str = ""
     action: str = ""
     seed: int | None = None
@@ -68,8 +66,8 @@ class Episode(BaseModel):
     season: int = Field(ge=1)
     episode: int = Field(ge=1)
     title: str = Field(min_length=1)
-    schema_version: Literal["2.0"]
-    dialogue_status: Literal["present", "missing", "partial"] = "present"
+    schema_version: str = Field(pattern=r"^2\.0$")
+    dialogue_status: str = Field(default="present", pattern=r"^(present|missing|partial)$")
     dialogue_recovery_note: str = ""
     render: RenderConfig | None = None
     cast: dict[str, Character]

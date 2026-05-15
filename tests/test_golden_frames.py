@@ -129,6 +129,13 @@ class TestGoldenFrameDeterminism:
         assert len(ids) == len(set(ids)), "Duplicate beat IDs"
 
 
+@pytest.fixture
+def golden_registry():
+    from showrunner.continuity import GoldenFrameRegistry
+
+    return GoldenFrameRegistry()
+
+
 class TestGoldenFrameRegression:
     def test_golden_fixtures_exist(self):
         from showrunner.continuity import GoldenFrameRegistry
