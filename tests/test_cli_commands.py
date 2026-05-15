@@ -164,7 +164,6 @@ class TestBootstrap:
         ep = tmp_path / "my-episode" / "episode.json"
         result2 = runner.invoke(app, ["validate", str(ep)])
         assert result2.exit_code == 0
-<<<<<<< HEAD
         assert "Valid" in result2.output
 
     def test_force_overwrites(self, tmp_path: Path):
