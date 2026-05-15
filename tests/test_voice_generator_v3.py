@@ -439,12 +439,12 @@ class TestGenerateEpisodeAudio:
         results = generate_episode_audio(data, tmp_path)
 
         assert results["001"]["lines_generated"] == 4
+        synth_kwargs = [c.kwargs for c in mock_synth.call_args_list]
+        assert any(k.get("seed") == 42 and k.get("temperature") == 0.8 for k in synth_kwargs)
 
     @patch("voice_generator_v3.synthesize_line")
     @patch("voice_generator_v3.concatenate_audio")
-    def test_builds_fish_text_for_each_line(
-        self, mock_concat, mock_synth, sample_episode, tmp_path
-    ):
+    def test_builds_fish_text_for_each_line(self, mock_concat, mock_synth, sample_episode, tmp_path):
         from voice_generator_v3 import generate_episode_audio, load_episode
 
         mock_synth.return_value = True
@@ -454,6 +454,8 @@ class TestGenerateEpisodeAudio:
         results = generate_episode_audio(data, tmp_path)
 
         assert results["001"]["lines_generated"] == 4
+        synth_kwargs = [c.kwargs for c in mock_synth.call_args_list]
+        assert any(k.get("fish_text", "").startswith("(") for k in synth_kwargs)
 
 
 class TestEmotionValidation:
@@ -637,6 +639,9 @@ class TestGenerateEpisodeAudioEdgeCases:
         }
         results = generate_episode_audio(ep, tmp_path)
         assert results["099"]["lines_generated"] == 1
+        _, kwargs = mock_synth.call_args
+        assert kwargs["seed"] == 42
+        assert kwargs["temperature"] == 0.8
 
 
 class TestMain:

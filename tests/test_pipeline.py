@@ -216,7 +216,8 @@ class TestRunPipelineAudioOnly:
         ep_path = _mini_episode(tmp_path)
         out_dir = tmp_path / "output"
         result = run_pipeline(ep_path, out_dir, audio_only=True)
-        assert result is not None
+        assert result == {"001_01": Path("/a.wav")}
+        assert "001_02" not in result
 
 
 class TestLoaderV2:

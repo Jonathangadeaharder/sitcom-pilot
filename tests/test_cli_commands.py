@@ -124,7 +124,7 @@ class TestPlan:
 
     def test_plan_verbose(self, tmp_path: Path):
         ep = _write_episode(tmp_path)
-        result = runner.invoke(app, ["plan", str(ep)])
+        result = runner.invoke(app, ["plan", str(ep), "--verbose"])
         assert result.exit_code == 0
 
     def test_plan_bad_file(self, tmp_path: Path):

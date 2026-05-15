@@ -32,10 +32,10 @@ def test_queue_prompt_retries_on_connection_error(client):
             raise ConnectionError("Connection refused")
         return mock_response
 
-        with patch("urllib.request.urlopen", side_effect=side_effect):
-            with patch("time.sleep"):
-                prompt_id = client.queue_prompt({"test": True}, max_retries=3)
-                assert prompt_id == "xyz"
+    with patch("urllib.request.urlopen", side_effect=side_effect):
+        with patch("time.sleep"):
+            prompt_id = client.queue_prompt({"test": True}, max_retries=3)
+            assert prompt_id == "xyz"
 
 
 def test_queue_prompt_raises_after_max_retries(client):

@@ -39,7 +39,8 @@ def plan_episode(episode_json: dict) -> list[BeatPlan]:
                 )
                 raise ValueError(f"Unsupported beat kind '{kind}' for beat {beat_id}")
             beat_number += 1
-            duration = b.get("duration_sec") or budget_per_beat
+            raw_duration = b.get("duration_sec")
+            duration = budget_per_beat if raw_duration is None else raw_duration
             description = _build_description(kind, b)
 
             beats.append(
