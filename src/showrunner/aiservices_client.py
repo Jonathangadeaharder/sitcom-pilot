@@ -21,11 +21,11 @@ class AIServicesClient:
 
     def __init__(
         self,
-        image_provider: str = "text2image.mlx",
+        image_provider: str = "mlx-flux",
         image_edit_provider: str = "image2image.mlx",
-        video_provider: str = "image2video.mlx",
-        tts_provider: str = "text2speech.fish_mlx",
-        asr_provider: str | None = "audio2subtitle.mlx",
+        video_provider: str = "mlx-ltx",
+        tts_provider: str = "mlx-audio",
+        asr_provider: str | None = None,
         subprocess_fallback: bool = True,
     ):
         self._image_provider = image_provider
