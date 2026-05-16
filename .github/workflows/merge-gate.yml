@@ -56,3 +56,36 @@ jobs:
 
       - name: Generate beat plan
         run: uv run --python ${{ matrix.python-version }} showrunner plan episode_01.json
+
+  sonarcloud:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clone AIServices
+        uses: actions/checkout@v4
+        with:
+          repository: Jonathangadeaharder/AIServices
+          path: aiservices
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python 3.11
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run tests with coverage XML
+        run: uv run pytest tests/ -q --cov=showrunner --cov-branch --cov-report=xml:coverage.xml
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5.1.0
+        with:
+          projectBaseDir: .
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
