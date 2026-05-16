@@ -28,6 +28,8 @@ class AIServicesClient:
         asr_provider: str | None = None,
         subprocess_fallback: bool = True,
     ):
+        if isinstance(image_provider, bool):
+            subprocess_fallback, image_provider = image_provider, "mlx-flux"
         self._image_provider = image_provider
         self._image_edit_provider = image_edit_provider
         self._video_provider = video_provider
@@ -297,6 +299,8 @@ class AIServicesClient:
             caps[op] = [reg_name]
         if self._asr_provider:
             caps["audio2subtitle"] = [self._asr_provider]
+        elif self._subprocess_fallback:
+            caps["audio2subtitle"] = ["cli-fallback"]
         return caps
 
     # ------------------------------------------------------------------
