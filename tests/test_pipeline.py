@@ -119,7 +119,7 @@ def _make_episode_data():
 
 class TestGenerateAudio:
     @staticmethod
-    def _mock_build_shot_audio(dialogue, character_id, output_path, **kwargs):
+    def _mock_build_shot_audio(dialogue, output_path, **kwargs):
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_bytes(b"fake_audio")
         return True

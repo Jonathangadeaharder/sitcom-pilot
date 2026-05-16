@@ -57,3 +57,17 @@ jobs:
 
       - name: Generate beat plan
         run: uv run --python ${{ matrix.python-version }} showrunner plan episode_01.json
+
+  required-checks:
+    name: required-checks
+    runs-on: self-hosted
+    needs: lint-and-test
+    if: always()
+    steps:
+      - name: Verify all jobs passed
+        run: |
+          if [ "${{ needs.lint-and-test.result }}" != "success" ]; then
+            echo "One or more CI jobs failed."
+            exit 1
+          fi
+          echo "All CI jobs passed."

@@ -62,6 +62,16 @@ rules:
     - "*.pyc"
     - "*.pyo"
 
+  github-workflows:
+    global:
+      disallow-command-masking: true
+      disallow-continue-on-error-on-quality: true
+      require-required-checks-aggregator: true
+    python:
+      coverage:
+        branches: 90
+        lines: 80
+
   test-adjacency:
     pattern: "separate"
     test-dir: "tests"

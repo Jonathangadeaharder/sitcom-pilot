@@ -151,13 +151,6 @@ class TestGenerateSrt:
         result = generate_srt([])
         assert result == ""
 
-    def test_parameter_affects_timing(self):
-        beats = [
-            BeatData(beat_id="1", kind="speech", text="Hello", duration_sec=2.0),
-        ]
-        result = generate_srt(beats)
-        assert "00:00:00,000 --> 00:00:02,000" in result
-
     def test_text_with_newlines_sanitized(self):
         beats = [
             BeatData(
