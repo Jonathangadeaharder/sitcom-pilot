@@ -132,7 +132,7 @@ class TestAllocateDurations:
             ),
         ]
         result = allocate_durations(jobs, 10.0)
-        assert result[0].duration_sec == 2.0
+        assert result[0].duration_sec == pytest.approx(2.0)
 
     def test_empty(self):
         assert allocate_durations([], 10.0) == []
@@ -169,7 +169,7 @@ class TestSceneReport:
 
     def test_success_rate_zero(self):
         r = SceneReport(scene_id="001")
-        assert r.success_rate == 0.0
+        assert r.success_rate == pytest.approx(0.0)
 
 
 class TestRenderEpisode:

@@ -28,14 +28,14 @@ class TestVisualReference:
 class TestVoiceProfile:
     def test_default_pitch_speed(self):
         v = VoiceProfile(voice_id="v1")
-        assert v.pitch == 1.0
-        assert v.speed == 1.0
+        assert v.pitch == pytest.approx(1.0)
+        assert v.speed == pytest.approx(1.0)
 
     def test_valid_pitch_range(self):
         v = VoiceProfile(voice_id="v1", pitch=0.5)
-        assert v.pitch == 0.5
+        assert v.pitch == pytest.approx(0.5)
         v2 = VoiceProfile(voice_id="v1", pitch=2.0)
-        assert v2.pitch == 2.0
+        assert v2.pitch == pytest.approx(2.0)
 
     @pytest.mark.parametrize("bad_pitch", [0.4, 2.1, -1.0])
     def test_invalid_pitch(self, bad_pitch):
@@ -124,5 +124,5 @@ class TestCastManifest:
         restored = CastManifest.model_validate(data)
         assert restored.characters["maya"].name == "Maya Chen"
         assert restored.characters["maya"].voice.voice_id == "mv1"
-        assert restored.characters["maya"].voice.pitch == 1.2
+        assert restored.characters["maya"].voice.pitch == pytest.approx(1.2)
         assert restored.characters["maya"].lora == "maya.safetensors"

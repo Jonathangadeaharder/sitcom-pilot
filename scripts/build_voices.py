@@ -56,8 +56,8 @@ def main() -> None:
                 voice=char.voice,
             )
             logger.info("Saved: %s", out_path)
-        except Exception as exc:
-            logger.error("Failed for %s: %s", slug, exc)
+        except Exception as _:
+            logger.exception("Failed for %s", slug)
             failed += 1
 
     if failed:

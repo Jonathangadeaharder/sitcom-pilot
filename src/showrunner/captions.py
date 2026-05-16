@@ -3,11 +3,11 @@ from __future__ import annotations
 from showrunner.loader import BeatData
 
 
-def timecode(seconds: float, fps: float = 24.0) -> str:
-    h = int(seconds // 3600)
-    m = int((seconds % 3600) // 60)
-    s = int(seconds % 60)
-    ms = int(round((seconds % 1) * 1000))
+def timecode(seconds: float) -> str:
+    total_ms = int(round(seconds * 1000))
+    h, rem_ms = divmod(total_ms, 3_600_000)
+    m, rem_ms = divmod(rem_ms, 60_000)
+    s, ms = divmod(rem_ms, 1_000)
     return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 
@@ -32,7 +32,6 @@ def split_text_for_subtitles(text: str, max_chars: int = 42) -> list[str]:
 
 def generate_srt(
     beats: list[BeatData],
-    fps: float = 24.0,
     max_chars: int = 42,
 ) -> str:
     lines: list[str] = []
@@ -45,8 +44,8 @@ def generate_srt(
             chunks = split_text_for_subtitles(text, max_chars=max_chars)
             chunk_duration = duration / max(len(chunks), 1)
             for i, chunk in enumerate(chunks):
-                start = timecode(current_time + i * chunk_duration, fps=fps)
-                end = timecode(current_time + (i + 1) * chunk_duration, fps=fps)
+                start = timecode(current_time + i * chunk_duration)
+                end = timecode(current_time + (i + 1) * chunk_duration)
                 lines.append(str(idx))
                 lines.append(f"{start} --> {end}")
                 if beat.speaker and i == 0:

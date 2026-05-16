@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from showrunner.loader import BeatData, EpisodeLoader, VoiceConfig
 
 V2_EPISODE = {
@@ -184,7 +186,7 @@ def test_v2_cast_voice_config(tmp_path):
     assert isinstance(voice, VoiceConfig)
     assert voice.voice_id == "maya_v1"
     assert voice.seed == 42
-    assert voice.temperature == 0.8
+    assert voice.temperature == pytest.approx(0.8)
     assert voice.language == "en"
 
 
@@ -260,7 +262,7 @@ def test_v2_silent_beat_fields(tmp_path):
     assert beat.kind == "silent"
     assert beat.camera == "wide shot"
     assert beat.action == "Maya at desk"
-    assert beat.duration_sec == 4.0
+    assert beat.duration_sec == pytest.approx(4.0)
     assert beat.seed == 110001
 
 

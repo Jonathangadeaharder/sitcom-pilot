@@ -147,7 +147,7 @@ class TestBeatStatus:
 class TestSceneReport:
     def test_success_rate_full(self):
         r = SceneReport(scene_id="s", total_beats=5, completed=5)
-        assert r.success_rate == 1.0
+        assert r.success_rate == pytest.approx(1.0)
 
     def test_success_rate_partial(self):
         r = SceneReport(scene_id="s", total_beats=10, completed=3)
@@ -155,7 +155,7 @@ class TestSceneReport:
 
     def test_success_rate_zero_total(self):
         r = SceneReport(scene_id="s", total_beats=0, completed=0)
-        assert r.success_rate == 0.0
+        assert r.success_rate == pytest.approx(0.0)
 
     def test_defaults(self):
         r = SceneReport(scene_id="s")
@@ -163,7 +163,7 @@ class TestSceneReport:
         assert r.completed == 0
         assert r.failed == 0
         assert r.skipped == 0
-        assert r.duration_sec == 0.0
+        assert r.duration_sec == pytest.approx(0.0)
         assert r.errors == []
 
 
@@ -243,9 +243,9 @@ class TestPlanBeats:
     def test_duration_preserved(self, multi_scene_episode, manifest, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
         jobs = plan_beats(multi_scene_episode, manifest, paths)
-        assert jobs[0].duration_sec == 2.0
-        assert jobs[1].duration_sec == 3.0
-        assert jobs[2].duration_sec == 1.0
+        assert jobs[0].duration_sec == pytest.approx(2.0)
+        assert jobs[1].duration_sec == pytest.approx(3.0)
+        assert jobs[2].duration_sec == pytest.approx(1.0)
 
     def test_scene_dirs_created(self, multi_scene_episode, manifest, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
@@ -289,7 +289,7 @@ class TestAllocateDurations:
             )
         ]
         result = allocate_durations(jobs, 10.0)
-        assert result[0].duration_sec == 2.0
+        assert result[0].duration_sec == pytest.approx(2.0)
 
     def test_single_beat_over_budget(self):
         jobs = [
@@ -570,7 +570,7 @@ class TestPlanEpisode:
                 ],
             }
         )
-        assert beats[0].duration_seconds == 60.0
+        assert beats[0].duration_seconds == pytest.approx(60.0)
 
     def test_beat_without_kind_defaults_to_silent(self):
         beats = plan_episode(
@@ -827,7 +827,7 @@ class TestPlanEpisode:
     def test_explicit_duration_overrides_budget(self, one_scene_one_beat):
         one_scene_one_beat["scenes"][0]["beats"][0]["duration_sec"] = 5.0
         beats = plan_episode(one_scene_one_beat)
-        assert beats[0].duration_seconds == 5.0
+        assert beats[0].duration_seconds == pytest.approx(5.0)
 
     def test_real_episode_01_creates_all_beats(self, episode_01):
         beats = plan_episode(episode_01)

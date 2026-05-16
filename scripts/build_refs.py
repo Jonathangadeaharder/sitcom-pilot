@@ -62,8 +62,8 @@ def main() -> None:
                     height=1024,
                 )
                 logger.info("Saved: %s", out_path)
-            except Exception as exc:
-                logger.error("Failed for %s %s: %s", slug, view, exc)
+            except Exception as _:
+                logger.exception("Failed for %s %s", slug, view)
                 failed += 1
 
     if failed:

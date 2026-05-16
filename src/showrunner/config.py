@@ -15,6 +15,8 @@ except ImportError:
 
 import os
 
+_DEFAULT_COMFYUI_URL = "http://127.0.0.1:8188"
+
 if _PYDANTIC_AVAILABLE:
 
     class PipelineConfig(BaseSettings):  # pyright: ignore[reportPossiblyUnboundVariable, reportRedeclaration]
@@ -34,7 +36,7 @@ if _PYDANTIC_AVAILABLE:
         )
 
         comfyui_url: str = Field(  # pyright: ignore[reportPossiblyUnboundVariable]
-            default="http://127.0.0.1:8188",
+            default=_DEFAULT_COMFYUI_URL,
             description="Base URL of the running ComfyUI server.",
         )
 
@@ -67,7 +69,7 @@ else:
     class PipelineConfig:  # type: ignore[no-redef]
         def __init__(self, **kwargs):
             defaults = {
-                "comfyui_url": os.environ.get("SITCOM_COMFYUI_URL", "http://127.0.0.1:8188"),
+                "comfyui_url": os.environ.get("SITCOM_COMFYUI_URL", _DEFAULT_COMFYUI_URL),
                 "output_dir": Path(os.environ.get("SITCOM_OUTPUT_DIR", "output")),
                 "run_id": os.environ.get("SITCOM_RUN_ID", ""),
                 "cooldown_seconds": float(os.environ.get("SITCOM_COOLDOWN_SECONDS", "0.0")),
@@ -83,7 +85,7 @@ else:
         @classmethod
         def from_env(cls) -> PipelineConfig:
             return cls(
-                comfyui_url=os.environ.get("SITCOM_COMFYUI_URL", "http://127.0.0.1:8188"),
+                comfyui_url=os.environ.get("SITCOM_COMFYUI_URL", _DEFAULT_COMFYUI_URL),
                 output_dir=Path(os.environ.get("SITCOM_OUTPUT_DIR", "output")),
                 run_id=os.environ.get("SITCOM_RUN_ID", ""),
                 cooldown_seconds=float(os.environ.get("SITCOM_COOLDOWN_SECONDS", "0.0")),

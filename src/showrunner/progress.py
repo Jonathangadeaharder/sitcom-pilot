@@ -64,7 +64,7 @@ ProgressCallback = Callable[[BeatProgressEvent], None]
 
 class NullProgressCallback:
     def __call__(self, event: BeatProgressEvent) -> None:
-        pass
+        """No-op progress callback for headless/CI runs."""
 
 
 def make_progress_callback(console: Any = None) -> RichRenderProgress:

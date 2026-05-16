@@ -157,7 +157,7 @@ class TestEstimateCost:
 
     def test_unknown_operation(self, client):
         result = client.estimate_cost("nonexistent")
-        assert result["time_sec"] == 0.0
+        assert result["time_sec"] == pytest.approx(0.0)
 
 
 class TestDiscoverCapabilities:

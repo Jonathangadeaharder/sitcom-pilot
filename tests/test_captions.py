@@ -21,7 +21,7 @@ class TestTimecode:
         assert timecode(1.234) == "00:00:01,234"
 
     def test_rounds_to_nearest_frame_at_24fps(self):
-        result = timecode(1.0 / 24.0, fps=24.0)
+        result = timecode(1.0 / 24.0)
         assert result == "00:00:00,041" or result == "00:00:00,042"
 
 
@@ -150,15 +150,6 @@ class TestGenerateSrt:
     def test_empty_beats(self):
         result = generate_srt([])
         assert result == ""
-
-    def test_fps_parameter_affects_timing(self):
-        beats = [
-            BeatData(beat_id="1", kind="speech", text="Hello", duration_sec=2.0),
-        ]
-        result_24 = generate_srt(beats, fps=24.0)
-        result_30 = generate_srt(beats, fps=30.0)
-        assert "00:00:00,000 --> 00:00:02,000" in result_24
-        assert "00:00:00,000 --> 00:00:02,000" in result_30
 
     def test_text_with_newlines_sanitized(self):
         beats = [

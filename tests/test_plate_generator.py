@@ -32,7 +32,7 @@ def episode():
 
 class TestGenerateScenePlate:
     @patch("showrunner.plate_generator.AIServicesClient")
-    def test_generates_image(self, MockClient, manifest, episode, tmp_path):
+    def test_generates_image(self, mock_client_cls, manifest, episode, tmp_path):
         mock_client = MagicMock()
         mock_client.text2image.return_value = tmp_path / "plate.png"
         out = tmp_path / "scene_001.png"
@@ -45,7 +45,7 @@ class TestGenerateScenePlate:
 
 class TestGenerateBeatPlate:
     @patch("showrunner.plate_generator.AIServicesClient")
-    def test_generates_from_scene_plate(self, MockClient, manifest, episode, tmp_path):
+    def test_generates_from_scene_plate(self, mock_client_cls, manifest, episode, tmp_path):
         mock_client = MagicMock()
         mock_client.image2image.return_value = tmp_path / "beat.png"
         scene_plate = tmp_path / "scene_001.png"

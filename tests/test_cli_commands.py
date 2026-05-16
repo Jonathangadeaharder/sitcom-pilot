@@ -457,8 +457,8 @@ class TestRun:
         self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path
     ):
         mock_client = MagicMock()
-        mock_client.text2image.return_value = Path("/tmp/img.png")
-        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
+        mock_client.text2image.return_value = tmp_path / "img.png"
+        mock_client.image2video.return_value = tmp_path / "vid.mp4"
         mock_client_cls.return_value = mock_client
         mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
         mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
@@ -486,8 +486,8 @@ class TestRun:
     @patch("showrunner.aiservices_client.AIServicesClient")
     def test_run_bootstrap_skipped(self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path):
         mock_client = MagicMock()
-        mock_client.text2image.return_value = Path("/tmp/img.png")
-        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
+        mock_client.text2image.return_value = tmp_path / "img.png"
+        mock_client.image2video.return_value = tmp_path / "vid.mp4"
         mock_client_cls.return_value = mock_client
         mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
         mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
@@ -503,8 +503,8 @@ class TestRun:
     @patch("showrunner.aiservices_client.AIServicesClient")
     def test_run_skip_validate(self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path):
         mock_client = MagicMock()
-        mock_client.text2image.return_value = Path("/tmp/img.png")
-        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
+        mock_client.text2image.return_value = tmp_path / "img.png"
+        mock_client.image2video.return_value = tmp_path / "vid.mp4"
         mock_client_cls.return_value = mock_client
         mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
         mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
@@ -523,8 +523,8 @@ class TestRun:
     @patch("showrunner.aiservices_client.AIServicesClient")
     def test_run_verbose(self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path):
         mock_client = MagicMock()
-        mock_client.text2image.return_value = Path("/tmp/img.png")
-        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
+        mock_client.text2image.return_value = tmp_path / "img.png"
+        mock_client.image2video.return_value = tmp_path / "vid.mp4"
         mock_client_cls.return_value = mock_client
         mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
         mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"

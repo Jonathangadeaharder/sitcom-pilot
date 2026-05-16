@@ -643,7 +643,7 @@ class TestGenerateEpisodeAudioEdgeCases:
         generate_episode_audio(ep, tmp_path)
         call = mock_synth.call_args_list[0]
         assert call.kwargs["seed"] == 42
-        assert call.kwargs["temperature"] == 0.8
+        assert call.kwargs["temperature"] == pytest.approx(0.8)
 
 
 class TestMain:

@@ -28,6 +28,10 @@ app = typer.Typer(
 render_app = typer.Typer(help="Render beats, scenes, or full episodes")
 app.add_typer(render_app, name="render")
 
+_EPISODE_PATH_HELP = "Path to episode JSON file"
+_OUTPUT_DIR_HELP = "Output directory"
+_PROGRESS_DESC_FMT = "[progress.description]{task.description}"
+
 
 def _setup_logging(verbose: bool = False, json_logs: bool = False) -> None:
     level = "DEBUG" if verbose else "INFO"
@@ -70,7 +74,7 @@ def _resolve_output_dir(output_dir: str | None) -> Path:
 
 @app.command()
 def validate(
-    episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
+    episode_path: str = typer.Argument(..., help=_EPISODE_PATH_HELP),
     strict: bool = typer.Option(False, "--strict", help="Enable strict business-rule checks"),
 ) -> None:
     """Validate an episode JSON file against the v2 schema."""
@@ -99,7 +103,7 @@ def validate(
 
 @app.command()
 def plan(
-    episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
+    episode_path: str = typer.Argument(..., help=_EPISODE_PATH_HELP),
 ) -> None:
     """Plan beats for an episode and output as JSON."""
     from showrunner.planner import plan_episode
@@ -212,12 +216,12 @@ def bootstrap(
 
 @render_app.command("beat")
 def render_beat(
-    episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
+    episode_path: str = typer.Argument(..., help=_EPISODE_PATH_HELP),
     beat_id: str = typer.Argument(..., help="Beat ID to render"),
     scene_id: str | None = typer.Option(
         None, "--scene", "-s", help="Scene ID (auto-detected if omitted)"
     ),
-    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
+    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help=_OUTPUT_DIR_HELP),
 ) -> None:
     """Render a single beat."""
     _setup_logging()
@@ -255,7 +259,7 @@ def render_beat(
 
     with Progress(
         SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
+        TextColumn(_PROGRESS_DESC_FMT),
         console=console,
     ) as progress:
         progress.add_task(f"Rendering beat {beat_id}...", total=None)
@@ -270,9 +274,9 @@ def render_beat(
 
 @render_app.command("scene")
 def render_scene(
-    episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
+    episode_path: str = typer.Argument(..., help=_EPISODE_PATH_HELP),
     scene_id: str = typer.Argument(..., help="Scene ID to render"),
-    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
+    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help=_OUTPUT_DIR_HELP),
     max_workers: int = typer.Option(1, "--workers", "-w", help="Parallel workers"),
     json_logs: bool = typer.Option(False, "--json", help="Output structured JSON logs"),
 ) -> None:
@@ -320,8 +324,8 @@ def render_scene(
 
 @render_app.command("episode")
 def render_episode_cmd(
-    episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
-    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
+    episode_path: str = typer.Argument(..., help=_EPISODE_PATH_HELP),
+    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help=_OUTPUT_DIR_HELP),
     max_workers: int = typer.Option(1, "--workers", "-w", help="Parallel workers"),
     json_logs: bool = typer.Option(False, "--json", help="Output structured JSON logs"),
     buffer: int | None = typer.Option(
@@ -392,8 +396,8 @@ def render_episode_cmd(
 
 @app.command()
 def assemble(
-    episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
-    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
+    episode_path: str = typer.Argument(..., help=_EPISODE_PATH_HELP),
+    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help=_OUTPUT_DIR_HELP),
     run_id: str | None = typer.Option(None, "--run-id", help="Specific run ID to assemble"),
     burn_captions: bool = typer.Option(False, "--captions", help="Burn in captions"),
 ) -> None:
@@ -448,7 +452,7 @@ def assemble(
 
     with Progress(
         SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
+        TextColumn(_PROGRESS_DESC_FMT),
         console=console,
     ) as progress:
         progress.add_task("Concatenating clips...", total=None)
@@ -477,9 +481,9 @@ def assemble(
 
 @app.command()
 def showcase(
-    episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
+    episode_path: str = typer.Argument(..., help=_EPISODE_PATH_HELP),
     scene: str = typer.Option("007", "--scene", help="Scene ID or 1-based index"),
-    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
+    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help=_OUTPUT_DIR_HELP),
     run_id: str | None = typer.Option(None, "--run-id", help="Specific run ID"),
 ) -> None:
     """Extract a scene clip + thumbnail from a render run."""
@@ -535,7 +539,7 @@ def showcase(
 
     with Progress(
         SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
+        TextColumn(_PROGRESS_DESC_FMT),
         console=console,
     ) as progress:
         clip_path = showcase_dir / f"{scene_id}.mp4"
@@ -618,8 +622,8 @@ def _find_latest_run(root: Path) -> str | None:
 
 @app.command()
 def run(
-    episode_path: str = typer.Argument(..., help="Path to episode JSON file"),
-    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help="Output directory"),
+    episode_path: str = typer.Argument(..., help=_EPISODE_PATH_HELP),
+    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help=_OUTPUT_DIR_HELP),
     max_workers: int = typer.Option(1, "--workers", "-w", help="Parallel render workers"),
     skip_bootstrap: bool = typer.Option(
         False, "--skip-bootstrap", help="Skip bootstrap (character refs) step"
@@ -689,7 +693,7 @@ def run(
     # ------------------------------------------------------------------
     with Progress(
         SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
+        TextColumn(_PROGRESS_DESC_FMT),
         console=console,
     ) as progress:
         progress.add_task("Loading episode...", total=None)
@@ -728,7 +732,7 @@ def run(
     if not skip_bootstrap:
         with Progress(
             SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
+            TextColumn(_PROGRESS_DESC_FMT),
             console=console,
         ) as progress:
             task = progress.add_task("Bootstrapping character refs...", total=len(episode.cast))
@@ -746,7 +750,7 @@ def run(
             env_task = progress.add_task(
                 "Bootstrapping environment refs...", total=len(episode.environments)
             )
-            for env_name in episode.environments:
+            for _ in episode.environments:
                 progress.advance(env_task)
 
         console.print("[bold green]\u2713[/bold green]  Bootstrap complete")
@@ -760,15 +764,12 @@ def run(
 
     with Progress(
         SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
+        TextColumn(_PROGRESS_DESC_FMT),
         BarColumn(),
         TaskProgressColumn(),
         console=console,
     ) as progress:
         task = progress.add_task("Rendering scenes...", total=total_beats)
-
-        def _progress_callback(_report):
-            progress.update(task, advance=0)
 
         reports = render_episode(
             episode,
@@ -811,7 +812,7 @@ def run(
 
     with Progress(
         SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
+        TextColumn(_PROGRESS_DESC_FMT),
         console=console,
     ) as progress:
         progress.add_task("Concatenating clips...", total=None)
