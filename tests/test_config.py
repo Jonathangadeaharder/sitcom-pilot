@@ -6,6 +6,8 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from showrunner.config import PipelineConfig
 
 
@@ -21,7 +23,7 @@ def test_default_output_dir():
 
 def test_default_cooldown_is_zero():
     cfg = PipelineConfig()
-    assert cfg.cooldown_seconds == 0.0
+    assert cfg.cooldown_seconds == pytest.approx(0.0)
 
 
 def test_default_max_crash_retries():
@@ -44,7 +46,7 @@ def test_env_override_output_dir():
 def test_env_override_cooldown():
     with patch.dict(os.environ, {"SITCOM_COOLDOWN_SECONDS": "2.5"}):
         cfg = PipelineConfig()
-        assert cfg.cooldown_seconds == 2.5
+        assert cfg.cooldown_seconds == pytest.approx(2.5)
 
 
 def test_env_override_max_retries():
@@ -73,7 +75,7 @@ class TestFallbackPipelineConfig:
                 cfg = cfg_mod.PipelineConfig()
                 assert cfg.comfyui_url == "http://127.0.0.1:8188"
                 assert cfg.output_dir == Path("output")
-                assert cfg.cooldown_seconds == 0.0
+                assert cfg.cooldown_seconds == pytest.approx(0.0)
                 assert cfg.max_crash_retries == 3
         finally:
             if saved is not None:
@@ -103,7 +105,7 @@ class TestFallbackPipelineConfig:
                     assert cfg.comfyui_url == "http://192.168.1.50:8188"
                     assert cfg.output_dir == Path("/tmp/fallback_out")
                     assert cfg.run_id == "test-run-42"
-                    assert cfg.cooldown_seconds == 1.5
+                    assert cfg.cooldown_seconds == pytest.approx(1.5)
                     assert cfg.max_crash_retries == 5
         finally:
             if saved is not None:

@@ -46,12 +46,12 @@ class TestAllocateDurationsEdgeCases:
     def test_exact_budget_no_change(self):
         jobs = [self._make_job("b", 5.0)]
         allocate_durations(jobs, 5.0)
-        assert jobs[0].duration_sec == 5.0
+        assert jobs[0].duration_sec == pytest.approx(5.0)
 
     def test_under_budget_no_scale_up(self):
         jobs = [self._make_job("b", 3.0)]
         allocate_durations(jobs, 10.0)
-        assert jobs[0].duration_sec == 3.0
+        assert jobs[0].duration_sec == pytest.approx(3.0)
 
 
 class TestSaveReport:
@@ -72,9 +72,9 @@ class TestSaveReport:
         data = json.loads(report_path.read_text())
         assert len(data) == 2
         assert data[0]["scene_id"] == "001"
-        assert data[0]["success_rate"] == 1.0
+        assert data[0]["success_rate"] == pytest.approx(1.0)
         assert data[1]["scene_id"] == "002"
-        assert data[1]["success_rate"] == 0.0
+        assert data[1]["success_rate"] == pytest.approx(0.0)
         assert data[1]["errors"] == ["b1: boom"]
 
 

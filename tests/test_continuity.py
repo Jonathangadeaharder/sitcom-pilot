@@ -18,7 +18,7 @@ class TestSimilarityResult:
     def test_passed(self):
         r = SimilarityResult("a.png", "b.png", 0.85, True)
         assert r.passed
-        assert r.ssim_score == 0.85
+        assert r.ssim_score == pytest.approx(0.85)
 
 
 class TestCheckContinuity:
@@ -28,7 +28,7 @@ class TestCheckContinuity:
         mock_load.return_value = MagicMock()
         result = check_continuity(Path("ref.png"), Path("gen.png"), threshold=0.7)
         assert result.passed
-        assert result.ssim_score == 0.9
+        assert result.ssim_score == pytest.approx(0.9)
 
     @patch("showrunner.continuity._compute_ssim", return_value=0.3)
     @patch("showrunner.continuity._load_image_gray")
@@ -43,7 +43,7 @@ class TestCheckContinuity:
         mock_load.return_value = MagicMock()
         result = check_continuity(Path("ref.png"), Path("gen.png"), threshold=0.7)
         assert result.passed
-        assert result.ssim_score == 0.7
+        assert result.ssim_score == pytest.approx(0.7)
 
     def test_invalid_threshold_raises(self):
         import pytest
@@ -62,21 +62,21 @@ class TestSsimFallback:
     def test_identical_images(self):
         img = MagicMock()
         img.tobytes.return_value = b"\x00\x01\x02"
-        assert _ssim_fallback(img, img) == 1.0
+        assert _ssim_fallback(img, img) == pytest.approx(1.0)
 
     def test_different_images(self):
         img_a = MagicMock()
         img_a.tobytes.return_value = b"\x00\x01\x02"
         img_b = MagicMock()
         img_b.tobytes.return_value = b"\x03\x04\x05"
-        assert _ssim_fallback(img_a, img_b) == 0.0
+        assert _ssim_fallback(img_a, img_b) == pytest.approx(0.0)
 
     def test_different_sizes_returns_zero(self):
         img_a = MagicMock()
         img_a.size = (10, 10)
         img_b = MagicMock()
         img_b.size = (20, 20)
-        assert _ssim_fallback(img_a, img_b) == 0.0
+        assert _ssim_fallback(img_a, img_b) == pytest.approx(0.0)
 
 
 class TestBatchCheck:
@@ -87,18 +87,17 @@ class TestBatchCheck:
         assert len(results) == 1
         assert results[0].passed
 
-    @patch("showrunner.continuity._load_image_gray", side_effect=OSError("missing"))
-    def test_oserror_caught(self, mock_load):
-        results = batch_check([(Path("a"), Path("b"))])
-        assert results == []
-
-    @patch("showrunner.continuity._load_image_gray", side_effect=ValueError("bad"))
-    def test_valueerror_caught(self, mock_load):
-        results = batch_check([(Path("a"), Path("b"))])
-        assert results == []
-
-    @patch("showrunner.continuity._load_image_gray", side_effect=ImportError("nope"))
-    def test_importerror_caught(self, mock_load):
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            OSError("missing"),
+            ValueError("bad"),
+            ImportError("nope"),
+        ],
+    )
+    @patch("showrunner.continuity._load_image_gray")
+    def test_exception_caught(self, mock_load, exc):
+        mock_load.side_effect = exc
         results = batch_check([(Path("a"), Path("b"))])
         assert results == []
 

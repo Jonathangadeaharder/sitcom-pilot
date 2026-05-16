@@ -177,11 +177,11 @@ def synthesize_dialogue_line(
             os.unlink(tmp_path)
             raise
         return True
-    except urllib.error.HTTPError as exc:
-        logger.error("TTS request failed for '%s': HTTP %s", character_id, exc.code)
+    except urllib.error.HTTPError:
+        logger.exception("TTS request failed for '%s'", character_id)
         return False
-    except urllib.error.URLError as exc:
-        logger.error("TTS request failed for '%s': %s", character_id, exc.reason)
+    except urllib.error.URLError:
+        logger.exception("TTS request failed for '%s'", character_id)
         return False
 
 
@@ -226,13 +226,12 @@ def concatenate_wavs(wav_files: list[Path], output_path: Path, pause_sec: float 
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         return result.returncode == 0 and output_path.exists()
     except (subprocess.SubprocessError, OSError) as exc:
-        logger.error("ffmpeg concat failed: %s", exc)
+        logger.exception("ffmpeg concat failed: %s", exc)
         return False
 
 
 def build_shot_audio(
     dialogue: list[dict],
-    character_id: str,
     output_path: Path,
     voice_seed: int = 42,
     voice_temp: float = 0.8,

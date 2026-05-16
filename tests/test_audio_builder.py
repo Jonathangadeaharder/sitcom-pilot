@@ -221,7 +221,7 @@ class TestBuildShotAudio:
             },
         ]
         output = tmp_path / "shot_001_01.wav"
-        result = build_shot_audio(dialogue, "maya", output, voice_seed=42, voice_temp=0.8)
+        result = build_shot_audio(dialogue, output, voice_seed=42, voice_temp=0.8)
         assert result is True
         mock_synth.assert_called_once()
 
@@ -230,7 +230,7 @@ class TestBuildShotAudio:
         from showrunner.audio_builder import build_shot_audio
 
         output = tmp_path / "shot.wav"
-        assert build_shot_audio([], "maya", output) is False
+        assert build_shot_audio([], output) is False
 
     @patch("showrunner.audio_builder.concatenate_wavs")
     @patch("showrunner.audio_builder.synthesize_dialogue_line")
@@ -257,7 +257,7 @@ class TestBuildShotAudio:
             },
         ]
         output = tmp_path / "shot.wav"
-        result = build_shot_audio(dialogue, "maya", output)
+        result = build_shot_audio(dialogue, output)
         assert result is True
         assert mock_synth.call_count == 2
         mock_concat.assert_called_once()
@@ -270,7 +270,7 @@ class TestBuildShotAudio:
         dialogue = [
             {"speaker": "maya", "emotion": "calm", "tone": None, "effect": None, "text": "Hi."}
         ]
-        result = build_shot_audio(dialogue, "maya", output)
+        result = build_shot_audio(dialogue, output)
         assert result is True
 
     @patch("showrunner.audio_builder.synthesize_dialogue_line")
@@ -284,7 +284,7 @@ class TestBuildShotAudio:
             {"speaker": "maya", "emotion": "calm", "tone": None, "effect": None, "text": "Line 2."},
         ]
         output = tmp_path / "shot.wav"
-        result = build_shot_audio(dialogue, "maya", output)
+        result = build_shot_audio(dialogue, output)
         assert result is False
         mock_synth.assert_called_once()
 
@@ -433,7 +433,7 @@ class TestBuildShotAudioEdgeCases:
             {"speaker": "maya", "emotion": None, "tone": None, "effect": None, "text": "Hi."}
         ]
         output = tmp_path / "shot.wav"
-        result = build_shot_audio(dialogue, "maya", output)
+        result = build_shot_audio(dialogue, output)
         assert result is True
         mock_synth.assert_called_once()
         mock_concat.assert_called_once()

@@ -24,7 +24,7 @@ class TestVoiceConfig:
         assert v.voice_id == ""
         assert v.clone_from == ""
         assert v.seed == 0
-        assert v.temperature == 0.8
+        assert v.temperature == pytest.approx(0.8)
         assert v.language == "en"
 
     def test_custom_values(self):
@@ -37,14 +37,14 @@ class TestVoiceConfig:
             language="fr",
         )
         assert v.provider == "mlx"
-        assert v.temperature == 0.5
+        assert v.temperature == pytest.approx(0.5)
         assert v.language == "fr"
 
     def test_boundary_temperature(self):
         v = VoiceConfig(temperature=0.0)
-        assert v.temperature == 0.0
+        assert v.temperature == pytest.approx(0.0)
         v2 = VoiceConfig(temperature=1.0)
-        assert v2.temperature == 1.0
+        assert v2.temperature == pytest.approx(1.0)
 
     def test_negative_seed(self):
         v = VoiceConfig(seed=-1)
@@ -112,7 +112,7 @@ class TestBeatData:
         b = BeatData(beat_id="b1", kind="silent")
         assert b.camera == ""
         assert b.action == ""
-        assert b.duration_sec == 3.0
+        assert b.duration_sec == pytest.approx(3.0)
         assert b.seed == 0
         assert b.speaker == ""
         assert b.text == ""
@@ -120,11 +120,11 @@ class TestBeatData:
 
     def test_zero_duration(self):
         b = BeatData(beat_id="b1", kind="silent", duration_sec=0.0)
-        assert b.duration_sec == 0.0
+        assert b.duration_sec == pytest.approx(0.0)
 
     def test_negative_duration(self):
         b = BeatData(beat_id="b1", kind="silent", duration_sec=-1.0)
-        assert b.duration_sec == -1.0
+        assert b.duration_sec == pytest.approx(-1.0)
 
     def test_kind_values(self):
         assert BeatData(beat_id="b1", kind="speech").kind == "speech"
