@@ -4,10 +4,10 @@ from showrunner.loader import BeatData
 
 
 def timecode(seconds: float) -> str:
-    h = int(seconds // 3600)
-    m = int((seconds % 3600) // 60)
-    s = int(seconds % 60)
-    ms = int(round((seconds % 1) * 1000))
+    total_ms = int(round(seconds * 1000))
+    h, rem_ms = divmod(total_ms, 3_600_000)
+    m, rem_ms = divmod(rem_ms, 60_000)
+    s, ms = divmod(rem_ms, 1_000)
     return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 
