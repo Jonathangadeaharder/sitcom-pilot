@@ -41,7 +41,6 @@ def generate_audio_for_episode(
             out_path = audio_dir / f"{shot.shot_id}.wav"
             success = build_shot_audio(
                 dialogue=shot.dialogue,
-                character_id=first_speaker,
                 output_path=out_path,
                 voice_seed=char.get("voice_seed", 42),
                 voice_temp=char.get("voice_temp", 0.8),
