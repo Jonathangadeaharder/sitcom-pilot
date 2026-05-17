@@ -61,7 +61,8 @@ branch = true
 source = ["src/showrunner"]
 
 [tool.coverage.report]
-fail_under = 90
+# fail_under enforced by --cov-fail-under=90 in CI workflow commands (pr-gate.yml lines 47, 51)
+# Removed from here to prevent mutmut's internal test runs from failing on pre-imported modules
 
 [tool.ruff]
 line-length = 100
