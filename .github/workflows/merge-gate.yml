@@ -7,7 +7,7 @@ on:
 
 jobs:
   quality-gate:
-    runs-on: self-hosted
+    runs-on: ["self-hosted", "python", "macos"]
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
@@ -58,7 +58,7 @@ jobs:
         run: uv run --python ${{ matrix.python-version }} showrunner plan episode_01.json
 
   sonarcloud:
-    runs-on: self-hosted
+    runs-on: ["self-hosted", "security", "macos"]
     steps:
       - uses: actions/checkout@v4
         with:

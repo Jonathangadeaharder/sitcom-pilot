@@ -12,7 +12,7 @@ permissions:
 jobs:
   pr-agent:
     if: vars.ENABLE_PR_AGENT == 'true' && github.event.issue.pull_request != null
-    runs-on: self-hosted
+    runs-on: ["self-hosted", "python", "macos"]
     steps:
       - uses: actions/checkout@v4
 
