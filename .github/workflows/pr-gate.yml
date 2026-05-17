@@ -1,4 +1,4 @@
-name: CI
+name: PR Gate
 
 on:
   push:
@@ -59,7 +59,7 @@ jobs:
         run: uv run --python ${{ matrix.python-version }} showrunner plan episode_01.json
 
   required-checks:
-    name: required-checks
+    name: Required Checks (PR)
     runs-on: self-hosted
     needs: lint-and-test
     if: always()

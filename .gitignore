@@ -1,6 +1,6 @@
 __pycache__/
 *.pyc
-.coverage
+.coverage*
 .pytest_cache/
 .DS_Store
 output/
@@ -11,6 +11,10 @@ aiservices/
 mutants/
 
 .worktrees/
+
+.ruff_cache/
+
+.mutmut-cache
 
 .venv/
 
