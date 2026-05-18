@@ -75,6 +75,7 @@ ignore = []
 
 [tool.ruff.lint.per-file-ignores]
 "legacy/*" = ["E402", "E501", "F841", "I001"]
+"tests/*" = ["PLC0415"]
 
 [build-system]
 requires = ["hatchling"]
