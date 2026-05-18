@@ -1,7 +1,23 @@
-# ADR-004: Testing Strategy
+---
+id: ADR-004
+kind: adr
+title: Testing Strategy
+status: draft
+date: 2026-05-17T00:00:00.000Z
+authors: []
+reviewers: []
+tags: []
+supersedes: []
+superseded_by: []
+depends_on: []
+blocks: []
+implements: []
+related: []
+external: []
+project: sitcom-pilot
+checksum: 460f991cfd297fdbd7b74cae958ed6ff57a627d41bba9bc89d2444ce552f2e9d
+---
 
-**Status:** Accepted  
-**Date:** 2026-05-17  
 **Deciders:** Project owner  
 **Tags:** testing, pytest, mutmut, coverage, sonarcloud
 

@@ -1,7 +1,23 @@
-# ADR-003: Quality Gates
+---
+id: ADR-003
+kind: adr
+title: Quality Gates
+status: draft
+date: 2026-05-17T00:00:00.000Z
+authors: []
+reviewers: []
+tags: []
+supersedes: []
+superseded_by: []
+depends_on: []
+blocks: []
+implements: []
+related: []
+external: []
+project: sitcom-pilot
+checksum: 13f11688901e93443a3c9459f14a52011a864e843320c2c52ac3da5e777d391c
+---
 
-**Status:** Accepted  
-**Date:** 2026-05-17  
 **Deciders:** Project owner  
 **Tags:** ci/cd, github-actions, quality-gates, sonarcloud
 

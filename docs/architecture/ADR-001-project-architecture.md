@@ -1,7 +1,23 @@
-# ADR-001: Project Architecture
+---
+id: ADR-001
+kind: adr
+title: Project Architecture
+status: draft
+date: 2026-05-17T00:00:00.000Z
+authors: []
+reviewers: []
+tags: []
+supersedes: []
+superseded_by: []
+depends_on: []
+blocks: []
+implements: []
+related: []
+external: []
+project: sitcom-pilot
+checksum: 4336f2e301bf7e63199154ff6e3cbeff4cca147998d8083f4d74ed9de085f9f6
+---
 
-**Status:** Accepted  
-**Date:** 2026-05-17  
 **Deciders:** Project owner  
 **Tags:** architecture, python, monorepo, uv, ffmpeg
 
@@ -60,6 +76,7 @@ All AI providers (image, video, TTS, ASR) are behind a client interface (`aiserv
 - Beat isolation enables parallel rendering, caching, and partial re-renders
 - Deterministic seeds make renders reproducible and regression-testable
 - Provider abstraction allows swapping models without pipeline changes
+- Docker Model Runner with vllm-metal provides an OpenAI-compatible LLM inference endpoint (port 12434) for text-based tasks, eliminating the need for a separate Ollama or LM Studio setup for text LLM inference during CI.
 
 **Negative:**
 - Vendored aiservices packages must stay in sync with upstream

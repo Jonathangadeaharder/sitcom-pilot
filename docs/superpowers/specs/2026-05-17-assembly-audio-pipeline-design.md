@@ -1,7 +1,23 @@
-# Assembly & Audio Pipeline Design
+---
+id: SPEC-ASSEMBLY-AUD
+kind: spec
+title: Assembly & Audio Pipeline Design
+status: draft
+authors: []
+reviewers: []
+tags: []
+supersedes: []
+superseded_by: []
+depends_on: []
+blocks: []
+implements: []
+related: []
+external: []
+project: sitcom-pilot
+checksum: 05f794fbda12163ea2b5dc73ef6ec56879fcad3787c747e8015c4dfd47308f3b
+---
 
 **Date:** 2026-05-17  
-**Status:** Design Complete - Ready for Implementation
 
 ---
 

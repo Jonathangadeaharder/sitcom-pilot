@@ -1,7 +1,23 @@
-# Determinism System Design
+---
+id: SPEC-DETERMINISM-
+kind: spec
+title: Determinism System Design
+status: draft
+authors: []
+reviewers: []
+tags: []
+supersedes: []
+superseded_by: []
+depends_on: []
+blocks: []
+implements: []
+related: []
+external: []
+project: sitcom-pilot
+checksum: 063b0d6ccb7966d88332bd53dc58afb3aec56afe839657598e831f281fef6722
+---
 
 **Date:** 2026-05-17  
-**Status:** Design Complete - Ready for Implementation
 
 ---
 

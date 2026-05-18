@@ -1,7 +1,23 @@
-# Cast Manifest & Character Consistency Design
+---
+id: SPEC-CAST-MANIFES
+kind: spec
+title: Cast Manifest & Character Consistency Design
+status: draft
+authors: []
+reviewers: []
+tags: []
+supersedes: []
+superseded_by: []
+depends_on: []
+blocks: []
+implements: []
+related: []
+external: []
+project: sitcom-pilot
+checksum: f6f8cd8445d83403cdc5d984819d464d51cf407cd5f13b2cfff792be15792088
+---
 
 **Date:** 2026-05-17  
-**Status:** Design Complete - Ready for Implementation
 
 ---
 

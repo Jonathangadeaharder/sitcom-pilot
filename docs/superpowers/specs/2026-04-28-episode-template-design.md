@@ -1,9 +1,25 @@
-# Episode Template Design
+---
+id: SPEC-EPISODE-TEMP
+kind: spec
+title: Episode Template Design
+status: draft
+authors: []
+reviewers: []
+tags: []
+supersedes: []
+superseded_by: []
+depends_on: []
+blocks: []
+implements: []
+related: []
+external: []
+project: sitcom-pilot
+checksum: 079095126944129d784f754692755e031dbca50ad6f87f686a24a4a218fd8b87
+---
 
 **Date:** 2026-04-28  
 **Epic:** E1 - Script Authoring  
 **Item:** E1.1 - Author episode_template.json  
-**Status:** Design Complete - Ready for Implementation
 
 ---
 

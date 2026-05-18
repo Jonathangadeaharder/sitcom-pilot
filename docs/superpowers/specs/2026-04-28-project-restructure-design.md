@@ -1,9 +1,25 @@
-# Project Restructure Design
+---
+id: SPEC-PROJECT-REST
+kind: spec
+title: Project Restructure Design
+status: draft
+authors: []
+reviewers: []
+tags: []
+supersedes: []
+superseded_by: []
+depends_on: []
+blocks: []
+implements: []
+related: []
+external: []
+project: sitcom-pilot
+checksum: 6f381e41a4f135dfb838a66b63ca3340c87c4e725bc24feec33fb6e1f279945c
+---
 
 **Date:** 2026-04-28  
 **Epic:** E0 - Foundation & New Schema  
 **Item:** E0.2 - Project layout: `src/showrunner/` + uv workspace  
-**Status:** Design Complete - Ready for Implementation
 
 ---
 

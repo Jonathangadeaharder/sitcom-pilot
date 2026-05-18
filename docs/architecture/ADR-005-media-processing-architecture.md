@@ -1,7 +1,23 @@
-# ADR-005: Media Processing Architecture
+---
+id: ADR-005
+kind: adr
+title: Media Processing Architecture
+status: draft
+date: 2026-05-17T00:00:00.000Z
+authors: []
+reviewers: []
+tags: []
+supersedes: []
+superseded_by: []
+depends_on: []
+blocks: []
+implements: []
+related: []
+external: []
+project: sitcom-pilot
+checksum: b64c4d01758b8c512f451c9c243ab0492e92d2fc026615163f03980001b1a365
+---
 
-**Status:** Accepted  
-**Date:** 2026-05-17  
 **Deciders:** Project owner  
 **Tags:** ffmpeg, media-pipeline, audio, video, assembly
 

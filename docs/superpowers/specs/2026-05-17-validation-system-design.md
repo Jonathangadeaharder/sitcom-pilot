@@ -1,7 +1,23 @@
-# Validation System Design
+---
+id: SPEC-VALIDATION-S
+kind: spec
+title: Validation System Design
+status: draft
+authors: []
+reviewers: []
+tags: []
+supersedes: []
+superseded_by: []
+depends_on: []
+blocks: []
+implements: []
+related: []
+external: []
+project: sitcom-pilot
+checksum: 54995499d36104ab95ecff5a14c691e5f9f58422ccf832c2117be06dd7553e16
+---
 
 **Date:** 2026-05-17  
-**Status:** Design Complete - Ready for Implementation
 
 ---
 

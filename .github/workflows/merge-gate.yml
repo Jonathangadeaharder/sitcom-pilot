@@ -7,7 +7,7 @@ on:
 
 jobs:
   quality-gate:
-    runs-on: ["self-hosted", "python", "macos"]
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
@@ -23,7 +23,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
 
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
@@ -58,7 +60,7 @@ jobs:
         run: uv run --python ${{ matrix.python-version }} showrunner plan episode_01.json
 
   sonarcloud:
-    runs-on: ["self-hosted", "security", "macos"]
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -72,7 +74,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
 
       - name: Set up Python 3.11
         run: uv python install 3.11

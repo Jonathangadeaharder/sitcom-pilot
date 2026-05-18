@@ -1,7 +1,23 @@
-# Pipeline Orchestration & Rendering Design
+---
+id: SPEC-PIPELINE-ORC
+kind: spec
+title: Pipeline Orchestration & Rendering Design
+status: draft
+authors: []
+reviewers: []
+tags: []
+supersedes: []
+superseded_by: []
+depends_on: []
+blocks: []
+implements: []
+related: []
+external: []
+project: sitcom-pilot
+checksum: 6d401eb6a98b12ec7bba0c201e086f28629cff8afae18c699bb76d3dd8da46a6
+---
 
 **Date:** 2026-05-17  
-**Status:** Design Complete - Ready for Implementation
 
 ---
 

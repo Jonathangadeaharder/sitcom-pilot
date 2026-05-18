@@ -1,7 +1,23 @@
-# ADR-002: Toolchain
+---
+id: ADR-002
+kind: adr
+title: Toolchain
+status: draft
+date: 2026-05-17T00:00:00.000Z
+authors: []
+reviewers: []
+tags: []
+supersedes: []
+superseded_by: []
+depends_on: []
+blocks: []
+implements: []
+related: []
+external: []
+project: sitcom-pilot
+checksum: 87029b554e9b81d5cdd878d13c372c30f358b302d93a08e2adf054c4f2d6adfc
+---
 
-**Status:** Accepted  
-**Date:** 2026-05-17  
 **Deciders:** Project owner  
 **Tags:** toolchain, uv, ruff, pyright, pytest
 
