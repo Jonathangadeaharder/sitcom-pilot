@@ -21,5 +21,9 @@ mutants/
 # Local aiservices symlink
 aiservices
 
+# Coverage reports
+coverage.xml
+ruff-report.json
+
 # iCloud duplicate files
 * [0-9]

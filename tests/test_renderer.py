@@ -302,9 +302,8 @@ def test_render_shot_crash_recovery_raises_after_max_retries(episode, mock_clien
         server_cwd="/opt",
         max_crash_retries=2,
     )
-    with patch("time.sleep"):
-        with pytest.raises(ConnectionError) as exc_info:
-            renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
+    with patch("time.sleep"), pytest.raises(ConnectionError) as exc_info:
+        renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
     assert "refused" in str(exc_info.value)
     assert mock_client.queue_prompt.call_count == 2
 
@@ -456,9 +455,8 @@ def test_render_shot_crash_recovery_raises_correct_exception(episode, mock_clien
         server_cwd="/opt",
         max_crash_retries=2,
     )
-    with patch("time.sleep"):
-        with pytest.raises(ConnectionError) as exc_info:
-            renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
+    with patch("time.sleep"), pytest.raises(ConnectionError) as exc_info:
+        renderer.render_shot(episode.scenes[0].shots[0], episode.scenes[0], episode, template)
     assert "refused" in str(exc_info.value)
     assert mock_client.queue_prompt.call_count == 2
 

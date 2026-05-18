@@ -195,7 +195,7 @@ class TestIntegrationRenderScene001:
         scene = episode_02.scenes[0]
         scene_jobs = [j for j in jobs if j.scene_id == "001"]
 
-        for j, beat in zip(scene_jobs, scene.beats):
+        for j, beat in zip(scene_jobs, scene.beats, strict=False):
             assert j.seed == beat.seed, f"{j.beat_id}: seed mismatch"
             assert j.beat_id == beat.beat_id
             assert j.kind == beat.kind

@@ -87,7 +87,7 @@ class ComfyUIClient:
 
         outputs = entry.get("outputs", {})
         filenames = []
-        for node_id, node_output in outputs.items():
+        for _node_id, node_output in outputs.items():
             for key in ("images", "videos", "gifs"):
                 for item in node_output.get(key, []):
                     filenames.append(item["filename"])

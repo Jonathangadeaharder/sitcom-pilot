@@ -32,11 +32,10 @@ def test_queue_prompt_retries_on_connection_error(client):
             raise ConnectionError("Connection refused")
         return mock_response
 
-    with patch("urllib.request.urlopen", side_effect=side_effect):
-        with patch("time.sleep"):
-            prompt_id = client.queue_prompt({"test": True}, max_retries=3)
-            assert prompt_id == "xyz"
-            assert call_count == 2
+    with patch("urllib.request.urlopen", side_effect=side_effect), patch("time.sleep"):
+        prompt_id = client.queue_prompt({"test": True}, max_retries=3)
+        assert prompt_id == "xyz"
+        assert call_count == 2
 
 
 def test_queue_prompt_raises_after_max_retries(client):
@@ -230,18 +229,16 @@ def test_queue_prompt_returns_empty_default_on_missing_key(client):
 
 def test_start_server_assigns_process(client):
     mock_process = MagicMock()
-    with patch("subprocess.Popen", return_value=mock_process):
-        with patch("time.sleep"):
-            client.start_server(cmd=["python", "main.py"], cwd="/opt/comfyui")
-            assert client._server_process is mock_process
+    with patch("subprocess.Popen", return_value=mock_process), patch("time.sleep"):
+        client.start_server(cmd=["python", "main.py"], cwd="/opt/comfyui")
+        assert client._server_process is mock_process
 
 
 def test_start_server_sleeps_for_readiness(client):
-    with patch("subprocess.Popen", return_value=MagicMock()):
-        with patch("time.sleep") as mock_sleep:
-            client.start_server(cmd=["python", "main.py"], cwd="/opt/comfyui")
-            mock_sleep.assert_called_once_with(10)
-            assert mock_sleep.call_count == 1
+    with patch("subprocess.Popen", return_value=MagicMock()), patch("time.sleep") as mock_sleep:
+        client.start_server(cmd=["python", "main.py"], cwd="/opt/comfyui")
+        mock_sleep.assert_called_once_with(10)
+        assert mock_sleep.call_count == 1
 
 
 def test_wait_for_completion_uses_correct_url(client):

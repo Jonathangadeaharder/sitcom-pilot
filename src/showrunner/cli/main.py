@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import shutil
 import sys
@@ -241,10 +242,9 @@ def render_beat(
     jobs = plan_beats(episode, manifest, paths)
     target = None
     for job in jobs:
-        if job.beat_id == beat_id:
-            if scene_id is None or job.scene_id == scene_id:
-                target = job
-                break
+        if job.beat_id == beat_id and (scene_id is None or job.scene_id == scene_id):
+            target = job
+            break
 
     if target is None:
         err_console.print(f"[red]Beat '{beat_id}' not found.[/red]")
@@ -738,13 +738,11 @@ def run(
             task = progress.add_task("Bootstrapping character refs...", total=len(episode.cast))
             for slug, char in episode.cast.items():
                 if char.visual:
-                    try:
+                    with contextlib.suppress(Exception):
                         client.text2image(
                             f"{char.visual}, front view, character reference sheet",
                             paths.beat_image("bootstrap", slug),
                         )
-                    except Exception:
-                        pass
                 progress.advance(task)
 
             env_task = progress.add_task(

@@ -28,8 +28,8 @@ def main() -> None:
     parser.add_argument("--sample-text", default=None, help="Custom sample text template")
     args = parser.parse_args()
 
-    from sitcom_pilot.aiservices_client import AIServicesClient
-    from sitcom_pilot.cast_manifest import CastManifest
+    from showrunner.aiservices_client import AIServicesClient
+    from showrunner.cast_manifest import CastManifest
 
     manifest = CastManifest.load(Path(args.manifest))
     output_dir = Path(args.output)
