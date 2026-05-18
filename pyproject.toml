@@ -66,11 +66,11 @@ source = ["src/showrunner"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 exclude = ["legacy/*"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP"]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "ARG", "PL"]
 ignore = []
 
 [tool.ruff.lint.per-file-ignores]
@@ -94,8 +94,11 @@ backup = false
 [tool.pyright]
 include = ["src"]
 exclude = ["**/__pycache__", "legacy", "output", "aiservices"]
-typeCheckingMode = "standard"
+typeCheckingMode = "strict"
 pythonVersion = "3.11"
+
+[tool.vulture]
+paths = ["src/"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/showrunner", "src/showrunner_utils", "src/showrunner_tests"]

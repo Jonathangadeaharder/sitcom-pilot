@@ -1,0 +1,10 @@
+{
+  "threshold": 10,
+  "reporters": ["console", "html"],
+  "ignore": ["**/__pycache__/**", "**/.venv/**", "**/legacy/**", "**/aiservices/**", "**/output/**", "**/*.egg-info/**"],
+  "absolute": true,
+  "gitignore": true,
+  "patterns": ["**/*.py"],
+  "minLines": 5,
+  "minTokens": 40
+}

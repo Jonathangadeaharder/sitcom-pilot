@@ -1,75 +1,94 @@
 name: PR Gate
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, master]
 
 jobs:
-  lint-and-test:
+  format:
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
-    strategy:
-      matrix:
-        python-version: ["3.11", "3.12"]
-
     steps:
       - uses: actions/checkout@v4
+      - name: Format check
+        run: uvx ruff format --check .
 
-      - name: Clone AIServices
-        uses: actions/checkout@v4
-        with:
-          repository: Jonathangadeaharder/AIServices
-          path: aiservices
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-
-      - name: Set up Python ${{ matrix.python-version }}
-        run: uv python install ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: uv sync --dev
-
-      - name: Ruff lint
-        run: uv run --python ${{ matrix.python-version }} ruff check .
-
-      - name: Ruff format check
-        run: uv run --python ${{ matrix.python-version }} ruff format --check .
-
-      - name: Pyright type check
-        run: uv run pyright src/
-
-      - name: Run tests with coverage
-        run: uv run --python ${{ matrix.python-version }} pytest tests/ -q --cov=showrunner --cov-branch --cov-report=term-missing --cov-fail-under=90
-
-      - name: Coverage XML (Python 3.11 only)
-        if: matrix.python-version == '3.11'
-        run: uv run pytest tests/ -q --cov=showrunner --cov-branch --cov-report=xml:coverage.xml
-
-      - name: Mutation testing (Python 3.11 only)
-        if: matrix.python-version == '3.11'
-        run: uv run mutmut run
-
-      - name: Validate episode JSONs
-        run: uv run --python ${{ matrix.python-version }} python -m showrunner.validator episode_01.json episode_02.json
-
-      - name: Generate beat plan
-        run: uv run --python ${{ matrix.python-version }} showrunner plan episode_01.json
-
-  required-checks:
-    name: Required Checks (PR)
+  lint:
+    needs: [format]
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
-    needs: lint-and-test
-    if: always()
     steps:
-      - name: Verify all jobs passed
-        run: |
-          if [ "${{ needs.lint-and-test.result }}" != "success" ]; then
-            echo "One or more CI jobs failed."
-            exit 1
-          fi
-          echo "All CI jobs passed."
+      - uses: actions/checkout@v4
+      - name: Lint
+        run: uvx ruff check .
+
+  typecheck:
+    needs: [lint]
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Type check
+        run: uvx pyright
+
+  build:
+    needs: [typecheck]
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: uv build
+
+  unit:
+    needs: [build]
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit tests with coverage
+        run: uv run pytest --cov --cov-branch --cov-fail-under=90
+
+  mutation:
+    needs: [build]
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    steps:
+      - uses: actions/checkout@v4
+      - id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: src/**/*.py
+          separator: ','
+      - name: Mutation test
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: uv run mutmut run --paths-to-mutate ${{ steps.changed-files.outputs.all_changed_files }}
+
+  deadcode:
+    needs: [build]
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dead code
+        run: uvx vulture src/
+
+  deps:
+    needs: [build]
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dep audit
+        run: uvx pip-audit
+
+  semgrep:
+    needs: [build]
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/default

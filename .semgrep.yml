@@ -1,0 +1,41 @@
+rules:
+  - id: no-assert-in-non-test-code
+    patterns:
+      - pattern: assert $CONDITION
+      - pattern-not-inside: |
+          def test_$NAME(...):
+            ...
+    message: "assert should not be used in production code"
+    languages: [python]
+    severity: ERROR
+
+  - id: no-hardcoded-secrets
+    patterns:
+      - pattern-regex: (?:api_key|api[_-]?secret|password|passwd|secret[_-]?key|token)\s*=\s*["\'][^"\'\s]{8,}["\']
+    message: "Possible hardcoded secret found"
+    languages: [python]
+    severity: ERROR
+
+  - id: no-bare-except
+    patterns:
+      - pattern: "except:"
+    message: "Bare except clauses catch too much; use except Exception: instead"
+    languages: [python]
+    severity: WARNING
+
+  - id: no-eval
+    patterns:
+      - pattern: eval($ARG)
+      - pattern: exec($ARG)
+    message: "eval/exec are dangerous; avoid dynamic code execution"
+    languages: [python]
+    severity: ERROR
+
+  - id: no-subprocess-shell-true
+    patterns:
+      - pattern: subprocess.run(..., shell=True, ...)
+      - pattern: subprocess.Popen(..., shell=True, ...)
+      - pattern: os.system(...)
+    message: "Using shell=True is a security risk; prefer subprocess.run with args list"
+    languages: [python]
+    severity: WARNING
