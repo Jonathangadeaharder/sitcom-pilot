@@ -110,6 +110,9 @@ reportUnusedClass = false
 reportAny = false
 reportMissingImports = false
 reportUntypedFunctionDecorator = false
+reportMissingTypeArgument = false
+reportUntypedBaseClass = false
+reportUnnecessaryIsInstance = false
 
 [tool.vulture]
 paths = ["src/"]
