@@ -22,7 +22,7 @@ class TestTimecode:
 
     def test_rounds_to_nearest_frame_at_24fps(self):
         result = timecode(1.0 / 24.0)
-        assert result == "00:00:00,041" or result == "00:00:00,042"
+        assert result in {"00:00:00,041", "00:00:00,042"}
 
 
 class TestSplitTextForSubtitles:

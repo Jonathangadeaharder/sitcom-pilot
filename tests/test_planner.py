@@ -230,7 +230,7 @@ class TestPlanBeats:
             multi_scene_episode, manifest, paths, episode_id="multi", seed_strategy=ss
         )
         no_ss = plan_beats(multi_scene_episode, manifest, paths)
-        for j, j2 in zip(jobs, no_ss):
+        for j, j2 in zip(jobs, no_ss, strict=False):
             assert j.seed != j2.seed
 
     def test_seed_strategy_deterministic(self, multi_scene_episode, manifest, tmp_path):

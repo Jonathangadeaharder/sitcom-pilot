@@ -33,8 +33,8 @@ def main() -> None:
     parser.add_argument("--seed-base", type=int, default=1000, help="Base seed for generation")
     args = parser.parse_args()
 
-    from sitcom_pilot.aiservices_client import AIServicesClient
-    from sitcom_pilot.cast_manifest import CastManifest
+    from showrunner.aiservices_client import AIServicesClient
+    from showrunner.cast_manifest import CastManifest
 
     manifest = CastManifest.load(Path(args.manifest))
     output_dir = Path(args.output)

@@ -85,10 +85,7 @@ class GoldenFrameRegistry:
         if entry is None:
             raise KeyError(f"Beat '{beat_id}' not registered. Available: {list(self._entries)}")
         ref = self.fixtures_dir / f"{beat_id}.png"
-        if generated is None:
-            gen = ref
-        else:
-            gen = generated
+        gen = ref if generated is None else generated
         return check_continuity(ref, gen, threshold=entry.threshold)
 
     def check_all(self, *, generated_dir: Path | None = None) -> list[SimilarityResult]:

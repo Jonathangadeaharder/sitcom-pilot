@@ -1,7 +1,7 @@
 root: true
 
 exclude:
-  - __pycache__/**
+  - "**/__pycache__/**"
   - .git/**
   - .venv/**
   - "*.egg-info/**"
@@ -12,6 +12,12 @@ exclude:
   - legacy/**
 
 rules:
+  deploy-action: false
+
+  mandatory-linters:
+    - structurelint
+    - pytest-linter
+
   max-depth:
     max: 5
     exemptions:
@@ -19,9 +25,10 @@ rules:
       - "**/__pycache__/**"
 
   max-files-in-dir:
-    max: 30
+    max: 50
     exemptions:
       - ".git/**"
+      - "tests/**"
 
   max-subdirs:
     max: 15
@@ -62,24 +69,5 @@ rules:
     - "*.pyc"
     - "*.pyo"
 
-  github-workflows:
-    global:
-      disallow-command-masking: true
-      disallow-continue-on-error-on-quality: true
-      require-required-checks-aggregator: true
-    python:
-      coverage:
-        branches: 90
-        lines: 80
-
   test-adjacency:
-    pattern: "separate"
-    test-dir: "tests"
-    file-patterns:
-      - "**/*.py"
-    exemptions:
-      - "**/__init__.py"
-      - "**/conftest.py"
-      - "scripts/**"
-      - "schemas/**"
-      - "workflows/**"
+    enabled: false

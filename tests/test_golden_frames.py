@@ -47,7 +47,7 @@ class TestGoldenFrameDeterminism:
     def test_prompts_deterministic(self, episode_02, manifest_02):
         run_a = _collect_beat_prompts(episode_02, manifest_02)
         run_b = _collect_beat_prompts(episode_02, manifest_02)
-        for a, b in zip(run_a, run_b):
+        for a, b in zip(run_a, run_b, strict=False):
             assert a["prompt"] == b["prompt"], f"Determinism failure at {a['beat_id']}"
 
     def test_manifest_hash_deterministic(self, episode_02, manifest_02):

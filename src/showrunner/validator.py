@@ -231,9 +231,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f"FAIL  {path}")
             for err in errors:
                 print(f"      - {err}")
-        else:
-            if not args.quiet:
-                print(f"OK    {path}")
+        elif not args.quiet:
+            print(f"OK    {path}")
 
     return 1 if any_failed else 0
 
