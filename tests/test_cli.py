@@ -266,10 +266,13 @@ def test_cli_no_outputs_to_assemble(tmp_path, capsys):
     mock_client_cls = MagicMock(return_value=mock_client)
     import sys
 
-    with patch("showrunner.comfyui_client.ComfyUIClient", mock_client_cls), patch.object(
-        sys,
-        "argv",
-        ["showrunner.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)],
+    with (
+        patch("showrunner.comfyui_client.ComfyUIClient", mock_client_cls),
+        patch.object(
+            sys,
+            "argv",
+            ["showrunner.py", str(ep), "--workflow", str(wf), "--output-dir", str(out_dir)],
+        ),
     ):
         mod = _load_main_module()
         mod.main()
