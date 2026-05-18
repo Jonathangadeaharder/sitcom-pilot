@@ -108,6 +108,8 @@ reportPrivateUsage = false
 reportConstantRedefinition = false
 reportUnusedClass = false
 reportAny = false
+reportMissingImports = false
+reportUntypedFunctionDecorator = false
 
 [tool.vulture]
 paths = ["src/"]
