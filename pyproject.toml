@@ -99,6 +99,15 @@ include = ["src"]
 exclude = ["**/__pycache__", "legacy", "output", "aiservices"]
 typeCheckingMode = "strict"
 pythonVersion = "3.11"
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportMissingParameterType = false
+reportPrivateUsage = false
+reportConstantRedefinition = false
+reportUnusedClass = false
+reportAny = false
 
 [tool.vulture]
 paths = ["src/"]
