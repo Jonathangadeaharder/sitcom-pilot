@@ -120,8 +120,14 @@ jobs:
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - uses: actions/checkout@v4
+      - name: Install pytest-linter
+        run: |
+          export PATH="/Users/jonathangadeaharder/.cargo/bin:$PATH"
+          cargo install pytest-linter --git https://github.com/VidiomTM/pytest-linter --locked 2>/dev/null || true
       - name: Run pytest-linter
-        run: uvx pytest-linter check tests/
+        run: |
+          export PATH="/Users/jonathangadeaharder/.cargo/bin:$PATH"
+          pytest-linter check tests/
 
   required-checks:
     name: Required Checks (PR)
