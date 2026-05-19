@@ -62,3 +62,14 @@ jobs:
         uses: returntocorp/semgrep-action@v1
         with:
           config: p/default
+  sonarcloud:
+    name: SonarCloud Code Analysis
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@v3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
