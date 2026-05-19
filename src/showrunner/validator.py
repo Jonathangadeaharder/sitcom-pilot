@@ -127,9 +127,7 @@ class EpisodeValidator:
                     f"Scene[{scene_idx}].beat[{beat_idx}] missing required field: '{key}'"
                 )
         if beat.get("kind") not in ("speech", "silent", None):
-            errors.append(
-                f"Scene[{scene_idx}].beat[{beat_idx}] kind must be 'speech' or 'silent'"
-            )
+            errors.append(f"Scene[{scene_idx}].beat[{beat_idx}] kind must be 'speech' or 'silent'")
         return errors
 
     # ------------------------------------------------------------------

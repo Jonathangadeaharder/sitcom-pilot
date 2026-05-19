@@ -58,8 +58,11 @@ class ShotRenderer:
         env_data = episode.environments.get(scene.environment)
         if env_data:
             self._inject_node_input(
-                workflow, self._node_map.env_profile, "lora_name",
-                f"{env_data.profile}.safetensors", "env lora",
+                workflow,
+                self._node_map.env_profile,
+                "lora_name",
+                f"{env_data.profile}.safetensors",
+                "env lora",
             )
 
     def _inject_character_loras(
@@ -72,8 +75,11 @@ class ShotRenderer:
             char_data = episode.cast.get(char_name)
             if char_data:
                 self._inject_node_input(
-                    workflow, nm.char_profiles[idx], "lora_name",
-                    f"{char_data.profile}.safetensors", f"char lora {char_name}",
+                    workflow,
+                    nm.char_profiles[idx],
+                    "lora_name",
+                    f"{char_data.profile}.safetensors",
+                    f"char lora {char_name}",
                 )
 
     def _inject_workflow(
