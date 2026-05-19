@@ -27,17 +27,13 @@ dependencies = [
     "audio2subtitle",
 ]
 
-[tool.uv.workspace]
-members = ["aiservices/packages/*"]
-exclude = ["aiservices/packages/text2video"]
-
 [tool.uv.sources]
-aiservices-core = { workspace = true }
-text2image = { workspace = true }
-image2image = { workspace = true }
-image2video = { workspace = true }
-text2speech = { workspace = true }
-audio2subtitle = { workspace = true }
+aiservices-core = { git = "https://github.com/Jonathangadeaharder/AIServices.git", subdirectory = "packages/aiservices_core" }
+text2image = { git = "https://github.com/Jonathangadeaharder/AIServices.git", subdirectory = "packages/text2image" }
+image2image = { git = "https://github.com/Jonathangadeaharder/AIServices.git", subdirectory = "packages/image2image" }
+image2video = { git = "https://github.com/Jonathangadeaharder/AIServices.git", subdirectory = "packages/image2video" }
+text2speech = { git = "https://github.com/Jonathangadeaharder/AIServices.git", subdirectory = "packages/text2speech" }
+audio2subtitle = { git = "https://github.com/Jonathangadeaharder/AIServices.git", subdirectory = "packages/audio2subtitle" }
 
 [dependency-groups]
 dev = [
