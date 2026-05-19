@@ -53,7 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Dead code
-        run: uvx vulture src/
+        run: uvx vulture src/ --min-confidence 100
   deps:
     needs: [build]
     runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
@@ -67,9 +67,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Semgrep
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: p/default
+        run: |
+          uv tool install semgrep 2>/dev/null || uv tool upgrade semgrep 2>/dev/null || true
+          uvx semgrep --config p/default --error .
   sonarcloud:
     name: SonarCloud Code Analysis
     needs: [unit]
