@@ -430,3 +430,49 @@ def test_main_nonexistent_file(capsys):
     exit_code = main(["/nonexistent/path.json"])
     assert exit_code == 1
     assert "FAIL" in capsys.readouterr().out
+
+
+class TestValidateScene:
+    def test_validate_scene_non_dict_returns_error(self):
+        v = EpisodeValidator()
+        errors = v._validate_scene("not a dict", 0)
+        assert any("must be an object" in e for e in errors)
+
+    def test_validate_scene_missing_fields(self):
+        v = EpisodeValidator()
+        errors = v._validate_scene({"scene_id": "001"}, 0)
+        assert any("environment" in e for e in errors)
+
+    def test_validate_scene_beats_not_list(self):
+        v = EpisodeValidator()
+        errors = v._validate_scene(
+            {"scene_id": "001", "environment": "env", "characters_present": [], "beats": "bad"}, 0
+        )
+        assert any("must be a list" in e for e in errors)
+
+
+class TestValidateBeat:
+    def test_validate_beat_non_dict_returns_error(self):
+        v = EpisodeValidator()
+        errors = v._validate_beat(42, 0, 0)
+        assert any("must be an object" in e for e in errors)
+
+    def test_validate_beat_missing_beat_id(self):
+        v = EpisodeValidator()
+        errors = v._validate_beat({"kind": "silent"}, 0, 0)
+        assert any("beat_id" in e for e in errors)
+
+    def test_validate_beat_invalid_kind(self):
+        v = EpisodeValidator()
+        errors = v._validate_beat({"beat_id": "b1", "kind": "invalid"}, 0, 0)
+        assert any("speech" in e.lower() or "silent" in e.lower() for e in errors)
+
+    def test_validate_beat_valid(self):
+        v = EpisodeValidator()
+        errors = v._validate_beat({"beat_id": "b1", "kind": "silent"}, 0, 0)
+        assert errors == []
+
+    def test_validate_beat_kind_none_valid(self):
+        v = EpisodeValidator()
+        errors = v._validate_beat({"beat_id": "b1", "kind": None}, 0, 0)
+        assert errors == []

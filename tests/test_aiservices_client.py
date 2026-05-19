@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from showrunner.aiservices_client import AIServicesClient, _build_speech_tags, _div8
-from showrunner.loader import VoiceConfig
+from showrunner.loader import CharacterData, VoiceConfig
 
 
 def _mock_aiservice_package(name: str):
@@ -191,3 +191,25 @@ class TestAudio2Subtitle:
         sys.modules["audio2subtitle.client"].generate.side_effect = ImportError
         with pytest.raises(RuntimeError, match="no provider"):
             client_no_fallback.audio2subtitle(tmp_path / "audio.wav", tmp_path / "out.srt")
+
+
+class TestResolveVoiceConfig:
+    def test_voice_returns_voice(self):
+        voice = VoiceConfig(provider="test", voice_id="v1")
+        result = AIServicesClient._resolve_voice_config(voice, None)
+        assert result is voice
+
+    def test_no_voice_uses_character_voice(self):
+        char_voice = VoiceConfig(provider="test", voice_id="char_v1")
+        char = CharacterData(name="Test", voice=char_voice)
+        result = AIServicesClient._resolve_voice_config(None, char)
+        assert result is char_voice
+
+    def test_no_voice_no_character_returns_none(self):
+        result = AIServicesClient._resolve_voice_config(None, None)
+        assert result is None
+
+    def test_no_voice_character_no_voice_returns_none(self):
+        char = CharacterData(name="Test", voice=None)
+        result = AIServicesClient._resolve_voice_config(None, char)
+        assert result is None
