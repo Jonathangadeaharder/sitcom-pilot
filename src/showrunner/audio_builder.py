@@ -173,7 +173,7 @@ def synthesize_dialogue_line(
             with os.fdopen(fd, "wb") as f:
                 f.write(audio_data)
             os.replace(tmp_path, output_path)
-        except BaseException:
+        except Exception:
             os.unlink(tmp_path)
             raise
         return True
