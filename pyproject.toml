@@ -25,6 +25,8 @@ dependencies = [
     "image2video",
     "text2speech",
     "audio2subtitle",
+    # MLX only available as arm64 wheels; CI runner at VidiomTM is x86_64 Rosetta
+    "mlx>=0.31.2; platform_machine == 'arm64'",
 ]
 
 [tool.uv.sources]
