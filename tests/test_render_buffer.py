@@ -282,7 +282,7 @@ class TestRenderBufferHelpers:
             buf.close()
 
         assert len(buffer_jobs) == len(jobs)
-        for buf_job, orig_job in zip(buffer_jobs, jobs):
+        for buf_job, orig_job in zip(buffer_jobs, jobs, strict=True):
             assert str(buf_job.image_path).startswith(str(buf.buffer_dir))
             assert buf_job.scene_id == orig_job.scene_id
             assert buf_job.beat_id == orig_job.beat_id

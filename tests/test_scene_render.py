@@ -18,13 +18,13 @@ from showrunner.paths import RunPaths
 from showrunner.scene_render import (
     BeatJob,
     SceneReport,
+    _render_audio,
+    _render_image,
+    _render_video,
     allocate_durations,
     plan_beats,
     render_episode,
     render_scene,
-    _render_image,
-    _render_audio,
-    _render_video,
 )
 
 
@@ -343,8 +343,13 @@ class TestCacheResume:
 class TestRenderImage:
     def test_renders_image_when_not_cached(self, tmp_path):
         job = BeatJob(
-            scene_id="001", beat_id="b1", kind="silent", prompt="test",
-            seed=42, duration_sec=3.0, needs_audio=False,
+            scene_id="001",
+            beat_id="b1",
+            kind="silent",
+            prompt="test",
+            seed=42,
+            duration_sec=3.0,
+            needs_audio=False,
             image_path=tmp_path / "img.png",
         )
         client = MagicMock()
@@ -356,8 +361,13 @@ class TestRenderImage:
         img = tmp_path / "img.png"
         img.write_bytes(b"data")
         job = BeatJob(
-            scene_id="001", beat_id="b1", kind="silent", prompt="test",
-            seed=42, duration_sec=3.0, needs_audio=False,
+            scene_id="001",
+            beat_id="b1",
+            kind="silent",
+            prompt="test",
+            seed=42,
+            duration_sec=3.0,
+            needs_audio=False,
             image_path=img,
         )
         client = MagicMock()
@@ -368,9 +378,15 @@ class TestRenderImage:
 class TestRenderAudio:
     def test_renders_audio_when_needed(self, tmp_path, manifest, episode):
         job = BeatJob(
-            scene_id="001", beat_id="b1", kind="speech", prompt="test",
-            seed=42, duration_sec=3.0, needs_audio=True,
-            speaker="maya", text="Hello!",
+            scene_id="001",
+            beat_id="b1",
+            kind="speech",
+            prompt="test",
+            seed=42,
+            duration_sec=3.0,
+            needs_audio=True,
+            speaker="maya",
+            text="Hello!",
             audio_path=tmp_path / "aud.wav",
         )
         client = MagicMock()
@@ -381,8 +397,13 @@ class TestRenderAudio:
     def test_skips_when_audio_not_needed(self, tmp_path):
         episode = EpisodeData(title="T", cast={}, environments={}, scenes=[])
         job = BeatJob(
-            scene_id="001", beat_id="b1", kind="silent", prompt="test",
-            seed=42, duration_sec=3.0, needs_audio=False,
+            scene_id="001",
+            beat_id="b1",
+            kind="silent",
+            prompt="test",
+            seed=42,
+            duration_sec=3.0,
+            needs_audio=False,
             audio_path=tmp_path / "aud.wav",
         )
         client = MagicMock()
@@ -393,9 +414,15 @@ class TestRenderAudio:
         aud = tmp_path / "aud.wav"
         aud.write_bytes(b"data")
         job = BeatJob(
-            scene_id="001", beat_id="b1", kind="speech", prompt="test",
-            seed=42, duration_sec=3.0, needs_audio=True,
-            speaker="maya", text="Hello!",
+            scene_id="001",
+            beat_id="b1",
+            kind="speech",
+            prompt="test",
+            seed=42,
+            duration_sec=3.0,
+            needs_audio=True,
+            speaker="maya",
+            text="Hello!",
             audio_path=aud,
         )
         client = MagicMock()
@@ -409,9 +436,15 @@ class TestRenderVideo:
         img.write_bytes(b"data")
         vid = tmp_path / "vid.mp4"
         job = BeatJob(
-            scene_id="001", beat_id="b1", kind="silent", prompt="test",
-            seed=42, duration_sec=3.0, needs_audio=False,
-            image_path=img, video_path=vid,
+            scene_id="001",
+            beat_id="b1",
+            kind="silent",
+            prompt="test",
+            seed=42,
+            duration_sec=3.0,
+            needs_audio=False,
+            image_path=img,
+            video_path=vid,
         )
         client = MagicMock()
         _render_video(job, client)
@@ -423,9 +456,15 @@ class TestRenderVideo:
         img = tmp_path / "img.png"
         img.write_bytes(b"data")
         job = BeatJob(
-            scene_id="001", beat_id="b1", kind="silent", prompt="test",
-            seed=42, duration_sec=3.0, needs_audio=False,
-            image_path=img, video_path=vid,
+            scene_id="001",
+            beat_id="b1",
+            kind="silent",
+            prompt="test",
+            seed=42,
+            duration_sec=3.0,
+            needs_audio=False,
+            image_path=img,
+            video_path=vid,
         )
         client = MagicMock()
         _render_video(job, client)
@@ -433,8 +472,13 @@ class TestRenderVideo:
 
     def test_skips_when_image_missing(self, tmp_path):
         job = BeatJob(
-            scene_id="001", beat_id="b1", kind="silent", prompt="test",
-            seed=42, duration_sec=3.0, needs_audio=False,
+            scene_id="001",
+            beat_id="b1",
+            kind="silent",
+            prompt="test",
+            seed=42,
+            duration_sec=3.0,
+            needs_audio=False,
             image_path=tmp_path / "nonexistent.png",
             video_path=tmp_path / "vid.mp4",
         )
