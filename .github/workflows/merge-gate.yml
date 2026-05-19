@@ -4,6 +4,10 @@ on:
   push:
     branches: [main, master]
 
+concurrency:
+  group: merge-gate-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   format:
     runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
