@@ -56,21 +56,18 @@ class RenderBuffer:
         """Map a final output path to a corresponding buffer path."""
         return self._buffer_dir / final_path.relative_to(self._paths.run_dir)
 
-    def render(
-        self,
-        jobs: list[BeatJob],
-        scenes: list[SceneData],
-    ) -> list[SceneReport]:
+    def _build_reports(
+        self, jobs: list[BeatJob], scenes: list[SceneData]
+    ) -> dict[str, SceneReport]:
         reports: dict[str, SceneReport] = {}
         for sc in scenes:
             reports[sc.scene_id] = SceneReport(
                 scene_id=sc.scene_id,
                 total_beats=sum(1 for j in jobs if j.scene_id == sc.scene_id),
             )
+        return reports
 
-        if not jobs:
-            return list(reports.values())
-
+    def _create_buffer_jobs(self, jobs: list[BeatJob]) -> list[BeatJob]:
         buffer_jobs: list[BeatJob] = []
         for job in jobs:
             buf_job = BeatJob(
@@ -90,26 +87,44 @@ class RenderBuffer:
                 video_path=self._buf_path_for(job.video_path),
             )
             buffer_jobs.append(buf_job)
+        return buffer_jobs
 
-        futures = {}
+    def _submit_buffer_job(
+        self,
+        j: BeatJob,
+        scenes: list[SceneData],
+        futures: dict,
+        submitted_ids: set[str],
+    ) -> None:
+        if j.beat_id in submitted_ids:
+            return
+        submitted_ids.add(j.beat_id)
+        scene = _find_scene(scenes, j.scene_id)
+        assert scene is not None, f"Scene {j.scene_id} not found"
+        fut = self._executor.submit(
+            _render_beat, j, self._client, self._manifest, self._episode, scene=scene
+        )
+        futures[fut] = j
+
+    def render(
+        self,
+        jobs: list[BeatJob],
+        scenes: list[SceneData],
+    ) -> list[SceneReport]:
+        reports = self._build_reports(jobs, scenes)
+        if not jobs:
+            return list(reports.values())
+
+        buffer_jobs = self._create_buffer_jobs(jobs)
+
+        futures: dict = {}
         submitted_ids: set[str] = set()
         next_to_submit = 0
         current_beat_idx = 0
 
-        def _submit(j: BeatJob) -> None:
-            if j.beat_id in submitted_ids:
-                return
-            submitted_ids.add(j.beat_id)
-            scene = _find_scene(scenes, j.scene_id)
-            assert scene is not None, f"Scene {j.scene_id} not found"
-            fut = self._executor.submit(
-                _render_beat, j, self._client, self._manifest, self._episode, scene=scene
-            )
-            futures[fut] = j
-
         while next_to_submit < len(buffer_jobs) or futures:
             while len(futures) < self._max_workers and next_to_submit < len(buffer_jobs):
-                _submit(buffer_jobs[next_to_submit])
+                self._submit_buffer_job(buffer_jobs[next_to_submit], scenes, futures, submitted_ids)
                 next_to_submit += 1
 
             if not futures:
@@ -126,7 +141,9 @@ class RenderBuffer:
 
                 lookahead_pos = current_beat_idx + self._buffer_size
                 if lookahead_pos < len(buffer_jobs):
-                    _submit(buffer_jobs[lookahead_pos])
+                    self._submit_buffer_job(
+                        buffer_jobs[lookahead_pos], scenes, futures, submitted_ids
+                    )
 
         return list(reports.values())
 

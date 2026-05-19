@@ -11,7 +11,6 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
-from rich.table import Table
 
 from showrunner.validator import EpisodeValidator
 
@@ -616,67 +615,31 @@ def _find_latest_run(root: Path) -> str | None:
 
 
 # ---------------------------------------------------------------------------
-# E7.7: run (full pipeline)
+# Pipeline stages (used by the ``run`` command)
 # ---------------------------------------------------------------------------
 
 
-@app.command()
-def run(
-    episode_path: str = typer.Argument(..., help=_EPISODE_PATH_HELP),
-    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help=_OUTPUT_DIR_HELP),
-    max_workers: int = typer.Option(1, "--workers", "-w", help="Parallel render workers"),
-    skip_bootstrap: bool = typer.Option(
-        False, "--skip-bootstrap", help="Skip bootstrap (character refs) step"
-    ),
-    skip_validate: bool = typer.Option(
-        False, "--skip-validate", help="Skip schema validation step"
-    ),
-    burn_captions: bool = typer.Option(False, "--captions", help="Burn in captions"),
-    seed: int | None = typer.Option(
-        None, "--seed", help="Override seed for deterministic generation"
-    ),
-    deterministic: bool = typer.Option(
-        False, "--deterministic", help="Enable strict deterministic mode"
-    ),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose logging"),
-) -> None:
-    """Run full pipeline: validate plan bootstrap render assemble."""
-    _setup_logging(verbose)
+def _pipeline_validate(ep_path: Path, skip: bool) -> None:
+    from showrunner.validator import EpisodeValidator
 
-    from showrunner.aiservices_client import AIServicesClient
-    from showrunner.assembler import burn_in_captions, concat_clips, generate_srt
-    from showrunner.cast_manifest import CastManifest, CharacterProfile
+    if skip:
+        console.print("[yellow]\u26a0[/yellow]  Validation skipped")
+        return
+    validator = EpisodeValidator()
+    errors = validator.validate_file(ep_path)
+    if errors:
+        for e in errors:
+            err_console.print(f"  [red]Error:[/red] {e}")
+        raise typer.Exit(code=1)
+    console.print("[bold green]\u2713[/bold green]  Episode validated")
+
+
+def _pipeline_determinism(ep_path: Path, seed: int | None, deterministic: bool) -> int:
     from showrunner.determinism import (
         DeterminismConfig,
-        SeedStrategy,
         compute_manifest_hash_from_dict,
         derive_seed,
     )
-    from showrunner.loader import BeatData, EpisodeLoader
-    from showrunner.paths import RunPaths
-    from showrunner.scene_render import BeatStatus, plan_beats, render_episode
-    from showrunner.validator import EpisodeValidator
-
-    ep_path = Path(episode_path)
-    out = _resolve_output_dir(output_dir)
-
-    # ------------------------------------------------------------------
-    # Stage 1: Validate
-    # ------------------------------------------------------------------
-    if not skip_validate:
-        validator = EpisodeValidator()
-        errors = validator.validate_file(ep_path)
-        if errors:
-            for e in errors:
-                err_console.print(f"  [red]Error:[/red] {e}")
-            raise typer.Exit(code=1)
-        console.print("[bold green]\u2713[/bold green]  Episode validated")
-    else:
-        console.print("[yellow]\u26a0[/yellow]  Validation skipped")
-
-    # ------------------------------------------------------------------
-    # Stage 2: Determinism setup
-    # ------------------------------------------------------------------
 
     json_data = _load_episode(ep_path)
     manifest_hash = compute_manifest_hash_from_dict(json_data)
@@ -687,10 +650,16 @@ def run(
     )
     if deterministic:
         console.print(f"  [dim]Deterministic mode: seed={effective_seed}[/dim]")
+    return effective_seed
 
-    # ------------------------------------------------------------------
-    # Stage 3: Load + Plan
-    # ------------------------------------------------------------------
+
+def _pipeline_load_plan(ep_path: Path, out: Path, effective_seed: int) -> tuple:
+    from showrunner.cast_manifest import CastManifest, CharacterProfile
+    from showrunner.determinism import SeedStrategy
+    from showrunner.loader import EpisodeLoader
+    from showrunner.paths import RunPaths
+    from showrunner.scene_render import plan_beats
+
     with Progress(
         SpinnerColumn(),
         TextColumn(_PROGRESS_DESC_FMT),
@@ -724,40 +693,40 @@ def run(
     total_beats = len(jobs)
     scene_count = len(episode.scenes)
     console.print(f"  [dim]{total_beats} beats across {scene_count} scenes[/dim]")
+    return episode, manifest, paths, jobs, total_beats, scene_count
 
-    # ------------------------------------------------------------------
-    # Stage 4: Bootstrap
-    # ------------------------------------------------------------------
-    client = AIServicesClient()
-    if not skip_bootstrap:
-        with Progress(
-            SpinnerColumn(),
-            TextColumn(_PROGRESS_DESC_FMT),
-            console=console,
-        ) as progress:
-            task = progress.add_task("Bootstrapping character refs...", total=len(episode.cast))
-            for slug, char in episode.cast.items():
-                if char.visual:
-                    with contextlib.suppress(Exception):
-                        client.text2image(
-                            f"{char.visual}, front view, character reference sheet",
-                            paths.beat_image("bootstrap", slug),
-                        )
-                progress.advance(task)
 
-            env_task = progress.add_task(
-                "Bootstrapping environment refs...", total=len(episode.environments)
-            )
-            for _ in episode.environments:
-                progress.advance(env_task)
-
-        console.print("[bold green]\u2713[/bold green]  Bootstrap complete")
-    else:
+def _pipeline_bootstrap(episode, paths, client, skip: bool) -> None:
+    if skip:
         console.print("[yellow]\u26a0[/yellow]  Bootstrap skipped")
+        return
+    with Progress(
+        SpinnerColumn(),
+        TextColumn(_PROGRESS_DESC_FMT),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Bootstrapping character refs...", total=len(episode.cast))
+        for slug, char in episode.cast.items():
+            if char.visual:
+                with contextlib.suppress(Exception):
+                    client.text2image(
+                        f"{char.visual}, front view, character reference sheet",
+                        paths.beat_image("bootstrap", slug),
+                    )
+            progress.advance(task)
 
-    # ------------------------------------------------------------------
-    # Stage 5: Render
-    # ------------------------------------------------------------------
+        env_task = progress.add_task(
+            "Bootstrapping environment refs...", total=len(episode.environments)
+        )
+        for _ in episode.environments:
+            progress.advance(env_task)
+
+    console.print("[bold green]\u2713[/bold green]  Bootstrap complete")
+
+
+def _pipeline_render(episode, manifest, paths, client, max_workers, jobs, total_beats) -> tuple:
+    from showrunner.scene_render import render_episode
+
     console.print(f"\n[bold]Rendering[/bold] {episode.title}")
 
     with Progress(
@@ -768,16 +737,9 @@ def run(
         console=console,
     ) as progress:
         task = progress.add_task("Rendering scenes...", total=total_beats)
-
         reports = render_episode(
-            episode,
-            manifest,
-            paths,
-            client,
-            max_workers=max_workers,
-            jobs=jobs,
+            episode, manifest, paths, client, max_workers=max_workers, jobs=jobs
         )
-
         total_done = sum(r.completed for r in reports)
         total_failed = sum(r.failed for r in reports)
         progress.update(task, completed=total_done + total_failed)
@@ -787,10 +749,14 @@ def run(
     )
     if total_failed:
         err_console.print(f"  [red]{total_failed} beats failed[/red]")
+    return total_done, total_failed
 
-    # ------------------------------------------------------------------
-    # Stage 6: Assemble
-    # ------------------------------------------------------------------
+
+def _pipeline_assemble(jobs, paths, burn_captions) -> tuple:
+    from showrunner.assembler import burn_in_captions, concat_clips, generate_srt
+    from showrunner.loader import BeatData
+    from showrunner.scene_render import BeatStatus
+
     video_paths: list[Path] = []
     beat_durations: list[tuple] = []
     for job in jobs:
@@ -828,9 +794,14 @@ def run(
             burn_in_captions(concat_path, srt_path, captioned)
             final_path = captioned
 
-    # ------------------------------------------------------------------
-    # Summary
-    # ------------------------------------------------------------------
+    return final_path, srt_path
+
+
+def _pipeline_summary(
+    episode, jobs, total_done, total_beats, scene_count, final_path, srt_path
+) -> None:
+    from rich.table import Table
+
     total_dur = sum(j.duration_sec for j in jobs)
     table = Table(title="Pipeline Summary", show_header=False)
     table.add_column("Key", style="cyan")
@@ -843,6 +814,59 @@ def run(
     table.add_row("Subtitles", str(srt_path))
     console.print()
     console.print(table)
+
+
+# ---------------------------------------------------------------------------
+# E7.7: run (full pipeline)
+# ---------------------------------------------------------------------------
+
+
+@app.command()
+def run(
+    episode_path: str = typer.Argument(..., help=_EPISODE_PATH_HELP),
+    output_dir: str | None = typer.Option(None, "--output-dir", "-o", help=_OUTPUT_DIR_HELP),
+    max_workers: int = typer.Option(1, "--workers", "-w", help="Parallel render workers"),
+    skip_bootstrap: bool = typer.Option(
+        False, "--skip-bootstrap", help="Skip bootstrap (character refs) step"
+    ),
+    skip_validate: bool = typer.Option(
+        False, "--skip-validate", help="Skip schema validation step"
+    ),
+    burn_captions: bool = typer.Option(False, "--captions", help="Burn in captions"),
+    seed: int | None = typer.Option(
+        None, "--seed", help="Override seed for deterministic generation"
+    ),
+    deterministic: bool = typer.Option(
+        False, "--deterministic", help="Enable strict deterministic mode"
+    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Verbose logging"),
+) -> None:
+    """Run full pipeline: validate plan bootstrap render assemble."""
+    _setup_logging(verbose)
+
+    from showrunner.aiservices_client import AIServicesClient
+
+    ep_path = Path(episode_path)
+    out = _resolve_output_dir(output_dir)
+
+    _pipeline_validate(ep_path, skip_validate)
+
+    effective_seed = _pipeline_determinism(ep_path, seed, deterministic)
+
+    episode, manifest, paths, jobs, total_beats, scene_count = _pipeline_load_plan(
+        ep_path, out, effective_seed
+    )
+
+    client = AIServicesClient()
+    _pipeline_bootstrap(episode, paths, client, skip_bootstrap)
+
+    total_done, total_failed = _pipeline_render(
+        episode, manifest, paths, client, max_workers, jobs, total_beats
+    )
+
+    final_path, srt_path = _pipeline_assemble(jobs, paths, burn_captions)
+
+    _pipeline_summary(episode, jobs, total_done, total_beats, scene_count, final_path, srt_path)
 
 
 if __name__ == "__main__":

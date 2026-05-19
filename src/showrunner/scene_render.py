@@ -115,6 +115,46 @@ def allocate_durations(
     return jobs
 
 
+def _render_image(job: BeatJob, client: AIServicesClient) -> None:
+    img_path = Path(job.image_path)
+    if img_path.exists():
+        logger.info("image cache hit", path=str(img_path))
+        return
+    client.text2image(job.prompt, job.image_path, seed=job.seed)
+
+
+def _render_audio(
+    job: BeatJob,
+    client: AIServicesClient,
+    manifest: CastManifest,
+    episode: EpisodeData,
+) -> None:
+    if not job.needs_audio or not job.text:
+        return
+    if job.audio_path.exists():
+        logger.info("audio cache hit", path=str(job.audio_path))
+        return
+    voice = None
+    char = manifest.get(job.speaker)
+    if char and char.voice:
+        voice = char.voice
+    client.text2speech(
+        job.text, job.audio_path, voice=voice, character=episode.cast.get(job.speaker)
+    )
+
+
+def _render_video(job: BeatJob, client: AIServicesClient) -> None:
+    if job.video_path.exists():
+        logger.info("video cache hit", path=str(job.video_path))
+        return
+    if not job.image_path.exists():
+        return
+    audio_arg = job.audio_path if job.audio_path.exists() else None
+    client.image2video(
+        job.image_path, job.prompt, job.video_path, audio_path=audio_arg, seed=job.seed
+    )
+
+
 def _render_beat(
     job: BeatJob,
     client: AIServicesClient,
@@ -132,41 +172,9 @@ def _render_beat(
     for attempt in range(max_retries + 1):
         job.status = BeatStatus.RUNNING
         try:
-            if Path(job.image_path).exists():
-                logger.info("image cache hit", path=str(job.image_path))
-            else:
-                client.text2image(
-                    job.prompt,
-                    job.image_path,
-                    seed=job.seed,
-                )
-
-            if job.needs_audio and job.text:
-                if job.audio_path.exists():
-                    logger.info("audio cache hit", path=str(job.audio_path))
-                else:
-                    voice = None
-                    char = manifest.get(job.speaker)
-                    if char and char.voice:
-                        voice = char.voice
-                    client.text2speech(
-                        job.text,
-                        job.audio_path,
-                        voice=voice,
-                        character=episode.cast.get(job.speaker),
-                    )
-
-            if job.video_path.exists():
-                logger.info("video cache hit", path=str(job.video_path))
-            elif job.image_path.exists():
-                audio_arg = job.audio_path if job.audio_path.exists() else None
-                client.image2video(
-                    job.image_path,
-                    job.prompt,
-                    job.video_path,
-                    audio_path=audio_arg,
-                    seed=job.seed,
-                )
+            _render_image(job, client)
+            _render_audio(job, client, manifest, episode)
+            _render_video(job, client)
 
             job.status = BeatStatus.DONE
             job.error = ""
