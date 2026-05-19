@@ -336,7 +336,7 @@ class TestGenerateFishPayload:
         assert payload["text"] == "(frustrated) The deployment is broken."
         assert payload["reference_id"] == "maya"
         assert payload["seed"] == 42
-        assert payload["temperature"] == 0.8
+        assert payload["temperature"] == pytest.approx(0.8)
         assert payload["format"] == "wav"
         assert payload["streaming"] is False
         assert payload["normalize"] is True
@@ -349,7 +349,7 @@ class TestGenerateFishPayload:
             character_id="finn",
         )
         assert payload["seed"] == 42
-        assert payload["temperature"] == 0.8
+        assert payload["temperature"] == pytest.approx(0.8)
         assert payload["reference_id"] == "finn"
 
 
@@ -442,7 +442,7 @@ class TestGenerateEpisodeAudio:
 
         first_call = mock_synth.call_args_list[0]
         assert first_call.kwargs["seed"] == 42
-        assert first_call.kwargs["temperature"] == 0.8
+        assert first_call.kwargs["temperature"] == pytest.approx(0.8)
 
     @patch("voice_generator_v3.synthesize_line")
     @patch("voice_generator_v3.concatenate_audio")

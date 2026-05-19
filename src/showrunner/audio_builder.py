@@ -177,7 +177,7 @@ def synthesize_dialogue_line(
             os.unlink(tmp_path)
             raise
         return True
-    except (urllib.error.HTTPError, urllib.error.URLError):
+    except urllib.error.URLError:
         logger.exception("TTS request failed for '%s'", character_id)
         return False
 
