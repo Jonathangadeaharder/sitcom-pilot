@@ -42,6 +42,46 @@ class ShotRenderer:
         self._server_cwd = server_cwd
         self._max_crash_retries = max_crash_retries
 
+    def _inject_node_input(
+        self, workflow: dict[str, Any], node_id: str | None, key: str, value: Any, label: str
+    ) -> None:
+        if node_id is None:
+            return
+        if node_id in workflow:
+            workflow[node_id].setdefault("inputs", {})[key] = value
+        else:
+            logger.warning("Workflow missing node '%s'; %s not injected", node_id, label)
+
+    def _inject_environment_lora(
+        self, workflow: dict[str, Any], scene: SceneData, episode: EpisodeData
+    ) -> None:
+        env_data = episode.environments.get(scene.environment)
+        if env_data:
+            self._inject_node_input(
+                workflow,
+                self._node_map.env_profile,
+                "lora_name",
+                f"{env_data.profile}.safetensors",
+                "env lora",
+            )
+
+    def _inject_character_loras(
+        self, workflow: dict[str, Any], scene: SceneData, episode: EpisodeData
+    ) -> None:
+        nm = self._node_map
+        for idx, char_name in enumerate(scene.characters_present):
+            if idx >= len(nm.char_profiles):
+                break
+            char_data = episode.cast.get(char_name)
+            if char_data:
+                self._inject_node_input(
+                    workflow,
+                    nm.char_profiles[idx],
+                    "lora_name",
+                    f"{char_data.profile}.safetensors",
+                    f"char lora {char_name}",
+                )
+
     def _inject_workflow(
         self,
         shot: ShotData,
@@ -52,42 +92,20 @@ class ShotRenderer:
         workflow = copy.deepcopy(workflow_template)
         nm = self._node_map
 
-        env_data = episode.environments.get(scene.environment)
-        if env_data and nm.env_profile in workflow:
-            workflow[nm.env_profile].setdefault("inputs", {})["lora_name"] = (
-                f"{env_data.profile}.safetensors"
-            )
-
-        for idx, char_name in enumerate(scene.characters_present):
-            if idx >= len(nm.char_profiles):
-                break
-            char_data = episode.cast.get(char_name)
-            if char_data:
-                node_id = nm.char_profiles[idx]
-                if node_id in workflow:
-                    workflow[node_id].setdefault("inputs", {})["lora_name"] = (
-                        f"{char_data.profile}.safetensors"
-                    )
+        self._inject_environment_lora(workflow, scene, episode)
+        self._inject_character_loras(workflow, scene, episode)
 
         start_prompt = self._builder.build_start_prompt(shot, scene, episode)
         end_prompt = self._builder.build_end_prompt(shot, scene, episode)
 
-        if nm.start_prompt in workflow:
-            workflow[nm.start_prompt].setdefault("inputs", {})["text"] = start_prompt
-        else:
-            logger.warning("Workflow missing node '%s'; start prompt not injected", nm.start_prompt)
-        if nm.end_prompt in workflow:
-            workflow[nm.end_prompt].setdefault("inputs", {})["text"] = end_prompt
-        else:
-            logger.warning("Workflow missing node '%s'; end prompt not injected", nm.end_prompt)
-        if nm.seed in workflow:
-            workflow[nm.seed].setdefault("inputs", {})["seed"] = shot.seed
-        else:
-            logger.warning("Workflow missing node '%s'; seed not injected", nm.seed)
-        if nm.audio in workflow:
-            workflow[nm.audio].setdefault("inputs", {})["audio"] = shot.audio_path
-        else:
-            logger.warning("Workflow missing node '%s'; audio path not injected", nm.audio)
+        for node_id, key, value, label in [
+            (nm.start_prompt, "text", start_prompt, "start prompt"),
+            (nm.end_prompt, "text", end_prompt, "end prompt"),
+            (nm.seed, "seed", shot.seed, "seed"),
+            (nm.audio, "audio", shot.audio_path, "audio path"),
+        ]:
+            self._inject_node_input(workflow, node_id, key, value, label)
+
         return workflow
 
     def render_shot(

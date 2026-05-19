@@ -98,28 +98,36 @@ class EpisodeValidator:
             errors.append("'environments' must be an object")
 
         for scene_idx, scene in enumerate(data.get("scenes", [])):
-            if not isinstance(scene, dict):
-                errors.append(f"Scene[{scene_idx}] must be an object")
-                continue
-            for key in ("scene_id", "environment", "characters_present", "beats"):
-                if key not in scene:
-                    errors.append(f"Scene[{scene_idx}] missing required field: '{key}'")
-            if not isinstance(scene.get("beats"), list):
-                errors.append(f"Scene[{scene_idx}] 'beats' must be a list")
-                continue
-            for beat_idx, beat in enumerate(scene.get("beats", [])):
-                if not isinstance(beat, dict):
-                    errors.append(f"Scene[{scene_idx}].beat[{beat_idx}] must be an object")
-                    continue
-                for key in ("beat_id", "kind"):
-                    if key not in beat:
-                        errors.append(
-                            f"Scene[{scene_idx}].beat[{beat_idx}] missing required field: '{key}'"
-                        )
-                if beat.get("kind") not in ("speech", "silent", None):
-                    errors.append(
-                        f"Scene[{scene_idx}].beat[{beat_idx}] kind must be 'speech' or 'silent'"
-                    )
+            errors.extend(self._validate_scene(scene, scene_idx))
+        return errors
+
+    def _validate_scene(self, scene: Any, scene_idx: int) -> list[str]:
+        errors: list[str] = []
+        if not isinstance(scene, dict):
+            errors.append(f"Scene[{scene_idx}] must be an object")
+            return errors
+        for key in ("scene_id", "environment", "characters_present", "beats"):
+            if key not in scene:
+                errors.append(f"Scene[{scene_idx}] missing required field: '{key}'")
+        if not isinstance(scene.get("beats"), list):
+            errors.append(f"Scene[{scene_idx}] 'beats' must be a list")
+            return errors
+        for beat_idx, beat in enumerate(scene.get("beats", [])):
+            errors.extend(self._validate_beat(beat, scene_idx, beat_idx))
+        return errors
+
+    def _validate_beat(self, beat: Any, scene_idx: int, beat_idx: int) -> list[str]:
+        errors: list[str] = []
+        if not isinstance(beat, dict):
+            errors.append(f"Scene[{scene_idx}].beat[{beat_idx}] must be an object")
+            return errors
+        for key in ("beat_id", "kind"):
+            if key not in beat:
+                errors.append(
+                    f"Scene[{scene_idx}].beat[{beat_idx}] missing required field: '{key}'"
+                )
+        if beat.get("kind") not in ("speech", "silent", None):
+            errors.append(f"Scene[{scene_idx}].beat[{beat_idx}] kind must be 'speech' or 'silent'")
         return errors
 
     # ------------------------------------------------------------------

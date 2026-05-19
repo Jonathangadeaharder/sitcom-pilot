@@ -192,6 +192,17 @@ class AIServicesClient:
 
         return result
 
+    @staticmethod
+    def _resolve_voice_config(
+        voice: VoiceConfig | None,
+        character: CharacterData | None,
+    ) -> VoiceConfig | None:
+        if voice:
+            return voice
+        if character and character.voice:
+            return character.voice
+        return None
+
     def text2speech(
         self,
         text: str,
@@ -206,7 +217,8 @@ class AIServicesClient:
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
 
-        voice = voice or (character.voice if character and character.voice else None)
+        voice = self._resolve_voice_config(voice, character)
+        voice_id = voice.voice_id if voice else None
         tags = _build_speech_tags(emotion, tone, effect)
         tagged_text = f"{tags} {text}".strip() if tags else text
 
@@ -216,7 +228,7 @@ class AIServicesClient:
             return generate(
                 text,
                 output,
-                voice_id=voice.voice_id if voice else None,
+                voice_id=voice_id,
                 emotion=emotion,
                 tone=tone,
                 effect=effect,
@@ -232,7 +244,7 @@ class AIServicesClient:
             return self._cli_text2speech(
                 text=tagged_text,
                 output_path=output,
-                voice_id=voice.voice_id if voice else None,
+                voice_id=voice_id,
                 clone_from=voice.clone_from if voice else None,
                 seed=voice.seed if voice else None,
                 temperature=voice.temperature if voice else 0.8,
