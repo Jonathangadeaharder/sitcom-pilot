@@ -55,6 +55,7 @@ addopts = "--cov=showrunner --cov-branch --cov-report=term-missing --cov-report=
 [tool.coverage.run]
 branch = true
 source = ["src/showrunner"]
+relative_files = true
 
 [tool.coverage.report]
 # fail_under enforced by --cov-fail-under=90 in CI workflow commands (pr-gate.yml lines 47, 51)
