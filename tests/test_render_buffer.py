@@ -241,3 +241,50 @@ class TestRenderBufferFailureHandling:
         finally:
             buf.close()
         assert reports[0].failed >= 1 or reports[0].completed >= 1
+
+
+class TestRenderBufferHelpers:
+    def test_build_reports_counts_beats(self, episode, manifest, tmp_path):
+        paths = RunPaths(tmp_path, "test-run")
+        paths.ensure_dirs()
+        jobs = plan_beats(episode, manifest, paths)
+        buf = RenderBuffer(MagicMock(), manifest, episode, paths, buffer_size=2, max_workers=4)
+        try:
+            reports = buf._build_reports(jobs, episode.scenes)
+        finally:
+            buf.close()
+
+        assert set(reports) == {"001", "002"}
+        assert reports["001"].total_beats == 3
+        assert reports["002"].total_beats == 1
+
+    def test_build_reports_empty_jobs(self, episode, tmp_path):
+        paths = RunPaths(tmp_path, "test-run")
+        paths.ensure_dirs()
+        buf = RenderBuffer(MagicMock(), MagicMock(), episode, paths, buffer_size=2, max_workers=4)
+        try:
+            reports = buf._build_reports([], episode.scenes)
+        finally:
+            buf.close()
+
+        assert set(reports) == {"001", "002"}
+        assert reports["001"].total_beats == 0
+        assert reports["002"].total_beats == 0
+
+    def test_create_buffer_jobs_maps_paths(self, episode, manifest, tmp_path):
+        paths = RunPaths(tmp_path, "test-run")
+        paths.ensure_dirs()
+        jobs = plan_beats(episode, manifest, paths)
+        buf = RenderBuffer(MagicMock(), manifest, episode, paths, buffer_size=2, max_workers=4)
+        try:
+            buffer_jobs = buf._create_buffer_jobs(jobs)
+        finally:
+            buf.close()
+
+        assert len(buffer_jobs) == len(jobs)
+        for buf_job, orig_job in zip(buffer_jobs, jobs):
+            assert str(buf_job.image_path).startswith(str(buf.buffer_dir))
+            assert buf_job.scene_id == orig_job.scene_id
+            assert buf_job.beat_id == orig_job.beat_id
+            assert buf_job.kind == orig_job.kind
+            assert buf_job.seed == orig_job.seed

@@ -494,3 +494,91 @@ def test_render_scene_cooldown_sleeps_correct_duration(episode, mock_client, wor
         renderer.render_scene(episode.scenes[0], episode, workflow_template)
         for call in mock_sleep.call_args_list:
             assert call[0][0] == pytest.approx(5.0)
+
+
+class TestInjectNodeInput:
+    def test_inject_node_input_sets_value(self, mock_client):
+        renderer = ShotRenderer(client=mock_client, builder=PromptBuilder())
+        workflow = {"6": {"inputs": {}}}
+        renderer._inject_node_input(workflow, "6", "text", "hello", "test")
+        assert workflow["6"]["inputs"]["text"] == "hello"
+
+    def test_inject_node_input_creates_inputs_if_missing(self, mock_client):
+        renderer = ShotRenderer(client=mock_client, builder=PromptBuilder())
+        workflow = {"6": {}}
+        renderer._inject_node_input(workflow, "6", "text", "hello", "test")
+        assert workflow["6"]["inputs"]["text"] == "hello"
+
+    def test_inject_node_input_skips_if_node_id_none(self, mock_client):
+        renderer = ShotRenderer(client=mock_client, builder=PromptBuilder())
+        workflow = {"6": {}}
+        original = dict(workflow)
+        renderer._inject_node_input(workflow, None, "text", "hello", "test")
+        assert workflow == original
+
+    def test_inject_node_input_missing_node_logs_warning(self, mock_client):
+        renderer = ShotRenderer(client=mock_client, builder=PromptBuilder())
+        workflow = {"6": {}}
+        with patch("showrunner.renderer.logger.warning") as mock_warn:
+            renderer._inject_node_input(workflow, "999", "text", "hello", "test prompt")
+            mock_warn.assert_called_once_with(
+                "Workflow missing node '%s'; %s not injected", "999", "test prompt"
+            )
+
+
+class TestInjectEnvironmentLora:
+    def test_inject_environment_lora_with_env_data(self, episode, mock_client):
+        renderer = ShotRenderer(client=mock_client, builder=PromptBuilder())
+        template = {"40": {"inputs": {"lora_name": ""}}}
+        renderer._inject_environment_lora(template, episode.scenes[0], episode)
+        assert template["40"]["inputs"]["lora_name"].startswith("apt_v1")
+
+    def test_inject_environment_lora_unknown_env(self, mock_client):
+        renderer = ShotRenderer(client=mock_client, builder=PromptBuilder())
+        template = {"40": {"inputs": {"lora_name": ""}}}
+        scene = SceneData(
+            scene_id="S01",
+            environment="NonExistent",
+            characters_present=[],
+            shots=[],
+        )
+        ep = EpisodeData(
+            title="NoEnv",
+            cast={},
+            environments={},
+            scenes=[scene],
+        )
+        original = dict(template)
+        renderer._inject_environment_lora(template, scene, ep)
+        assert template == original
+
+
+class TestInjectCharacterLoras:
+    def test_inject_character_loras_with_char_data(self, episode, mock_client):
+        renderer = ShotRenderer(client=mock_client, builder=PromptBuilder())
+        template = {"41": {"inputs": {"lora_name": ""}}}
+        renderer._inject_character_loras(template, episode.scenes[0], episode)
+        assert template["41"]["inputs"]["lora_name"].endswith(".safetensors")
+
+    def test_inject_character_loras_unknown_char(self, mock_client):
+        renderer = ShotRenderer(
+            client=mock_client,
+            builder=PromptBuilder(),
+            node_map=NodeMap(char_profiles=["41"]),
+        )
+        template = {"41": {"inputs": {"lora_name": ""}}}
+        scene = SceneData(
+            scene_id="S01",
+            environment="Apt",
+            characters_present=["UnknownChar"],
+            shots=[],
+        )
+        ep = EpisodeData(
+            title="NoChar",
+            cast={},
+            environments={},
+            scenes=[scene],
+        )
+        original = dict(template)
+        renderer._inject_character_loras(template, scene, ep)
+        assert template == original

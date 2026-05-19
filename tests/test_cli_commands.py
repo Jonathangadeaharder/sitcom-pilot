@@ -5,6 +5,9 @@ import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+import typer
 from typer.testing import CliRunner
 
 from showrunner.cli.main import app
@@ -578,3 +581,104 @@ class TestHelp:
             assert "--provider" not in result.output, f"{cmd_args} contains --provider"
             assert "--backend" not in result.output, f"{cmd_args} contains --backend"
             assert "--engine" not in result.output, f"{cmd_args} contains --engine"
+
+
+# ---------------------------------------------------------------------------
+# Pipeline helper tests
+# ---------------------------------------------------------------------------
+
+
+class TestPipelineValidate:
+    def test_validates_episode(self, tmp_path):
+        from showrunner.cli.main import _pipeline_validate
+
+        ep = tmp_path / "ep.json"
+        ep.write_text(json.dumps(V2_EPISODE))
+        # Should not raise
+        _pipeline_validate(ep, skip=False)
+
+    def test_skip_validate(self, tmp_path):
+        from showrunner.cli.main import _pipeline_validate
+
+        _pipeline_validate(tmp_path / "nonexistent.json", skip=True)
+
+    def test_raises_on_invalid(self, tmp_path):
+        from showrunner.cli.main import _pipeline_validate
+
+        bad = tmp_path / "bad.json"
+        bad.write_text('{"schema_version": "1.0"}')
+        with pytest.raises((typer.Exit, SystemExit)):
+            _pipeline_validate(bad, skip=False)
+
+
+class TestPipelineDeterminism:
+    def test_returns_seed(self, tmp_path):
+        from showrunner.cli.main import _pipeline_determinism
+
+        ep = tmp_path / "ep.json"
+        ep.write_text(json.dumps(V2_EPISODE))
+        seed = _pipeline_determinism(ep, seed=42, deterministic=False)
+        assert seed == 42
+
+    def test_without_seed_derives_from_hash(self, tmp_path):
+        from showrunner.cli.main import _pipeline_determinism
+
+        ep = tmp_path / "ep.json"
+        ep.write_text(json.dumps(V2_EPISODE))
+        seed = _pipeline_determinism(ep, seed=None, deterministic=False)
+        assert isinstance(seed, int)
+
+
+class TestPipelineBootstrap:
+    def test_skip_bootstrap(self):
+        from showrunner.cli.main import _pipeline_bootstrap
+
+        episode = MagicMock()
+        paths = MagicMock()
+        client = MagicMock()
+        _pipeline_bootstrap(episode, paths, client, skip=True)
+        client.text2image.assert_not_called()
+
+    def test_bootstraps_characters(self):
+        from showrunner.cli.main import _pipeline_bootstrap
+
+        episode = MagicMock()
+        episode.cast = {
+            "maya": MagicMock(visual="a person", name="Maya"),
+            "jake": MagicMock(visual=None, name="Jake"),
+        }
+        episode.environments = {}
+        paths = MagicMock()
+        client = MagicMock()
+        _pipeline_bootstrap(episode, paths, client, skip=False)
+        # Only maya has visual set, jake doesn't
+        assert client.text2image.call_count == 1
+
+
+class TestPipelineSummary:
+    def test_prints_table(self):
+        from showrunner.cli.main import _pipeline_summary
+        from showrunner.scene_render import BeatJob
+
+        episode = MagicMock()
+        episode.title = "Test"
+        jobs = [
+            BeatJob(
+                scene_id="001",
+                beat_id="b1",
+                kind="speech",
+                prompt="test",
+                seed=1,
+                duration_sec=3.0,
+                needs_audio=True,
+            )
+        ]
+        _pipeline_summary(
+            episode,
+            jobs,
+            total_done=1,
+            total_beats=1,
+            scene_count=1,
+            final_path=Path("/out.mp4"),
+            srt_path=Path("/out.srt"),
+        )

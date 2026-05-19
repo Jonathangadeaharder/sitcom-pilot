@@ -22,6 +22,9 @@ from showrunner.scene_render import (
     plan_beats,
     render_episode,
     render_scene,
+    _render_image,
+    _render_audio,
+    _render_video,
 )
 
 
@@ -335,3 +338,106 @@ class TestCacheResume:
 
         client.text2speech.assert_not_called()
         assert speech_job.status.value == "done"
+
+
+class TestRenderImage:
+    def test_renders_image_when_not_cached(self, tmp_path):
+        job = BeatJob(
+            scene_id="001", beat_id="b1", kind="silent", prompt="test",
+            seed=42, duration_sec=3.0, needs_audio=False,
+            image_path=tmp_path / "img.png",
+        )
+        client = MagicMock()
+        client.text2image.return_value = tmp_path / "img.png"
+        _render_image(job, client)
+        client.text2image.assert_called_once_with("test", job.image_path, seed=42)
+
+    def test_skips_when_image_exists(self, tmp_path):
+        img = tmp_path / "img.png"
+        img.write_bytes(b"data")
+        job = BeatJob(
+            scene_id="001", beat_id="b1", kind="silent", prompt="test",
+            seed=42, duration_sec=3.0, needs_audio=False,
+            image_path=img,
+        )
+        client = MagicMock()
+        _render_image(job, client)
+        client.text2image.assert_not_called()
+
+
+class TestRenderAudio:
+    def test_renders_audio_when_needed(self, tmp_path, manifest, episode):
+        job = BeatJob(
+            scene_id="001", beat_id="b1", kind="speech", prompt="test",
+            seed=42, duration_sec=3.0, needs_audio=True,
+            speaker="maya", text="Hello!",
+            audio_path=tmp_path / "aud.wav",
+        )
+        client = MagicMock()
+        client.text2speech.return_value = tmp_path / "aud.wav"
+        _render_audio(job, client, manifest, episode)
+        client.text2speech.assert_called_once()
+
+    def test_skips_when_audio_not_needed(self, tmp_path):
+        episode = EpisodeData(title="T", cast={}, environments={}, scenes=[])
+        job = BeatJob(
+            scene_id="001", beat_id="b1", kind="silent", prompt="test",
+            seed=42, duration_sec=3.0, needs_audio=False,
+            audio_path=tmp_path / "aud.wav",
+        )
+        client = MagicMock()
+        _render_audio(job, client, CastManifest(), episode)
+        client.text2speech.assert_not_called()
+
+    def test_skips_when_audio_exists(self, tmp_path, manifest, episode):
+        aud = tmp_path / "aud.wav"
+        aud.write_bytes(b"data")
+        job = BeatJob(
+            scene_id="001", beat_id="b1", kind="speech", prompt="test",
+            seed=42, duration_sec=3.0, needs_audio=True,
+            speaker="maya", text="Hello!",
+            audio_path=aud,
+        )
+        client = MagicMock()
+        _render_audio(job, client, manifest, episode)
+        client.text2speech.assert_not_called()
+
+
+class TestRenderVideo:
+    def test_renders_video_when_not_cached(self, tmp_path):
+        img = tmp_path / "img.png"
+        img.write_bytes(b"data")
+        vid = tmp_path / "vid.mp4"
+        job = BeatJob(
+            scene_id="001", beat_id="b1", kind="silent", prompt="test",
+            seed=42, duration_sec=3.0, needs_audio=False,
+            image_path=img, video_path=vid,
+        )
+        client = MagicMock()
+        _render_video(job, client)
+        client.image2video.assert_called_once()
+
+    def test_skips_when_video_exists(self, tmp_path):
+        vid = tmp_path / "vid.mp4"
+        vid.write_bytes(b"data")
+        img = tmp_path / "img.png"
+        img.write_bytes(b"data")
+        job = BeatJob(
+            scene_id="001", beat_id="b1", kind="silent", prompt="test",
+            seed=42, duration_sec=3.0, needs_audio=False,
+            image_path=img, video_path=vid,
+        )
+        client = MagicMock()
+        _render_video(job, client)
+        client.image2video.assert_not_called()
+
+    def test_skips_when_image_missing(self, tmp_path):
+        job = BeatJob(
+            scene_id="001", beat_id="b1", kind="silent", prompt="test",
+            seed=42, duration_sec=3.0, needs_audio=False,
+            image_path=tmp_path / "nonexistent.png",
+            video_path=tmp_path / "vid.mp4",
+        )
+        client = MagicMock()
+        _render_video(job, client)
+        client.image2video.assert_not_called()
