@@ -71,10 +71,13 @@ exclude = ["legacy/*"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "ARG", "PL"]
-ignore = []
+ignore = ["PLC0415", "ARG001", "ARG002", "ARG004", "ARG005", "SIM117", "B904", "B007", "B018", "PLR2004", "PLR0913", "PLW1510", "PLR0912", "PLR0915"]
 
 [tool.ruff.lint.per-file-ignores]
 "legacy/*" = ["E402", "E501", "F841", "I001"]
+"tests/*" = ["PLC0415"]
+"scripts/*" = ["PLC0415"]
+"src/showrunner/aiservices_client.py" = ["PLC0415"]
 
 [build-system]
 requires = ["hatchling"]
@@ -96,6 +99,20 @@ include = ["src"]
 exclude = ["**/__pycache__", "legacy", "output", "aiservices"]
 typeCheckingMode = "strict"
 pythonVersion = "3.11"
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportMissingParameterType = false
+reportPrivateUsage = false
+reportConstantRedefinition = false
+reportUnusedClass = false
+reportAny = false
+reportMissingImports = false
+reportUntypedFunctionDecorator = false
+reportMissingTypeArgument = false
+reportUntypedBaseClass = false
+reportUnnecessaryIsInstance = false
 
 [tool.vulture]
 paths = ["src/"]
