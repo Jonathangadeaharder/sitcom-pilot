@@ -27,3 +27,4 @@ ruff-report.json
 
 # iCloud duplicate files
 * [0-9]
+.scannerwork/
