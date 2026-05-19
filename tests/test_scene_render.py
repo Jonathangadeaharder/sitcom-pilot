@@ -18,13 +18,13 @@ from showrunner.paths import RunPaths
 from showrunner.scene_render import (
     BeatJob,
     SceneReport,
+    _render_audio,
+    _render_image,
+    _render_video,
     allocate_durations,
     plan_beats,
     render_episode,
     render_scene,
-    _render_image,
-    _render_audio,
-    _render_video,
 )
 
 
