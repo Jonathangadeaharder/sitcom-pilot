@@ -860,7 +860,7 @@ def run(
     client = AIServicesClient()
     _pipeline_bootstrap(episode, paths, client, skip_bootstrap)
 
-    total_done, total_failed = _pipeline_render(
+    total_done, _ = _pipeline_render(
         episode, manifest, paths, client, max_workers, jobs, total_beats
     )
 
