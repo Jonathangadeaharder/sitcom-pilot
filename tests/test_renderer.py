@@ -493,4 +493,4 @@ def test_render_scene_cooldown_sleeps_correct_duration(episode, mock_client, wor
     with patch("time.sleep") as mock_sleep:
         renderer.render_scene(episode.scenes[0], episode, workflow_template)
         for call in mock_sleep.call_args_list:
-            assert call[0][0] == 5.0
+            assert call[0][0] == pytest.approx(5.0)

@@ -268,7 +268,7 @@ def test_wait_for_completion_polls_with_correct_interval(client):
             with patch("time.sleep") as mock_sleep:
                 client.wait_for_completion("abc", timeout=0.15, poll_interval=0.05)
                 if mock_sleep.called:
-                    assert mock_sleep.call_args[0][0] == 0.05
+                    assert mock_sleep.call_args[0][0] == pytest.approx(0.05)
 
 
 def test_get_output_paths_all_three_media_types(client):
