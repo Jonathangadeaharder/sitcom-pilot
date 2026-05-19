@@ -222,8 +222,10 @@ class TestRenderBeat:
     @patch("showrunner.aiservices_client.AIServicesClient")
     def test_render_beat_success(self, mock_client_cls, tmp_path: Path):
         mock_client = MagicMock()
-        mock_client.text2image.return_value = Path("/tmp/img.png")
-        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
+        img_path = tmp_path / "img.png"
+        vid_path = tmp_path / "vid.mp4"
+        mock_client.text2image.return_value = img_path
+        mock_client.image2video.return_value = vid_path
         mock_client_cls.return_value = mock_client
 
         ep = _write_episode(tmp_path)
@@ -243,8 +245,10 @@ class TestRenderScene:
     @patch("showrunner.aiservices_client.AIServicesClient")
     def test_render_scene_success(self, mock_client_cls, tmp_path: Path):
         mock_client = MagicMock()
-        mock_client.text2image.return_value = Path("/tmp/img.png")
-        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
+        img_path = tmp_path / "img.png"
+        vid_path = tmp_path / "vid.mp4"
+        mock_client.text2image.return_value = img_path
+        mock_client.image2video.return_value = vid_path
         mock_client_cls.return_value = mock_client
 
         ep = _write_episode(tmp_path)
@@ -262,8 +266,10 @@ class TestRenderEpisode:
     @patch("showrunner.aiservices_client.AIServicesClient")
     def test_render_episode_success(self, mock_client_cls, tmp_path: Path):
         mock_client = MagicMock()
-        mock_client.text2image.return_value = Path("/tmp/img.png")
-        mock_client.image2video.return_value = Path("/tmp/vid.mp4")
+        img_path = tmp_path / "img.png"
+        vid_path = tmp_path / "vid.mp4"
+        mock_client.text2image.return_value = img_path
+        mock_client.image2video.return_value = vid_path
         mock_client_cls.return_value = mock_client
 
         ep = _write_episode(tmp_path)
