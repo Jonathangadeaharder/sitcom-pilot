@@ -37,6 +37,8 @@ jobs:
     runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
+      - name: Sync dependencies
+        run: uv sync
       - name: Unit tests with coverage
         run: uv run pytest --cov --cov-branch --cov-fail-under=90
       - name: Upload coverage
