@@ -54,7 +54,7 @@ showrunner = "showrunner.cli.main:app"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=showrunner --cov-branch --cov-report=term-missing"
+addopts = "--cov=showrunner --cov-branch --cov-report=term-missing --cov-report=xml"
 
 [tool.coverage.run]
 branch = true
