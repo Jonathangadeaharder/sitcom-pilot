@@ -61,7 +61,7 @@ async fn run_pipeline(
     tauri::async_runtime::spawn(async move {
         use std::io::{BufRead, BufReader};
         let reader = BufReader::new(stdout);
-        for line in reader.lines().flatten() {
+        for line in reader.lines().map_while(Result::ok) {
             let _ = app_for_stdout.emit("pipeline-log", &line);
         }
     });
@@ -70,7 +70,7 @@ async fn run_pipeline(
     tauri::async_runtime::spawn(async move {
         use std::io::{BufRead, BufReader};
         let reader = BufReader::new(stderr);
-        for line in reader.lines().flatten() {
+        for line in reader.lines().map_while(Result::ok) {
             let _ = app_handle.emit("pipeline-log", &format!("[stderr] {line}"));
         }
     });
