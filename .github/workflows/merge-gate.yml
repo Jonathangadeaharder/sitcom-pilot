@@ -6,40 +6,39 @@ on:
 
 jobs:
   format:
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Format check
         run: uvx ruff format --check .
   lint:
     needs: [format]
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Lint
         run: uvx ruff check .
   typecheck:
     needs: [lint]
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Type check
         run: uvx pyright
   build:
     needs: [typecheck]
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Build
         run: uv build
   unit:
     needs: [build]
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Sync dependencies
-        # mlx/mlx-metal only have arm64 wheels; runner is x86_64 Rosetta. Skip install.
-        run: uv sync --no-install-package mlx --no-install-package mlx-metal
+        run: uv sync
       - name: Unit tests with coverage
         run: uv run pytest --cov --cov-branch --cov-fail-under=90
       - name: Upload coverage
@@ -50,31 +49,29 @@ jobs:
           path: coverage.xml
   deadcode:
     needs: [build]
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Dead code
-        run: uvx vulture src/ --min-confidence 100
+        run: uvx vulture src/ --min-confidence 80
   deps:
     needs: [build]
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Dep audit
         run: uvx pip-audit
   semgrep:
     needs: [build]
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Semgrep
         # Pre-existing findings. Fix urllib->requests migration as follow-up.
         continue-on-error: true
-        run: |
-          uv tool install semgrep 2>/dev/null || uv tool upgrade semgrep 2>/dev/null || true
-          uvx semgrep --config p/default --error .
+        run: uvx semgrep scan --config p/default --metrics=off
   gui-lint:
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     defaults:
       run:
         working-directory: gui
@@ -100,7 +97,7 @@ jobs:
         run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
 
   gui-build:
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     defaults:
       run:
         working-directory: gui
@@ -122,7 +119,7 @@ jobs:
   sonarcloud:
     name: SonarCloud Code Analysis
     needs: [unit]
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
         with:

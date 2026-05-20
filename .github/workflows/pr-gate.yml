@@ -7,7 +7,7 @@ on:
 jobs:
   format:
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Format check
@@ -16,7 +16,7 @@ jobs:
   lint:
     needs: [format]
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Lint
@@ -25,7 +25,7 @@ jobs:
   typecheck:
     needs: [lint]
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Type check
@@ -34,7 +34,7 @@ jobs:
   build:
     needs: [typecheck]
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Build
@@ -43,12 +43,11 @@ jobs:
   unit:
     needs: [build]
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Sync dependencies
-        # mlx/mlx-metal only have arm64 wheels; runner is x86_64 Rosetta. Skip install.
-        run: uv sync --no-install-package mlx --no-install-package mlx-metal
+        run: uv sync
       - name: Unit tests with coverage
         run: uv run pytest --cov --cov-branch --cov-fail-under=90
         continue-on-error: true
@@ -56,7 +55,7 @@ jobs:
   mutation:
     needs: [build]
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - id: changed-files
@@ -72,7 +71,7 @@ jobs:
   deadcode:
     needs: [build]
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Dead code
@@ -81,7 +80,7 @@ jobs:
   deps:
     needs: [build]
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Dep audit
@@ -90,7 +89,7 @@ jobs:
   semgrep:
     needs: [build]
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     steps:
       - uses: actions/checkout@v4
       - name: Semgrep
@@ -98,7 +97,7 @@ jobs:
 
   structure:
     name: Repository Structure
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     needs: [build]
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
     steps:
@@ -118,7 +117,7 @@ jobs:
 
   pytest-lint:
     name: Test Quality (pytest)
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     needs: [build]
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
     steps:
@@ -133,7 +132,7 @@ jobs:
           pytest-linter check tests/
 
   gui-lint:
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     defaults:
       run:
         working-directory: gui
@@ -159,7 +158,7 @@ jobs:
         run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
 
   gui-build:
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     defaults:
       run:
         working-directory: gui
@@ -180,7 +179,7 @@ jobs:
 
   required-checks:
     name: Required Checks (PR)
-    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     needs: [format, lint, typecheck, build, unit, mutation, deadcode, deps, semgrep, structure, pytest-lint, gui-lint, gui-build]
     if: always()
     steps:
