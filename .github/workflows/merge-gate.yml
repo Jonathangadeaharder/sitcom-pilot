@@ -73,6 +73,52 @@ jobs:
         run: |
           uv tool install semgrep 2>/dev/null || uv tool upgrade semgrep 2>/dev/null || true
           uvx semgrep --config p/default --error .
+  gui-lint:
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    defaults:
+      run:
+        working-directory: gui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - name: Install JS deps
+        run: pnpm install --frozen-lockfile
+      - name: Generate SvelteKit types
+        run: pnpm exec svelte-kit sync
+      - name: Svelte check
+        run: pnpm exec svelte-check
+      - name: Rust lint (clippy)
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
+      - name: Rust format check
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
+
+  gui-build:
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    defaults:
+      run:
+        working-directory: gui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install JS deps
+        run: pnpm install --frozen-lockfile
+      - name: Build frontend
+        run: pnpm exec vite build
+      - name: Build Rust backend (check only)
+        run: cargo check --manifest-path src-tauri/Cargo.toml
+
   sonarcloud:
     name: SonarCloud Code Analysis
     needs: [unit]

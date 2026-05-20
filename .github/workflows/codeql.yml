@@ -26,3 +26,19 @@ jobs:
           queries: security-extended,security-and-quality
       - uses: github/codeql-action/autobuild@v3
       - uses: github/codeql-action/analyze@v3
+
+  rust:
+    runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: rust
+          queries: security-and-quality
+          source-root: gui/src-tauri
+      - uses: github/codeql-action/autobuild@v3
+        with:
+          working-directory: gui/src-tauri
+      - uses: github/codeql-action/analyze@v3
