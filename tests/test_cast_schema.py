@@ -3,11 +3,27 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
+from showrunner.schemas import (
+    CastCharacter as CastCharacterViaInit,
+)
+from showrunner.schemas import (
+    CastManifest as CastManifestViaInit,
+)
+from showrunner.schemas import (
+    VisualReference as VisualReferenceViaInit,
+)
+from showrunner.schemas import (
+    VoiceProfile as VoiceProfileViaInit,
+)
+from showrunner.schemas import (
+    WardrobeEntry as WardrobeEntryViaInit,
+)
 from showrunner.schemas.cast import (
     CastCharacter,
     CastManifest,
     VisualReference,
     VoiceProfile,
+    WardrobeEntry,
 )
 
 
@@ -89,6 +105,81 @@ class TestCastCharacter:
         assert c.voice is None
         assert c.lora is None
 
+    def test_visual_and_role(self):
+        c = CastCharacter(
+            name="Maya Chen",
+            slug="maya",
+            visual="East Asian woman, late 20s, purple hoodie",
+            role="Lead engineer",
+        )
+        assert c.visual == "East Asian woman, late 20s, purple hoodie"
+        assert c.role == "Lead engineer"
+
+    def test_wardrobe_default_empty(self):
+        c = CastCharacter(name="Maya Chen", slug="maya")
+        assert c.wardrobe == []
+
+    def test_with_wardrobe(self):
+        c = CastCharacter(
+            name="Maya Chen",
+            slug="maya",
+            wardrobe=[
+                WardrobeEntry(episode="s01e01", description="purple hoodie, jeans"),
+                WardrobeEntry(episode="s01e02", description="blue jacket"),
+            ],
+        )
+        assert len(c.wardrobe) == 2
+        assert c.wardrobe[0].episode == "s01e01"
+        assert c.wardrobe[0].description == "purple hoodie, jeans"
+
+    def test_consistency_notes(self):
+        c = CastCharacter(
+            name="Maya Chen",
+            slug="maya",
+            consistency_notes="always wears glasses",
+        )
+        assert c.consistency_notes == "always wears glasses"
+
+    def test_full_character_with_all_new_fields(self):
+        c = CastCharacter(
+            name="Maya Chen",
+            slug="maya",
+            description="Lead engineer at startup",
+            age="late 20s",
+            gender="female",
+            ethnicity="East Asian",
+            visual="East Asian woman, late 20s, purple hoodie",
+            role="Lead engineer",
+            visual_refs=VisualReference(front="cast/maya/front.png"),
+            voice=VoiceProfile(voice_id="maya_v1"),
+            lora="models/lora/maya.safetensors",
+            wardrobe=[WardrobeEntry(episode="s01e01", description="purple hoodie")],
+            consistency_notes="always wears glasses",
+        )
+        assert c.visual == "East Asian woman, late 20s, purple hoodie"
+        assert c.role == "Lead engineer"
+        assert len(c.wardrobe) == 1
+        assert c.wardrobe[0].episode == "s01e01"
+        assert c.consistency_notes == "always wears glasses"
+
+
+class TestWardrobeEntry:
+    def test_defaults(self):
+        w = WardrobeEntry()
+        assert w.episode == ""
+        assert w.description == ""
+        assert w.notes == ""
+
+    def test_full(self):
+        w = WardrobeEntry(
+            episode="s01e01",
+            description="purple hoodie",
+            notes="worn in office scenes",
+        )
+        assert w.episode == "s01e01"
+        assert w.description == "purple hoodie"
+        assert w.notes == "worn in office scenes"
+
 
 class TestCastManifest:
     def test_empty_manifest(self):
@@ -105,6 +196,13 @@ class TestCastManifest:
         )
         assert len(m.characters) == 2
         assert m.characters["maya"].name == "Maya Chen"
+
+    def test_importable_from_init(self):
+        assert CastCharacterViaInit is CastCharacter
+        assert CastManifestViaInit is CastManifest
+        assert VisualReferenceViaInit is VisualReference
+        assert VoiceProfileViaInit is VoiceProfile
+        assert WardrobeEntryViaInit is WardrobeEntry
 
     def test_serialization_round_trip(self):
         m = CastManifest(
