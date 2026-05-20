@@ -144,6 +144,9 @@ jobs:
           node-version: '22'
       - name: Install pnpm
         run: npm install -g pnpm@9
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
       - name: Install JS deps
         run: pnpm install --frozen-lockfile
       - name: Svelte check
@@ -165,6 +168,7 @@ jobs:
           node-version: '22'
       - name: Install pnpm
         run: npm install -g pnpm@9
+      - uses: dtolnay/rust-toolchain@stable
       - name: Install JS deps
         run: pnpm install --frozen-lockfile
       - name: Build frontend
