@@ -4,10 +4,6 @@ on:
   push:
     branches: [main, master]
 
-concurrency:
-  group: merge-gate-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   format:
     runs-on: ["self-hosted", "macos", "arm64", "VidiomTM"]
@@ -42,10 +38,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Sync dependencies
-        # mlx only has arm64 wheels; runner is x86_64 Rosetta. Skip install, mlx not imported directly.
-        run: uv sync --no-install-package mlx
+        # mlx/mlx-metal only have arm64 wheels; runner is x86_64 Rosetta. Skip install.
+        run: uv sync --no-install-package mlx --no-install-package mlx-metal
       - name: Unit tests with coverage
-        continue-on-error: true
         run: uv run pytest --cov --cov-branch --cov-fail-under=90
       - name: Upload coverage
         uses: actions/upload-artifact@v4
