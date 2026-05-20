@@ -8,15 +8,9 @@ from showrunner.assembler import EpisodeAssembler
 from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
 from showrunner.loader import EpisodeLoader
 
-sys.path  # ensure imported before use below
-
-_LEGACY_DIR = str(Path(__file__).resolve().parent.parent / "legacy" / "retired")
-if _LEGACY_DIR not in sys.path:
-    sys.path.insert(0, _LEGACY_DIR)
-
 collect_ignore = []
 if "mutmut" in sys.modules:
-    collect_ignore = ["test_cli.py", "test_e2e.py", "test_episode_01.py"]
+    collect_ignore = ["test_e2e.py", "test_episode_01.py"]
 
 _EPISODE_02 = str(Path(__file__).resolve().parent.parent / "episode_02.json")
 

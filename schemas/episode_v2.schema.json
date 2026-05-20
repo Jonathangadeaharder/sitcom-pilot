@@ -187,7 +187,7 @@
         },
         "legacy_audio_path": { 
           "type": "string",
-          "description": "Path to legacy audio file (for migration)"
+          "description": "[Deprecated] Path to legacy audio file — no longer used"
         },
         "beats": {
           "type": "array",

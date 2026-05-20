@@ -126,7 +126,6 @@
         "maya"
       ],
       "mood": "tense, late-night",
-      "legacy_audio_path": "output/voices/scene_001_full.wav",
       "beats": [
         {
           "beat_id": "001_b00",
@@ -207,7 +206,7 @@
         "finn"
       ],
       "mood": "domestic chaos, comedic",
-      "legacy_audio_path": "output/voices/scene_002_full.wav",
+
       "beats": [
         {
           "beat_id": "002_b00",
@@ -378,7 +377,7 @@
         "derek"
       ],
       "mood": "panic meets absurdity",
-      "legacy_audio_path": "output/voices/scene_003_full.wav",
+
       "beats": [
         {
           "beat_id": "003_b00",
@@ -558,7 +557,7 @@
         "finn"
       ],
       "mood": "caffeinated determination",
-      "legacy_audio_path": "output/voices/scene_004_full.wav",
+
       "beats": [
         {
           "beat_id": "004_b00",
@@ -740,7 +739,7 @@
         "finn"
       ],
       "mood": "comedic suspense, group climax",
-      "legacy_audio_path": "output/voices/scene_005_full.wav",
+
       "beats": [
         {
           "beat_id": "005_b00",
@@ -940,7 +939,7 @@
         "finn"
       ],
       "mood": "quiet exhaustion, satisfaction, absurd tag",
-      "legacy_audio_path": "output/voices/scene_006_full.wav",
+
       "beats": [
         {
           "beat_id": "006_b00",
