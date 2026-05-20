@@ -143,6 +143,8 @@ jobs:
         with:
           node-version: '22'
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: gui/package.json
       - name: Install JS deps
         run: pnpm install --frozen-lockfile
       - name: Svelte check
@@ -163,6 +165,8 @@ jobs:
         with:
           node-version: '22'
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: gui/package.json
       - name: Install JS deps
         run: pnpm install --frozen-lockfile
       - name: Build frontend
