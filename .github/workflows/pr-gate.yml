@@ -50,7 +50,7 @@ jobs:
         # mlx/mlx-metal only have arm64 macOS wheels; runner is x86_64.
         run: uv sync --no-install-package mlx --no-install-package mlx-metal
       - name: Unit tests with coverage
-        run: uv run pytest --cov --cov-branch --cov-fail-under=90
+        run: uv run --no-sync pytest --cov --cov-branch --cov-fail-under=90
         continue-on-error: true
 
   mutation:
