@@ -38,8 +38,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Sync dependencies
-        # mlx and torch have no x86_64 macOS wheel; skip on Rosetta runners. Unit tests don't need them.
-        run: uv sync --no-install-package mlx --no-install-package torch
+        # mlx + mlx-whisper + their transitive deps only have arm64 macOS wheels; skip on Rosetta.
+        run: uv sync --no-install-package mlx --no-install-package mlx-whisper --no-install-package torch
       - name: Unit tests with coverage
         run: uv run pytest --cov --cov-branch --cov-fail-under=90
       - name: Upload coverage
