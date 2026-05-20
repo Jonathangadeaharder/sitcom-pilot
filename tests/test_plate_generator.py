@@ -67,16 +67,34 @@ class TestGenerateBeatPlate:
         beat = BeatData(beat_id="001_001", kind="speech", action="Maya enters")
         with pytest.raises(ValueError, match="strength must be between"):
             generate_beat_plate(
-                beat, episode.scenes[0], episode, manifest, mock_client,
-                scene_plate, out, strength=-0.5,
+                beat,
+                episode.scenes[0],
+                episode,
+                manifest,
+                mock_client,
+                scene_plate,
+                out,
+                strength=-0.5,
             )
         with pytest.raises(ValueError, match="strength must be between"):
             generate_beat_plate(
-                beat, episode.scenes[0], episode, manifest, mock_client,
-                scene_plate, out, strength=1.5,
+                beat,
+                episode.scenes[0],
+                episode,
+                manifest,
+                mock_client,
+                scene_plate,
+                out,
+                strength=1.5,
             )
         # valid boundary should not raise
         generate_beat_plate(
-            beat, episode.scenes[0], episode, manifest, mock_client,
-            scene_plate, out, strength=0.0,
+            beat,
+            episode.scenes[0],
+            episode,
+            manifest,
+            mock_client,
+            scene_plate,
+            out,
+            strength=0.0,
         )
