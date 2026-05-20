@@ -4,7 +4,7 @@ Beat-based AI sitcom pilot pipeline. Turns JSON episode scripts into animated vi
 
 Built for **Buffering S01**.
 
-Package name: **`showrunner`** | CLI entry point: **`sitcom-pilot`**
+Package name: **`showrunner`** | CLI entry point: **`showrunner`**
 
 ## Architecture
 
@@ -36,12 +36,12 @@ git clone git@github.com:Jonathangadeaharder/sitcom-pilot.git && cd sitcom-pilot
 uv sync
 ```
 
-MLX provider packages (text2image, image2video, text2speech, etc.) are vendored under `aiservices/packages/`. The client falls back to CLI subprocess when Python APIs are unavailable.
+MLX provider packages (text2image, image2video, text2speech, etc.) are installed via AIServices git dependencies.
 
 Verify dependencies:
 
 ```bash
-sitcom-pilot doctor
+showrunner doctor
 ```
 
 ## Quick Start
@@ -104,7 +104,7 @@ rm -rf output && showrunner bootstrap episode_02.json -o output
 
 ## CLI Reference
 
-All commands are under the `sitcom-pilot` / `showrunner` entrypoint.
+All commands are under the `showrunner` entrypoint.
 
 ### `validate`
 
@@ -364,21 +364,7 @@ Post-render assembly via ffmpeg:
 
 ## Configuration
 
-`PipelineConfig` reads from environment variables (prefixed `SITCOM_`) or a `.env` file:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SITCOM_COMFYUI_URL` | `http://127.0.0.1:8188` | ComfyUI server URL |
-| `SITCOM_OUTPUT_DIR` | `output` | Root output directory |
-| `SITCOM_RUN_ID` | auto-generated | Run identifier |
-| `SITCOM_COOLDOWN_SECONDS` | `0.0` | Pause between shots |
-| `SITCOM_MAX_CRASH_RETRIES` | `3` | Retry count on failures |
-| `SITCOM_IMAGE_PROVIDER` | `mlx-flux` | Image generation provider |
-| `SITCOM_VIDEO_PROVIDER` | `mlx-ltx` | Video generation provider |
-| `SITCOM_TTS_PROVIDER` | `mlx-audio` | TTS provider |
-| `SITCOM_ASR_PROVIDER` | — | Speech-to-text provider |
-
-Per-episode render config in JSON (`episode.json` → `render` block) overrides these:
+Per-episode render config in JSON (`episode.json` → `render` block) controls output:
 
 ```json
 "render": {
@@ -406,12 +392,6 @@ output/
 
 ```
 sitcom-pilot/
-├── aiservices/          # Vendored MLX provider packages
-│   └── packages/
-│       ├── text2image/
-│       ├── image2video/
-│       ├── text2speech/
-│       └── ...
 ├── assets/              # Cast reference images, voice samples
 ├── docs/                # Guides and references
 │   ├── architecture/
@@ -421,9 +401,7 @@ sitcom-pilot/
 ├── schemas/             # JSON Schema definitions
 │   └── episode_v2.schema.json
 ├── src/
-│   ├── showrunner/      # Main package (CLI, renderer, validator, assembler)
-│   ├── showrunner_utils/
-│   └── sitcom_pilot/    # Legacy package
+│   └── showrunner/      # Main package (CLI, renderer, validator, assembler)
 ├── scripts/             # Utility scripts (build_refs.py, build_voices.py)
 ├── tests/               # pytest test suite
 ├── episode_01.json      # S01E01 "Pilot"
