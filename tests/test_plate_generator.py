@@ -57,3 +57,26 @@ class TestGenerateBeatPlate:
         )
         mock_client.image2image.assert_called_once()
         assert result == tmp_path / "beat.png"
+
+    @patch("showrunner.plate_generator.AIServicesClient")
+    def test_rejects_strength_out_of_range(self, mock_client_cls, manifest, episode, tmp_path):
+        mock_client = MagicMock()
+        scene_plate = tmp_path / "scene_001.png"
+        scene_plate.write_bytes(b"fake")
+        out = tmp_path / "beat_bad.png"
+        beat = BeatData(beat_id="001_001", kind="speech", action="Maya enters")
+        with pytest.raises(ValueError, match="strength must be between"):
+            generate_beat_plate(
+                beat, episode.scenes[0], episode, manifest, mock_client,
+                scene_plate, out, strength=-0.5,
+            )
+        with pytest.raises(ValueError, match="strength must be between"):
+            generate_beat_plate(
+                beat, episode.scenes[0], episode, manifest, mock_client,
+                scene_plate, out, strength=1.5,
+            )
+        # valid boundary should not raise
+        generate_beat_plate(
+            beat, episode.scenes[0], episode, manifest, mock_client,
+            scene_plate, out, strength=0.0,
+        )

@@ -211,3 +211,28 @@ class TestRichRenderProgress:
                     status="failed",
                 )
             )
+
+    def test_unknown_status(self):
+        with RichRenderProgress() as on_progress:
+            on_progress(
+                BeatProgressEvent(
+                    scene_id="001",
+                    beat_id="001_001",
+                    beat_index=0,
+                    total_beats=1,
+                    status="unknown",
+                )
+            )
+
+    def test_make_progress_callback_default(self):
+        cb = RichRenderProgress()
+        with cb as on_progress:
+            on_progress(
+                BeatProgressEvent(
+                    scene_id="001",
+                    beat_id="001_001",
+                    beat_index=0,
+                    total_beats=1,
+                    status="done",
+                )
+            )

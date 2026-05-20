@@ -131,7 +131,8 @@ class TestCheckRam:
         assert r.passed is False
 
     def test_not_installed(self):
-        r = check_ram()
+        with patch.dict("sys.modules", {"psutil": None}):
+            r = check_ram()
         assert r.passed is True
         assert "skipped" in r.detail.lower()
 

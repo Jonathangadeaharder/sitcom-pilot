@@ -1,8 +1,14 @@
 import json
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+# Retired module was moved to legacy/retired/
+_legacy_path = Path(__file__).resolve().parent.parent / "legacy" / "retired"
+if _legacy_path.exists():
+    sys.path.insert(0, str(_legacy_path))
 
 FIXTURES = Path(__file__).parent / "fixtures"
 

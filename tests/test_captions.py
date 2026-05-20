@@ -64,6 +64,20 @@ class TestSplitTextForSubtitles:
         assert len(result) == 1
         assert result[0] == "Hello world foo"
 
+    def test_text_exactly_max_chars(self):
+        text = "A" * 42
+        assert split_text_for_subtitles(text) == [text]
+
+    def test_text_slightly_over_max_splits_at_space(self):
+        text = "hello world foo bar baz qux"
+        chunks = split_text_for_subtitles(text, max_chars=10)
+        assert all(len(c) <= 10 for c in chunks)
+        assert len(chunks) > 1
+
+    def test_text_splitting_ends_on_exact_break(self):
+        result = split_text_for_subtitles("ab ", max_chars=2)
+        assert result == ["ab"]
+
 
 class TestGenerateSrt:
     def test_single_beat(self):
