@@ -26,7 +26,7 @@ fn validate_episode(path: String, state: State<AppState>) -> Result<String, Stri
     let ep_json: serde_json::Value =
         serde_json::from_str(&ep_content).map_err(|e| format!("Invalid JSON: {e}"))?;
 
-    Ok(serde_json::to_string(&ep_json).map_err(|e| e.to_string())?)
+    serde_json::to_string(&ep_json).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -61,10 +61,8 @@ async fn run_pipeline(
     tauri::async_runtime::spawn(async move {
         use std::io::{BufRead, BufReader};
         let reader = BufReader::new(stdout);
-        for line in reader.lines() {
-            if let Ok(line) = line {
-                let _ = app_for_stdout.emit("pipeline-log", &line);
-            }
+        for line in reader.lines().flatten() {
+            let _ = app_for_stdout.emit("pipeline-log", &line);
         }
     });
 
@@ -72,10 +70,8 @@ async fn run_pipeline(
     tauri::async_runtime::spawn(async move {
         use std::io::{BufRead, BufReader};
         let reader = BufReader::new(stderr);
-        for line in reader.lines() {
-            if let Ok(line) = line {
-                let _ = app_handle.emit("pipeline-log", &format!("[stderr] {line}"));
-            }
+        for line in reader.lines().flatten() {
+            let _ = app_handle.emit("pipeline-log", &format!("[stderr] {line}"));
         }
     });
 
@@ -92,7 +88,7 @@ async fn run_pipeline(
         "video_path": ""
     });
 
-    Ok(serde_json::to_string(&result).map_err(|e| e.to_string())?)
+    serde_json::to_string(&result).map_err(|e| e.to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
