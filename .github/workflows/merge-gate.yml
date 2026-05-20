@@ -38,7 +38,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Sync dependencies
-        run: uv sync
+        # mlx/mlx-metal only have arm64 macOS wheels; runner is x86_64.
+        run: uv sync --no-install-package mlx --no-install-package mlx-metal
       - name: Unit tests with coverage
         run: uv run pytest --cov --cov-branch --cov-fail-under=90
       - name: Upload coverage
