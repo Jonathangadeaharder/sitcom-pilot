@@ -1,0 +1,5 @@
+root: true
+
+rules:
+  ci-gates: true
+  fallow-gate: true

@@ -1,0 +1,25 @@
+name: Merge Gate
+
+on:
+  merge_group:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  merge-check:
+    name: Merge Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: corepack enable && pnpm install
+      - run: pnpm dlx @biomejs/biome check
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm vitest run --coverage
+      - run: pnpm build
