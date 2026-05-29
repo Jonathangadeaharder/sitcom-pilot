@@ -1,11 +1,8 @@
 from __future__ import annotations
 
 import logging
-import os
 import re
 import subprocess
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -15,10 +12,6 @@ _SAFE_NAME_RE = re.compile(r"[^a-zA-Z0-9_-]")
 
 def _safe_filename(name: str) -> str:
     return _SAFE_NAME_RE.sub("_", name)
-
-
-FISH_API_URL = "http://127.0.0.1:8090"
-TTS_TIMEOUT_SEC = 300
 
 VALID_EMOTIONS = frozenset(
     {
@@ -118,30 +111,6 @@ def build_fish_text_from_dialogue(line: dict) -> str:
     return text
 
 
-def _make_payload(
-    fish_text: str,
-    character_id: str,
-    seed: int = 42,
-    temperature: float = 0.8,
-) -> dict:
-    return {
-        "text": fish_text,
-        "references": [],
-        "reference_id": character_id,
-        "seed": seed,
-        "temperature": temperature,
-        "top_p": 0.8,
-        "repetition_penalty": 1.1,
-        "chunk_length": 200,
-        "max_new_tokens": 1024,
-        "streaming": False,
-        "format": "wav",
-        "latency": "normal",
-        "normalize": True,
-        "use_memory_cache": "on",
-    }
-
-
 def synthesize_dialogue_line(
     fish_text: str,
     character_id: str,
@@ -152,33 +121,17 @@ def synthesize_dialogue_line(
     if output_path.exists():
         return True
     try:
-        import ormsgpack
-    except ImportError:
-        return False
-    payload = _make_payload(fish_text, character_id, seed, temperature)
-    try:
-        data = ormsgpack.packb(payload)
-        req = urllib.request.Request(
-            f"{FISH_API_URL}/v1/tts",
-            data=data,
-            headers={"Content-Type": "application/msgpack"},
-        )
-        resp = urllib.request.urlopen(req, timeout=TTS_TIMEOUT_SEC)
-        audio_data = resp.read()
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        import tempfile
+        from aiservices.generate import AudioGenerator
 
-        fd, tmp_path = tempfile.mkstemp(dir=output_path.parent, suffix=".wav")
-        try:
-            with os.fdopen(fd, "wb") as f:
-                f.write(audio_data)
-            os.replace(tmp_path, output_path)
-        except Exception:
-            os.unlink(tmp_path)
-            raise
-        return True
-    except urllib.error.URLError:
-        logger.exception("TTS request failed for '%s'", character_id)
+        gen = AudioGenerator(seed=seed, temperature=temperature)
+        gen.generate(
+            text=fish_text,
+            output=output_path,
+            file_prefix="",
+        )
+        return output_path.exists()
+    except Exception:
+        logger.exception("TTS failed for '%s'", character_id)
         return False
 
 

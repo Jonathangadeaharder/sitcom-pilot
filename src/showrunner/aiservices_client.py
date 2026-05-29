@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from aiservices import generate_text2image, generate_image2image
 from showrunner.loader import CharacterData, VoiceConfig
 
 logger = logging.getLogger(__name__)
@@ -22,7 +23,7 @@ class AIServicesClient:
     def __init__(
         self,
         image_provider: str = "mlx-flux",
-        image_edit_provider: str = "image2image.mlx",
+        image_edit_provider: str | None = None,  # deprecated
         video_provider: str = "mlx-ltx",
         tts_provider: str = "mlx-audio",
         asr_provider: str | None = None,
@@ -31,7 +32,7 @@ class AIServicesClient:
         if isinstance(image_provider, bool):
             subprocess_fallback, image_provider = image_provider, "mlx-flux"
         self._image_provider = image_provider
-        self._image_edit_provider = image_edit_provider
+        self._image_edit_provider = image_edit_provider  # deprecated
         self._video_provider = video_provider
         self._tts_provider = tts_provider
         self._asr_provider = asr_provider
@@ -43,46 +44,21 @@ class AIServicesClient:
         output_path: str | Path,
         *,
         seed: int | None = None,
-        width: int = 1024,
-        height: int = 720,
-        negative_prompt: str | None = None,
-        guidance_scale: float = 7.5,
-        num_inference_steps: int = 50,
+        **kwargs: Any,
     ) -> Path:
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
-
         try:
-            from text2image.client import generate
-
-            return generate(
-                prompt,
-                output,
-                seed=seed,
-                width=width,
-                height=height,
-                negative_prompt=negative_prompt,
-                guidance_scale=guidance_scale,
-                num_inference_steps=num_inference_steps,
-                provider_name=self._image_provider,
-            )
-        except ImportError:
-            pass
-        except Exception as exc:
-            logger.warning("text2image Python API failed: %s", exc)
-
-        if self._subprocess_fallback:
-            return self._cli_text2image(
+            result = generate_text2image(
                 prompt=prompt,
-                output_path=output,
-                seed=seed,
-                width=width,
-                height=height,
-                negative_prompt=negative_prompt,
-                guidance_scale=guidance_scale,
-                steps=num_inference_steps,
+                out_path=output,
+                seed=seed or 42,
+                steps=4,
             )
-        raise RuntimeError("text2image failed: no provider available")
+            return result.path
+        except Exception as exc:
+            logger.error("text2image failed: %s", exc)
+            raise RuntimeError("text2image failed") from exc
 
     def image2image(
         self,
@@ -91,46 +67,22 @@ class AIServicesClient:
         output_path: str | Path,
         *,
         seed: int | None = None,
-        strength: float = 0.5,
-        negative_prompt: str | None = None,
-        guidance_scale: float = 7.5,
-        num_inference_steps: int = 50,
+        **kwargs: Any,
     ) -> Path:
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
-        inp = str(image_path)
-
         try:
-            from image2image.client import generate
-
-            return generate(
-                inp,
-                prompt,
-                output,
-                seed=seed,
-                strength=strength,
-                negative_prompt=negative_prompt,
-                guidance_scale=guidance_scale,
-                num_inference_steps=num_inference_steps,
-                provider_name=self._image_edit_provider,
-            )
-        except ImportError:
-            pass
-        except Exception as exc:
-            logger.warning("image2image Python API failed: %s", exc)
-
-        if self._subprocess_fallback:
-            return self._cli_image2image(
-                input_path=inp,
+            result = generate_image2image(
                 prompt=prompt,
-                output_path=output,
-                seed=seed,
-                strength=strength,
-                negative_prompt=negative_prompt,
-                guidance_scale=guidance_scale,
-                steps=num_inference_steps,
+                base_image=Path(image_path),
+                out_path=output,
+                seed=seed or 42,
+                steps=4,
             )
-        raise RuntimeError("image2image failed: no provider available")
+            return result.path
+        except Exception as exc:
+            logger.error("image2image failed: %s", exc)
+            raise RuntimeError("image2image failed") from exc
 
     def image2video(
         self,
@@ -146,49 +98,24 @@ class AIServicesClient:
         num_inference_steps: int = 4,
         fps: int = 16,
     ) -> Path:
+        from aiservices.generate import VideoGenerator
+
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
-        inp = str(image_path)
 
-        result: Path | None = None
-        try:
-            from image2video.client import generate
+        gen = VideoGenerator(seed=seed or 0, fps=fps, num_inference_steps=num_inference_steps)
+        result = gen.generate(
+            prompt=prompt,
+            output=output_path,
+            image=str(image_path),
+            width=width,
+            height=height,
+            num_frames=num_frames,
+        )
 
-            result = generate(
-                inp,
-                prompt,
-                output,
-                seed=seed,
-                width=width,
-                height=height,
-                num_frames=num_frames,
-                num_inference_steps=num_inference_steps,
-                fps=fps,
-                provider_name=self._video_provider,
-            )
-        except ImportError:
-            pass
-        except Exception as exc:
-            logger.warning("image2video Python API failed: %s", exc)
-
-        if result is None and self._subprocess_fallback:
-            result = self._cli_image2video(
-                image_path=inp,
-                prompt=prompt,
-                output_path=output,
-                seed=seed,
-                width=width,
-                height=height,
-                num_frames=num_frames,
-                steps=num_inference_steps,
-                fps=fps,
-            )
-
-        if result is None:
-            raise RuntimeError("image2video failed: no provider available")
-
-        if audio_path and result.suffix == ".mp4":
-            return _mux_audio(result, audio_path, output)
+        # optionally attach audio
+        if audio_path and Path(audio_path).exists():
+            self._attach_audio(result, audio_path)
 
         return result
 
@@ -300,6 +227,9 @@ class AIServicesClient:
             operation, {"time_sec": 0.0, "memory_gb": 0.0, "note": "unknown operation"}
         )
 
+    def _attach_audio(self, video_path: Path, audio_path: str | Path) -> Path:
+        return _mux_audio(video_path, audio_path, video_path)
+
     def discover_capabilities(self) -> dict[str, list[str]]:
         caps: dict[str, list[str]] = {}
         for op, reg_name in [
@@ -318,100 +248,6 @@ class AIServicesClient:
     # ------------------------------------------------------------------
     # CLI subprocess fallbacks
     # ------------------------------------------------------------------
-
-    def _cli_text2image(
-        self, *, prompt, output_path, seed, width, height, negative_prompt, guidance_scale, steps
-    ):
-        cmd = [
-            "text2image",
-            "generate",
-            "--prompt",
-            prompt,
-            "--output",
-            str(output_path),
-            "--provider",
-            self._image_provider,
-            "--width",
-            str(_div8(width)),
-            "--height",
-            str(_div8(height)),
-            "--guidance-scale",
-            str(guidance_scale),
-            "--steps",
-            str(steps),
-        ]
-        if seed is not None:
-            cmd += ["--seed", str(seed)]
-        if negative_prompt:
-            cmd += ["--negative-prompt", negative_prompt]
-        _run_cli(cmd)
-        return Path(output_path)
-
-    def _cli_image2image(
-        self,
-        *,
-        input_path,
-        prompt,
-        output_path,
-        seed,
-        strength,
-        negative_prompt,
-        guidance_scale,
-        steps,
-    ):
-        cmd = [
-            "image2image",
-            "--input",
-            input_path,
-            "--prompt",
-            prompt,
-            "--output",
-            str(output_path),
-            "--provider",
-            self._image_edit_provider,
-            "--strength",
-            str(strength),
-            "--guidance",
-            str(guidance_scale),
-            "--steps",
-            str(steps),
-        ]
-        if seed is not None:
-            cmd += ["--seed", str(seed)]
-        if negative_prompt:
-            cmd += ["--negative-prompt", negative_prompt]
-        _run_cli(cmd)
-        return Path(output_path)
-
-    def _cli_image2video(
-        self, *, image_path, prompt, output_path, seed, width, height, num_frames, steps, fps
-    ):
-        cmd = [
-            "image2video",
-            "generate",
-            "--image",
-            image_path,
-            "--prompt",
-            prompt,
-            "--output",
-            str(output_path),
-            "--provider",
-            self._video_provider,
-            "--width",
-            str(_div8(width)),
-            "--height",
-            str(_div8(height)),
-            "--frames",
-            str(num_frames),
-            "--steps",
-            str(steps),
-            "--fps",
-            str(fps),
-        ]
-        if seed is not None:
-            cmd += ["--seed", str(seed)]
-        _run_cli(cmd)
-        return Path(output_path)
 
     def _cli_text2speech(self, *, text, output_path, voice_id, clone_from, seed, temperature):
         cmd = [
@@ -448,10 +284,6 @@ class AIServicesClient:
             cmd += ["--provider", self._asr_provider]
         _run_cli(cmd)
         return Path(output_path)
-
-
-def _div8(n: int) -> int:
-    return max(512, (n // 8) * 8)
 
 
 def _mux_audio(video_path: Path, audio_path: str | Path, output_path: Path) -> Path:
