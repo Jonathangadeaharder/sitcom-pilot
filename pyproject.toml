@@ -118,4 +118,4 @@ reportUnnecessaryIsInstance = false
 paths = ["src/"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/showrunner", "src/showrunner_utils", "src/showrunner_tests"]
+packages = ["src/showrunner"]
