@@ -41,7 +41,7 @@ audio2subtitle = { git = "https://github.com/Jonathangadeaharder/AIServices.git"
 [dependency-groups]
 dev = [
     "mutmut>=3.5.0",
-    "pygments<2.19",
+    "pygments>=2.20.0",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
     "pyright>=1.1.400",

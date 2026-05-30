@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from aiservices import generate_text2image, generate_image2image
+from aiservices import generate_image2image, generate_text2image
 from showrunner.loader import CharacterData, VoiceConfig
 
 logger = logging.getLogger(__name__)
