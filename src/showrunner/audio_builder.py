@@ -13,6 +13,7 @@ _SAFE_NAME_RE = re.compile(r"[^a-zA-Z0-9_-]")
 def _safe_filename(name: str) -> str:
     return _SAFE_NAME_RE.sub("_", name)
 
+
 VALID_EMOTIONS = frozenset(
     {
         "happy",
