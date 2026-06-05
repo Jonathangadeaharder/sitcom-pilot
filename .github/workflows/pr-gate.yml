@@ -88,13 +88,15 @@ jobs:
         run: uvx pip-audit
 
   semgrep:
-    needs: [build]
     if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
+    runs-on: ubuntu-latest
+    name: Semgrep SAST
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Semgrep
-        run: uvx semgrep scan --config p/default --metrics=off
+      - uses: returntocorp/semgrep-action@v1
+        with:
+          config: .semgrep.yml
 
   structure:
     name: Repository Structure

@@ -63,14 +63,14 @@ jobs:
       - name: Dep audit
         run: uvx pip-audit
   semgrep:
-    needs: [build]
-    runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
+    runs-on: ubuntu-latest
+    name: Semgrep SAST
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Semgrep
-        # Pre-existing findings. Fix urllib->requests migration as follow-up.
-        continue-on-error: true
-        run: uvx semgrep scan --config p/default --metrics=off
+      - uses: returntocorp/semgrep-action@v1
+        with:
+          config: .semgrep.yml
   gui-lint:
     runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
     defaults:
