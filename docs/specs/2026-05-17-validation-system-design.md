@@ -49,32 +49,27 @@ Episode JSON files are human-authored or AI-generated. They can contain structur
 
 ```python
 class EpisodeValidator:
-    def validate_file(self, path: Path, strict: bool = False) -> list[ValidationError]:
-        """Validate an episode JSON file against schema + business rules."""
+    def validate_file(self, path: Path, strict: bool = False) -> list[str]:
+        """Validate an episode JSON file against schema + business rules. Returns error strings."""
 
-    def validate_episode(self, episode: dict, strict: bool = False) -> list[ValidationError]:
-        """Validate a loaded episode dict."""
+    def validate(self, data: dict, strict: bool = False) -> list[str]:
+        """Validate a loaded episode dict. Returns error strings."""
 
-class ValidationError:
-    path: str           # JSON path to error location
-    message: str        # Human-readable error
-    severity: str       # "error" | "warning"
-    beat_id: str | None  # Associated beat, if applicable
+class ValidationError(Exception):
+    """Raised when an episode file fails structural validation."""
 ```
+
+> **Note:** The actual implementation returns `list[str]` (error message strings), not structured `ValidationError` objects. Errors are simple strings like `"Scene '003' references unknown environment 'foo'"`.
 
 ### 2.2 `loader.py`
 
 ```python
 class EpisodeLoader:
-    def load(self, path: Path) -> dict:
-        """Load and parse episode JSON file."""
-
-    def load_with_schema(self, path: Path, schema_path: Path) -> dict:
-        """Load with optional schema validation."""
-
-    def resolve_references(self, episode: dict) -> Episode:
-        """Resolve cast and environment references for validation."""
+    def load(self, path: Path) -> EpisodeData:
+        """Load and parse episode JSON file into typed dataclasses (supports v1 and v2 schemas)."""
 ```
+
+> **Note:** The loader does not have `load_with_schema` or `resolve_references` methods. Schema validation is handled separately by `EpisodeValidator` and `commands/validate.py` (Pydantic).
 
 ### 2.3 Schema: `schemas/episode_v2.schema.json`
 
@@ -94,7 +89,7 @@ JSON Schema Draft 2020-12 covering:
 Checks enforced by `jsonschema.validate()`:
 - Required fields present
 - Field types match schema
-- Enum values valid (e.g., `kind` is `"speech"` or `"silent"`)
+- Enum values valid (e.g., `kind` is `"speech"`, `"silent"`, or `"transition"`)
 - Array item types correct
 
 ### Layer 2: Reference Integrity (strict mode)
@@ -108,10 +103,8 @@ Checks enforced by `jsonschema.validate()`:
 
 - Speech beats must have non-empty `text`
 - Speech beats must have `speaker` field
-- Silent beats must not have `speaker` or `text`
 - `schema_version` must be `"2.0"`
-- Seed values must be unique within episode (if present)
-- `scene_id` values must be unique
+- No duplicate `beat_id` values within an episode (enforced in non-strict mode too)
 
 ---
 
@@ -131,19 +124,19 @@ Error: episode_02.json: beat_id '003_b05' is duplicated (also at scene 004)
 ## 5. CLI Integration
 
 ```bash
-# Basic validation
+# Basic validation (Pydantic schema check + jsonschema)
 showrunner validate episode_02.json
 
-# Strict validation
+# Strict validation (adds business-rule checks: speaker refs, text presence)
 showrunner validate episode_02.json --strict
 
 # Programmatic
 python -c "
 from showrunner.validator import EpisodeValidator
 v = EpisodeValidator()
-errors = v.validate_file('episode_02.json', strict=True)
+errors = v.validate_file(Path('episode_02.json'), strict=True)
 for e in errors:
-    print(f'{e.path}: {e.message}')
+    print(e)
 "
 ```
 

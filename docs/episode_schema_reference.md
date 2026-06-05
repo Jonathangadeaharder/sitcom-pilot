@@ -144,7 +144,7 @@ Each beat is either a "speech" or "silent" beat.
 Unique beat identifier.
 
 ##### `kind` (string, required)
-Type of beat. Must be "speech" or "silent".
+Type of beat. Must be "speech", "silent", or "transition".
 
 ##### `camera` (string, optional)
 Camera angle or shot description.

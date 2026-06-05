@@ -1,5 +1,14 @@
 # AI Showrunner Blueprint Enhancements — Implementation Plan
 
+> **DEPRECATED:** This plan describes enhancements to the v1 ComfyUI-based architecture. The codebase has since evolved to a v2 beat-based architecture with AIServices providers and Typer CLI. Many enhancements described here (NodeMap, crash recovery, multi-char LoRA, cooldown, output retrieval, server management) have been implemented differently in the current codebase. See README.md for the current architecture. This document is kept for historical reference only.
+>
+> **Key divergences from current code:**
+> - `NodeMap` → exists but used only by legacy `ShotRenderer` (ComfyUI path); v2 uses `AIServicesClient` directly
+> - `ProgressTracker` → current `progress.py` provides `RichRenderProgress` callback, not a file-based tracker
+> - CLI is Typer, not argparse; `--crash-recovery`, `--resume`, `--assemble-only`, `--node-map` flags don't exist
+> - `ShotRenderer` has crash recovery but v2 `scene_render._render_beat` uses `AIServicesClient` with retry
+> - Episode schema uses `beats[]` not `shots[]`
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Enhance the existing showrunner to match the master blueprint — add crash recovery, multi-character LoRA injection, configurable node mapping, output retrieval, VRAM cooldown, and full render→assemble pipeline.

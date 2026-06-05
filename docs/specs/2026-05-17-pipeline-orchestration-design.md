@@ -59,23 +59,22 @@ The sitcom-pilot pipeline must coordinate multiple MLX-based AI providers (text2
 ### 2.2 Render Flow
 
 ```
-Planner.pipeline_jobs(episode)
+plan_beats(episode, manifest, paths)
   │
   ▼
 List[BeatJob] (one per beat)
   │
   ▼ (per scene, parallel)
-SceneRenderContext
-  ├── Renderer.render_beat(beat_job)
-  │     ├── text2image → keyframe.png
-  │     ├── text2speech → dialogue.wav (speech beats only)
-  │     └── image2video → beat.mp4
+scene_render.render_scene(scene, jobs, client, ...)
+  ├── _render_image(beat_job)   → text2image → keyframe.png
+  ├── _render_audio(beat_job)   → text2speech → dialogue.wav (speech beats only)
+  └── _render_video(beat_job)   → image2video → beat.mp4
   │
   ▼
 BeatClipUniformiser.uniformise(clips)
   │
   ▼
-Assembler.concat_clips(uniform_clips)
+concat_clips(uniform_clips) → episode_raw.mp4
 ```
 
 ### 2.3 BeatJob Structure
@@ -85,16 +84,18 @@ Assembler.concat_clips(uniform_clips)
 class BeatJob:
     scene_id: str
     beat_id: str
-    kind: Literal["speech", "silent"]
-    image_prompt: str
-    speaker: str | None
-    text: str | None
+    kind: str            # "speech" | "silent"
+    prompt: str          # generated image prompt
     seed: int
-    output_paths: BeatOutputPaths
     duration_sec: float
-    emotion: str | None
-    tone: str | None
-    effect: str | None
+    needs_audio: bool
+    speaker: str = ""
+    text: str = ""
+    image_path: Path = field(default_factory=Path)
+    audio_path: Path = field(default_factory=Path)
+    video_path: Path = field(default_factory=Path)
+    status: BeatStatus = BeatStatus.PENDING
+    error: str = ""
 ```
 
 ### 2.4 Parallelism Model

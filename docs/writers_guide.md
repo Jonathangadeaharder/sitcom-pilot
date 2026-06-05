@@ -194,7 +194,7 @@ Each episode is a single JSON file (`episode_0N.json`) conforming to `schemas/ep
 1. Copy `episode_template.json` to `episode_0N.json`
 2. Update metadata (`season`, `episode`, `title`)
 3. Write scenes with beats
-4. Run `sitcom-pilot validate episode_0N.json`
+4. Run `showrunner validate episode_0N.json`
 5. Fix any validation errors
 
 ### Beat Fields Reference
@@ -247,7 +247,7 @@ Pattern: `{episode_prefix}{scene_number}{beat_number}1`
 ### Validation
 
 ```bash
-sitcom-pilot validate episode_0N.json
+showrunner validate episode_0N.json
 ```
 
 Or programmatically:

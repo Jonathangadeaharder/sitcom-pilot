@@ -40,23 +40,24 @@ The project needs a consistent, modern Python toolchain for package management, 
 ### Linting + Formatting: ruff
 
 - Line length: 100
-- Target: Python 3.11
-- Rules: E, F, I, UP (pycodestyle, pyflakes, isort, pyupgrade)
+- Target: Python 3.12
+- Rules: E, F, I, N, W, UP, B, SIM, ARG, PL (pycodestyle, pyflakes, isort, pep8-naming, pycodestyle warnings, pyupgrade, flake8-bugbear, flake8-simplify, flake8-unused-arguments, pylint)
 - Execute: `uvx ruff check` / `uvx ruff format`
 - No black, flake8, isort, pylint, or autopep8
 
 ### Type Checking: pyright
 
-- Mode: standard
+- Mode: strict
 - Include: `src/`
 - Exclude: `**/__pycache__`, `legacy`, `output`, `aiservices`
+- Python version: 3.11
 - Execute: `uvx pyright src/`
 - No mypy
 
 ### Testing: pytest + pytest-cov
 
-- Config in `[tool.pytest.ini_options]`: `--cov=showrunner --cov-branch --cov-report=term-missing`
-- Threshold: `fail_under = 90` branch coverage
+- Config in `[tool.pytest.ini_options]`: `--cov=showrunner --cov-branch --cov-report=term-missing --cov-report=xml`
+- Threshold: 90% branch coverage (enforced via `--cov-fail-under=90` in CI workflow, not in pyproject.toml)
 - No unittest (framework), nose, or doctests as primary strategy
 
 ### Mutation Testing: mutmut

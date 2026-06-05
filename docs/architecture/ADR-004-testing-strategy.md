@@ -37,7 +37,7 @@ The sitcom-pilot pipeline involves AI provider calls (non-deterministic, slow, e
 
 ### Coverage Mandate: Branch Coverage >= 90%
 
-- Enforced via `[tool.coverage.report] fail_under = 90`
+- Enforced via `--cov-fail-under=90` flag in CI workflow commands (not in `[tool.coverage.report]`, to avoid breaking mutmut's internal test runs)
 - Branch coverage (not line coverage) is the metric — catches untaken conditional paths
 - `[tool.coverage.run] branch = true`
 - Reported as XML for SonarCloud ingestion

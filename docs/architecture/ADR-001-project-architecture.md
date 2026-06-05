@@ -38,8 +38,6 @@ Use `uv` workspace at the project root with `src/` layout:
 ```
 src/
   showrunner/       # Core package (CLI, renderer, validator, assembler)
-  showrunner_utils/ # Shared utilities
-  showrunner_tests/ # Test fixtures and helpers
 aiservices/
   packages/         # Vendored MLX provider packages (text2image, image2video, text2speech, etc.)
 ```
@@ -84,4 +82,4 @@ All AI providers (image, video, TTS, ASR) are behind a client interface (`aiserv
 - FFmpeg assembly is a single-threaded bottleneck at the end of the pipeline
 
 **Neutral:**
-- `showrunner_utils` and `showrunner_tests` packages add minor complexity but keep the core package focused
+- Test fixtures and helpers live in `tests/conftest.py` rather than a separate package
