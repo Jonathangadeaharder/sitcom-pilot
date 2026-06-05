@@ -288,8 +288,7 @@ class TestRenderEpisode:
 
 class TestAssemble:
     @patch("showrunner.assembler.concat_clips")
-    @patch("showrunner.assembler.generate_srt")
-    def test_assemble_with_clips(self, mock_srt, mock_concat, tmp_path: Path):
+    def test_assemble_with_clips(self, mock_concat, tmp_path: Path):
         ep = _write_episode(tmp_path)
         out = tmp_path / "output"
         run_dir = out / "test-run"
@@ -302,7 +301,6 @@ class TestAssemble:
         assembly_dir.mkdir(parents=True)
 
         mock_concat.return_value = assembly_dir / "episode_raw.mp4"
-        mock_srt.return_value = assembly_dir / "episode.srt"
 
         result = runner.invoke(
             app, ["assemble", str(ep), "--output-dir", str(out), "--run-id", "test-run"]
@@ -317,9 +315,8 @@ class TestAssemble:
         assert result.exit_code == 1
 
     @patch("showrunner.assembler.concat_clips")
-    @patch("showrunner.assembler.generate_srt")
     @patch("showrunner.assembler.burn_in_captions")
-    def test_assemble_with_captions(self, mock_burn, mock_srt, mock_concat, tmp_path: Path):
+    def test_assemble_with_captions(self, mock_burn, mock_concat, tmp_path: Path):
         ep = _write_episode(tmp_path)
         out = tmp_path / "output"
         run_dir = out / "test-run"
@@ -331,7 +328,6 @@ class TestAssemble:
         assembly_dir.mkdir(parents=True)
 
         mock_concat.return_value = assembly_dir / "episode_raw.mp4"
-        mock_srt.return_value = assembly_dir / "episode.srt"
         mock_burn.return_value = assembly_dir / "episode.mp4"
 
         result = runner.invoke(
@@ -458,18 +454,16 @@ class TestDoctor:
 
 
 class TestRun:
-    @patch("showrunner.assembler.generate_srt")
     @patch("showrunner.assembler.concat_clips")
     @patch("showrunner.aiservices_client.AIServicesClient")
     def test_run_validates_and_renders(
-        self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path
+        self, mock_client_cls, mock_concat, tmp_path: Path
     ):
         mock_client = MagicMock()
         mock_client.text2image.return_value = tmp_path / "img.png"
         mock_client.image2video.return_value = tmp_path / "vid.mp4"
         mock_client_cls.return_value = mock_client
         mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
-        mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
 
         ep = _write_episode(tmp_path)
         out = tmp_path / "output"
@@ -489,16 +483,14 @@ class TestRun:
         result = runner.invoke(app, ["run", str(bad), "--skip-bootstrap"])
         assert result.exit_code == 1
 
-    @patch("showrunner.assembler.generate_srt")
     @patch("showrunner.assembler.concat_clips")
     @patch("showrunner.aiservices_client.AIServicesClient")
-    def test_run_bootstrap_skipped(self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path):
+    def test_run_bootstrap_skipped(self, mock_client_cls, mock_concat, tmp_path: Path):
         mock_client = MagicMock()
         mock_client.text2image.return_value = tmp_path / "img.png"
         mock_client.image2video.return_value = tmp_path / "vid.mp4"
         mock_client_cls.return_value = mock_client
         mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
-        mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
 
         ep = _write_episode(tmp_path)
         out = tmp_path / "output"
@@ -506,16 +498,14 @@ class TestRun:
         assert "Bootstrap skipped" in result.output
         assert result.exit_code == 0
 
-    @patch("showrunner.assembler.generate_srt")
     @patch("showrunner.assembler.concat_clips")
     @patch("showrunner.aiservices_client.AIServicesClient")
-    def test_run_skip_validate(self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path):
+    def test_run_skip_validate(self, mock_client_cls, mock_concat, tmp_path: Path):
         mock_client = MagicMock()
         mock_client.text2image.return_value = tmp_path / "img.png"
         mock_client.image2video.return_value = tmp_path / "vid.mp4"
         mock_client_cls.return_value = mock_client
         mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
-        mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
 
         ep = _write_episode(tmp_path)
         out = tmp_path / "output"
@@ -526,16 +516,14 @@ class TestRun:
         assert "Validation skipped" in result.output
         assert result.exit_code == 0
 
-    @patch("showrunner.assembler.generate_srt")
     @patch("showrunner.assembler.concat_clips")
     @patch("showrunner.aiservices_client.AIServicesClient")
-    def test_run_verbose(self, mock_client_cls, mock_concat, mock_srt, tmp_path: Path):
+    def test_run_verbose(self, mock_client_cls, mock_concat, tmp_path: Path):
         mock_client = MagicMock()
         mock_client.text2image.return_value = tmp_path / "img.png"
         mock_client.image2video.return_value = tmp_path / "vid.mp4"
         mock_client_cls.return_value = mock_client
         mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
-        mock_srt.return_value = tmp_path / "output" / "run" / "assembly" / "episode.srt"
 
         ep = _write_episode(tmp_path)
         out = tmp_path / "output"

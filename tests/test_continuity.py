@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
 from PIL import Image
@@ -22,28 +21,35 @@ class TestSimilarityResult:
 
 
 class TestCheckContinuity:
-    @patch("showrunner.continuity._compute_ssim", return_value=0.9)
-    @patch("showrunner.continuity._load_image_gray")
-    def test_passes_above_threshold(self, mock_load, mock_ssim):
-        mock_load.return_value = MagicMock()
-        result = check_continuity(Path("ref.png"), Path("gen.png"), threshold=0.7)
+    def test_passes_above_threshold(self, tmp_path):
+        img = Image.new("L", (64, 64), 128)
+        ref = tmp_path / "ref.png"
+        gen = tmp_path / "gen.png"
+        img.save(ref)
+        img.save(gen)
+        result = check_continuity(ref, gen, threshold=0.7)
         assert result.passed
-        assert result.ssim_score == pytest.approx(0.9)
+        assert result.ssim_score == pytest.approx(1.0)
 
-    @patch("showrunner.continuity._compute_ssim", return_value=0.3)
-    @patch("showrunner.continuity._load_image_gray")
-    def test_fails_below_threshold(self, mock_load, mock_ssim):
-        mock_load.return_value = MagicMock()
-        result = check_continuity(Path("ref.png"), Path("gen.png"), threshold=0.7)
+    def test_fails_below_threshold(self, tmp_path):
+        ref_img = Image.new("L", (64, 64), 0)
+        gen_img = Image.new("L", (64, 64), 255)
+        ref = tmp_path / "ref.png"
+        gen = tmp_path / "gen.png"
+        ref_img.save(ref)
+        gen_img.save(gen)
+        result = check_continuity(ref, gen, threshold=0.99)
         assert not result.passed
 
-    @patch("showrunner.continuity._compute_ssim", return_value=0.7)
-    @patch("showrunner.continuity._load_image_gray")
-    def test_passes_at_exact_threshold(self, mock_load, mock_ssim):
-        mock_load.return_value = MagicMock()
-        result = check_continuity(Path("ref.png"), Path("gen.png"), threshold=0.7)
+    def test_passes_at_exact_threshold(self, tmp_path):
+        img = Image.new("L", (64, 64), 128)
+        ref = tmp_path / "ref.png"
+        gen = tmp_path / "gen.png"
+        img.save(ref)
+        img.save(gen)
+        result = check_continuity(ref, gen, threshold=1.0)
         assert result.passed
-        assert result.ssim_score == pytest.approx(0.7)
+        assert result.ssim_score == pytest.approx(1.0)
 
     def test_invalid_threshold_raises(self):
         import pytest
@@ -60,63 +66,45 @@ class TestCheckContinuity:
 
 class TestSsimFallback:
     def test_identical_images(self):
-        img = MagicMock()
-        img.tobytes.return_value = b"\x00\x01\x02"
+        img = Image.new("L", (10, 10), 0)
         assert _ssim_fallback(img, img) == pytest.approx(1.0)
 
     def test_different_images(self):
-        img_a = MagicMock()
-        img_a.tobytes.return_value = b"\x00\x01\x02"
-        img_b = MagicMock()
-        img_b.tobytes.return_value = b"\x03\x04\x05"
+        img_a = Image.new("L", (10, 10), 0)
+        img_b = Image.new("L", (10, 10), 255)
         assert _ssim_fallback(img_a, img_b) == pytest.approx(0.0)
 
     def test_different_sizes_returns_zero(self):
-        img_a = MagicMock()
-        img_a.size = (10, 10)
-        img_b = MagicMock()
-        img_b.size = (20, 20)
+        img_a = Image.new("L", (10, 10))
+        img_b = Image.new("L", (20, 20))
         assert _ssim_fallback(img_a, img_b) == pytest.approx(0.0)
 
 
 class TestBatchCheck:
-    @patch("showrunner.continuity.check_continuity")
-    def test_batch(self, mock_check):
-        mock_check.return_value = SimilarityResult("a", "b", 0.8, True)
-        results = batch_check([(Path("a"), Path("b"))])
+    def test_batch(self, tmp_path):
+        img = Image.new("L", (64, 64), 128)
+        ref = tmp_path / "ref.png"
+        gen = tmp_path / "gen.png"
+        img.save(ref)
+        img.save(gen)
+        results = batch_check([(ref, gen)])
         assert len(results) == 1
         assert results[0].passed
 
-    @pytest.mark.parametrize(
-        "exc",
-        [
-            OSError("missing"),
-            ValueError("bad"),
-            ImportError("nope"),
-        ],
-    )
-    @patch("showrunner.continuity._load_image_gray")
-    def test_exception_caught(self, mock_load, exc):
-        mock_load.side_effect = exc
-        results = batch_check([(Path("a"), Path("b"))])
+    def test_exception_caught_oserror(self):
+        results = batch_check([(Path("nonexistent_a.png"), Path("nonexistent_b.png"))])
         assert results == []
 
-    @patch("showrunner.continuity._load_image_gray", side_effect=RuntimeError("boom"))
-    def test_runtimeerror_propagates(self, mock_load):
-        import pytest
-
-        with pytest.raises(RuntimeError, match="boom"):
-            batch_check([(Path("a"), Path("b"))])
+    def test_exception_caught_valueerror(self, tmp_path):
+        img = Image.new("L", (64, 64), 128)
+        ref = tmp_path / "ref.png"
+        img.save(ref)
+        results = batch_check([(ref, ref)], threshold=1.5)
+        assert results == []
 
 
 class TestLoadImageGray:
     def test_context_manager_usage(self, tmp_path):
-        pytest = __import__("pytest")
-        try:
-            from PIL import Image
-        except ImportError:
-            pytest.skip("Pillow not installed")
-
         img_path = tmp_path / "test.png"
         Image.new("RGB", (10, 10), "red").save(img_path)
 

@@ -4,6 +4,14 @@ from unittest.mock import patch
 
 import pytest
 
+
+def pytest_runtest_setup(item):
+    try:
+        from pytest_socket import disable_socket
+        disable_socket()
+    except ImportError:
+        pass
+
 from showrunner.assembler import EpisodeAssembler
 from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
 from showrunner.loader import EpisodeLoader
