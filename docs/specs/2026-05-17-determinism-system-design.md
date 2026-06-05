@@ -60,14 +60,20 @@ Pattern: `{episode_prefix}{scene_number}{beat_number}1`
 ### 2.2 Core Module: `determinism.py`
 
 ```python
-class Determinist:
-    """Manages deterministic seed generation and verification."""
+class SeedStrategy:
+    """Generates deterministic seeds per beat from episode metadata."""
 
-    def seed_for_beat(self, scene_id: str, beat_id: str) -> int:
+    def for_beat(self, scene_id: str, beat_id: str, beat_seed: int) -> int:
         """Generate or retrieve seed for a given beat."""
 
-    def verify_episode_determinism(self, episode: dict) -> list[str]:
-        """Check all seeds are unique and valid."""
+class DeterminismConfig:
+    """Runtime determinism configuration (seed, deterministic mode)."""
+
+def derive_seed(manifest_hash: str) -> int:
+    """Derive a deterministic seed from episode manifest hash."""
+
+def compute_manifest_hash_from_dict(episode_data: dict) -> str:
+    """Compute a hash of the episode's cast/manifest for seed derivation."""
 ```
 
 ### 2.3 SSIM Regression
@@ -106,14 +112,14 @@ if score < threshold:
 ## 4. CLI Commands
 
 ```bash
-# Verify determinism of episode
+# Verify determinism of episode (strict mode checks seed uniqueness)
 showrunner validate episode_02.json --strict
 
-# Compare golden frame regression
-python -m showrunner.determinism compare-scene 003 output/golden output/latest
+# Run with explicit seed for deterministic generation
+showrunner run episode_02.json --seed 12345 --deterministic
 
-# Regenerate golden frames
-showrunner bootstrap episode_02.json --golden
+# Run with strict deterministic mode
+showrunner run episode_02.json --deterministic
 ```
 
 ---

@@ -55,10 +55,10 @@ showrunner doctor
 showrunner validate episode_02.json --strict
 
 # 2. Preview the beat plan (128 beats across 8 scenes)
-showrunner plan episode_02.json -v
+showrunner plan episode_02.json
 
-# 3. Bootstrap reference images + voice samples
-showrunner bootstrap episode_02.json -o output
+# 3. Bootstrap reference images + voice samples (via the run command)
+showrunner run episode_02.json -o output --skip-validate
 
 # 4. Render a single beat (e.g., cold open first beat)
 showrunner render beat episode_02.json 001_b00 -o output
@@ -86,7 +86,7 @@ showrunner render scene episode_02.json 003 -o output -w 2
 **Reboot**: clean everything and start fresh:
 
 ```bash
-rm -rf output && showrunner bootstrap episode_02.json -o output
+rm -rf output && showrunner run episode_02.json -o output
 ```
 
 ### Scene reference
@@ -120,60 +120,68 @@ showrunner validate <episode.json> [--strict]
 
 ### `plan`
 
-Show beat plan with prompts (dry run — no rendering).
+Output beat plan as JSON (dry run — no rendering).
 
 ```bash
-showrunner plan <episode.json> [-v]
+showrunner plan <episode.json>
+```
+
+Outputs a JSON array of beat plan objects with beat number, type, description, duration, estimated cost, and rendering strategy.
+
+### `bootstrap`
+
+Create a new episode project scaffold with a template episode.json, scenes/, output/, and assets/ directories.
+
+```bash
+showrunner bootstrap <project_name> [--force] [--no-assets]
 ```
 
 | Flag | Description |
 |------|-------------|
-| `-v, --verbose` | Show full generation prompts |
-
-Outputs a table of all beats with scene ID, beat ID, kind, duration, speaker, and (optionally) the image prompt.
-
-### `bootstrap`
-
-Generate reference images and copy voice samples for cast and environments.
-
-```bash
-showrunner bootstrap <episode.json> [-o <dir>]
-```
-
-Outputs to `output/bootstrap/`:
-- `cast/<slug>/front.png` — character reference images
-- `voices/<slug>/` — voice clone audio files
-- `environments/<name>/reference.png` — environment reference images
-- `cast_manifest.json` — serialized `CastManifest`
+| `--force` | Overwrite existing project directory |
+| `--no-assets` | Skip creating assets directory |
 
 ### `render beat`
 
 Render a single beat.
 
 ```bash
-showrunner render beat <episode.json> <beat_id> [-s <scene_id>] [-o <dir>] [--retries 1]
+showrunner render beat <episode.json> <beat_id> [-s <scene_id>] [-o <dir>]
 ```
+
+| Flag | Description |
+|------|-------------|
+| `-s, --scene` | Scene ID (auto-detected if omitted) |
+| `-o, --output-dir` | Output root directory (default: `output`) |
 
 ### `render scene`
 
 Render all beats in a scene.
 
 ```bash
-showrunner render scene <episode.json> <scene_id> [-o <dir>] [-w <workers>]
-```
-
-### `render episode`
-
-Render all beats across all scenes.
-
-```bash
-showrunner render episode <episode.json> [-o <dir>] [-w <workers>]
+showrunner render scene <episode.json> <scene_id> [-o <dir>] [-w <workers>] [--json]
 ```
 
 | Flag | Description |
 |------|-------------|
 | `-o, --output-dir` | Output root directory (default: `output`) |
 | `-w, --workers` | Parallel render threads (default: 1) |
+| `--json` | Output structured JSON logs |
+
+### `render episode`
+
+Render all beats across all scenes.
+
+```bash
+showrunner render episode <episode.json> [-o <dir>] [-w <workers>] [--json] [-b <N>]
+```
+
+| Flag | Description |
+|------|-------------|
+| `-o, --output-dir` | Output root directory (default: `output`) |
+| `-w, --workers` | Parallel render threads (default: 1) |
+| `--json` | Output structured JSON logs |
+| `-b, --buffer` | Buffer N beats ahead (default: sequential) |
 
 ### `assemble`
 
@@ -185,18 +193,59 @@ showrunner assemble <episode.json> [-o <dir>] [--run-id <id>] [--captions]
 
 | Flag | Description |
 |------|-------------|
+| `-o, --output-dir` | Output root directory (default: `output`) |
 | `--run-id` | Specific run to assemble (defaults to latest) |
 | `--captions` | Burn SRT subtitles into video |
 
-Outputs `output/<run_id>/assembly/episode_raw.mp4` (and `episode.mp4` with captions).
+Outputs `output/<run_id>/assembly/episode_raw.mp4`, `episode.srt`, and (with `--captions`) `episode.mp4`.
+
+### `showcase`
+
+Extract a scene clip + thumbnail from a render run.
+
+```bash
+showrunner showcase <episode.json> [--scene <id>] [-o <dir>] [--run-id <id>]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--scene` | Scene ID or 1-based index (default: `007`) |
+| `-o, --output-dir` | Output root directory (default: `output`) |
+| `--run-id` | Specific run ID |
+
+Outputs `output/<run_id>/showcase/<scene_id>.mp4` and `<scene_id>.jpg`.
+
+### `run`
+
+Run the full pipeline: validate → plan → bootstrap → render → assemble.
+
+```bash
+showrunner run <episode.json> [-o <dir>] [-w <workers>] [--captions] [--seed <N>] [--deterministic] [-v]
+```
+
+| Flag | Description |
+|------|-------------|
+| `-o, --output-dir` | Output root directory (default: `output`) |
+| `-w, --workers` | Parallel render workers (default: 1) |
+| `--captions` | Burn in captions |
+| `--skip-bootstrap` | Skip bootstrap (character refs) step |
+| `--skip-validate` | Skip schema validation step |
+| `--seed` | Override seed for deterministic generation |
+| `--deterministic` | Enable strict deterministic mode |
+| `-v, --verbose` | Verbose logging |
 
 ### `doctor`
 
-Check all dependencies (ffmpeg, provider CLIs, Python packages).
+Check system prerequisites (Python, ffmpeg, uv, disk space, RAM).
 
 ```bash
-showrunner doctor
+showrunner doctor [--json] [-v]
 ```
+
+| Flag | Description |
+|------|-------------|
+| `--json` | Output results as JSON |
+| `-v, --verbose` | Show details for passing checks |
 
 ## Episode Format (v2.0)
 
@@ -312,17 +361,18 @@ Each character is keyed by a slug (e.g., `"maya"`):
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `beat_id` | string | yes | Unique identifier (e.g., `"001_b00"`) |
-| `kind` | string | yes | `"speech"` or `"silent"` |
+| `kind` | string | yes | `"speech"`, `"silent"`, or `"transition"` |
 | `camera` | string | no | Camera angle/shot description |
 | `action` | string | no | Visual action description |
 | `duration_sec` | float | no | Beat duration (default: 3.0) |
 | `seed` | integer | no | Reproducibility seed |
 | `speaker` | string | speech | Character slug of speaker |
 | `text` | string | speech | Dialogue text |
+| `audio_path` | string | no | Path to audio file |
 
 ## Cast Manifest
 
-The `CastManifest` tracks per-character metadata across the pipeline. Generated by `bootstrap` and consumed by the render pipeline for:
+The `CastManifest` tracks per-character metadata across the pipeline. Built internally by the `run` command and consumed by the render pipeline for:
 
 - **Reference images** (`CharacterRef`): front, three-quarter, profile views
 - **Voice config** (`VoiceConfig`): provider, voice ID, clone source
@@ -339,11 +389,11 @@ Validates episode JSON against `schemas/episode_v2.schema.json`. Strict mode add
 
 ### 2. Plan (`scene_render.py:plan_beats`)
 
-Converts every beat in every scene into a `BeatJob` — a renderable unit with a generated image prompt (from `beat_prompts.py`), output paths (from `paths.py`), and status tracking. The `plan` CLI command displays this as a dry-run table.
+Converts every beat in every scene into a `BeatJob` — a renderable unit with a generated image prompt (from `beat_prompts.py`), output paths (from `paths.py`), and status tracking. The `plan` CLI command outputs beat plans as JSON.
 
-### 3. Bootstrap (`cli/main.py:bootstrap`)
+### 3. Bootstrap (`cli/main.py:_pipeline_bootstrap`)
 
-Calls `AIServicesClient.text2image` to generate character reference sheets and environment establishing shots. Copies voice clone audio files. Produces a `CastManifest`.
+Called by the `run` command. Uses `AIServicesClient.text2image` to generate character reference sheets and environment establishing shots. Can be skipped with `--skip-bootstrap`.
 
 ### 4. Render (`scene_render.py`)
 
@@ -393,15 +443,45 @@ output/
 ```
 sitcom-pilot/
 ├── assets/              # Cast reference images, voice samples
-├── docs/                # Guides and references
-│   ├── architecture/
+├── docs/                # Guides, references, and architecture docs
+│   ├── architecture/    # ADRs (architecture decision records)
+│   ├── specs/           # Design specs
+│   ├── plans/           # Implementation plans
 │   ├── episode_template_guide.md
 │   ├── episode_schema_reference.md
+│   ├── writers_guide.md
 │   └── reference_asset_checklist.md
 ├── schemas/             # JSON Schema definitions
 │   └── episode_v2.schema.json
 ├── src/
-│   └── showrunner/      # Main package (CLI, renderer, validator, assembler)
+│   └── showrunner/      # Main package
+│       ├── cli/         # Typer CLI entry point
+│       ├── commands/    # Subcommand implementations (doctor, validate)
+│       ├── schemas/     # Pydantic models (episode, beat_plan, cast)
+│       ├── loader.py    # EpisodeLoader — parses episode JSON (v1 + v2)
+│       ├── prompts.py   # PromptBuilder (v1 legacy, ComfyUI workflows)
+│       ├── beat_prompts.py  # Beat-based prompt generation (v2)
+│       ├── scene_render.py  # BeatJob orchestration, render_scene/episode
+│       ├── renderer.py  # ShotRenderer (v1 legacy, ComfyUI driver)
+│       ├── assembler.py # FFmpeg assembly (concat, SRT, captions, music)
+│       ├── validator.py # EpisodeValidator (jsonschema + business rules)
+│       ├── planner.py   # Plan episode beats with cost estimation
+│       ├── paths.py     # RunPaths — output directory layout
+│       ├── config.py    # PipelineConfig (pydantic-settings + fallback)
+│       ├── determinism.py   # Seed strategy and manifest hashing
+│       ├── cast_manifest.py # CastManifest tracking
+│       ├── manifest.py  # Episode manifest utilities
+│       ├── continuity.py    # Cross-scene continuity checks
+│       ├── node_map.py  # ComfyUI workflow node mapping
+│       ├── progress.py  # Progress callback system
+│       ├── render_buffer.py # Buffered concurrent render
+│       ├── beat_clip_uniformiser.py # Normalize clips before concat
+│       ├── captions.py  # SRT/caption generation
+│       ├── audio_builder.py # Audio assembly utilities
+│       ├── plate_generator.py # Plate/background generation
+│       ├── silent_renderer.py # Silent beat renderer
+│       ├── comfyui_client.py  # ComfyUI API client
+│       └── aiservices_client.py # AIServices unified facade
 ├── scripts/             # Utility scripts (build_refs.py, build_voices.py)
 ├── tests/               # pytest test suite
 ├── episode_01.json      # S01E01 "Pilot"

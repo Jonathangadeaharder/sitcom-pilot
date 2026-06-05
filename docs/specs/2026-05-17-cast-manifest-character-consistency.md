@@ -120,15 +120,16 @@ class ContinuityChecker:
 
 ## 3. Bootstrap Flow
 
+> **Note:** The `showrunner bootstrap` CLI command creates a project scaffold, not reference images. Reference image generation happens inside `showrunner run` via `_pipeline_bootstrap()`.
+
+The bootstrap pipeline step (invoked by `showrunner run`):
+
 ```
-showrunner bootstrap episode_02.json -o output
+showrunner run episode_02.json -o output
   │
-  ├── text2image → cast/<slug>/front.png
-  ├── text2image → cast/<slug>/3q.png
-  ├── text2image → cast/<slug>/profile.png
-  ├── text2image → environments/<name>/reference.png
-  ├── Copy voice samples → audio/voices/<slug>/
-  └── Write cast_manifest.json
+  ├── (bootstrap step) text2image → cast/<slug>/front.png
+  ├── (bootstrap step) text2image → environments/<name>/reference.png
+  └── ... render + assemble
 ```
 
 ### Output

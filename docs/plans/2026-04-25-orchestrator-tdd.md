@@ -1,6 +1,17 @@
 # AI Showrunner Orchestrator — TDD Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **DEPRECATED:** This plan describes the original v1 architecture (shot-based, ComfyUI-driven, argparse CLI). The codebase has since evolved to a v2 beat-based architecture with AIServices providers, Typer CLI, and ~25 source modules. See README.md for the current architecture. This document is kept for historical reference only.
+>
+> **Key divergences from current code:**
+> - Schema v1 (`shots[]`, `shot_id`, `camera_angle`, `action_start`, `action_end`) → Schema v2 (`beats[]`, `beat_id`, `kind`, `camera`, `action`)
+> - Python 3.9+ → Python >=3.11
+> - argparse CLI → Typer CLI (`showrunner.cli.main:app`)
+> - `PromptBuilder` (ComfyUI `build_start_prompt`/`build_end_prompt`) → `beat_prompts.build_beat_prompt()` (AIServices)
+> - `ShotRenderer` (ComfyUI workflow injection) → `scene_render.render_scene/episode` (AIServicesClient)
+> - `EpisodeAssembler` (class-based) → `assembler` module functions (`concat_clips`, `generate_srt`, `burn_in_captions`, etc.)
+> - 5 source modules → ~25 source modules including determinism, cast_manifest, planner, progress, render_buffer, etc.
+> - Stdlib-only deps → pydantic, structlog, typer, rich, jsonschema, pillow, scikit-image, aiservices packages
+> - All TDD tasks have been completed (implemented differently than described here)
 
 **Goal:** Build a decoupled, testable showrunner that drives ComfyUI via API to render video shots from a JSON cut-sheet, with crash recovery and Apple Silicon MPS optimization.
 
@@ -10,29 +21,40 @@
 
 ---
 
-## File Structure
+## File Structure (v1 — as planned)
+
+> **Note:** The actual current file structure is much larger. See README.md "Project Structure" for the current layout.
 
 ```
 ├── src/
 │   └── showrunner/
-│       ├── __init__.py          # Package init, exports public API
-│       ├── loader.py            # EpisodeLoader — parses episode JSON
-│       ├── prompts.py           # PromptBuilder — builds ComfyUI text prompts
+│       ├── __init__.py          # Package init, exports __version__
+│       ├── loader.py            # EpisodeLoader — parses episode JSON (v1 + v2)
+│       ├── prompts.py           # PromptBuilder — builds ComfyUI text prompts (v1 legacy)
 │       ├── comfyui_client.py    # ComfyUIClient — API communication + retry
-│       ├── renderer.py          # ShotRenderer — drives per-shot render pipeline
-│       ├── assembler.py         # EpisodeAssembler — FFmpeg concat
+│       ├── renderer.py          # ShotRenderer — drives per-shot render pipeline (v1 legacy)
+│       ├── assembler.py         # FFmpeg assembly functions (concat, SRT, captions, music)
+│       ├── beat_prompts.py      # Beat-based prompt generation (v2)
+│       ├── scene_render.py      # BeatJob orchestration (v2)
+│       ├── validator.py         # EpisodeValidator (jsonschema + business rules)
+│       ├── planner.py           # Episode beat planning with cost estimation
+│       ├── aiservices_client.py # AIServices unified facade
+│       ├── config.py            # PipelineConfig (pydantic-settings)
+│       ├── determinism.py       # Seed strategy and manifest hashing
+│       ├── cast_manifest.py     # CastManifest tracking
 │       └── cli/
-│           └── main.py          # CLI entry point (thin wrapper)
+│           └── main.py          # CLI entry point (Typer)
 ├── tests/
 │   ├── __init__.py
-│   ├── test_loader.py       # Unit tests for EpisodeLoader
-│   ├── test_prompts.py      # Unit tests for PromptBuilder
-│   ├── test_comfyui_client.py  # Unit tests for ComfyUIClient (mocked HTTP)
-│   ├── test_renderer.py     # Unit tests for ShotRenderer (mocked client)
-│   ├── test_assembler.py    # Unit tests for EpisodeAssembler (mocked subprocess)
-│   ├── test_integration.py  # Integration tests between pairs of units
-│   └── conftest.py          # Shared fixtures (sample episode JSON, etc.)
-└── episode_01.json          # The Buffering S01E01 cut-sheet
+│   ├── conftest.py              # Shared fixtures
+│   ├── test_loader.py           # Unit tests for EpisodeLoader
+│   ├── test_prompts.py          # Unit tests for PromptBuilder
+│   ├── test_comfyui_client.py   # Unit tests for ComfyUIClient
+│   ├── test_renderer.py         # Unit tests for ShotRenderer
+│   ├── test_assembler.py        # Unit tests for assembler functions
+│   ├── test_integration.py      # Integration tests
+│   └── ... (25+ additional test files)
+└── episode_01.json              # The Buffering S01E01 episode
 ```
 
 ## Test Pyramid
@@ -57,7 +79,7 @@
 
 ### RED
 
-- [ ] **Step 1: Write failing test for loading a valid episode**
+- [x] **Step 1: Write failing test for loading a valid episode**
 
 ```python
 # tests/test_loader.py
@@ -108,14 +130,14 @@ def test_load_valid_episode_returns_episode_data(tmp_path):
     assert episode.scenes[0].shots[0].shot_id == "S01_SH01"
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `python3 -m pytest tests/test_loader.py -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'showrunner'`
 
 ### GREEN
 
-- [ ] **Step 3: Create package init and minimal loader**
+- [x] **Step 3: Create package init and minimal loader**
 
 ```python
 # src/showrunner/__init__.py
@@ -215,14 +237,14 @@ class EpisodeLoader:
         )
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `python3 -m pytest tests/test_loader.py -v`
 Expected: PASS
 
 ### MORE TESTS
 
-- [ ] **Step 5: Write test for missing required fields**
+- [x] **Step 5: Write test for missing required fields**
 
 ```python
 def test_load_missing_title_raises(tmp_path):
@@ -233,7 +255,7 @@ def test_load_missing_title_raises(tmp_path):
         loader.load(episode_json)
 ```
 
-- [ ] **Step 6: Write test for empty scenes**
+- [x] **Step 6: Write test for empty scenes**
 
 ```python
 def test_load_empty_scenes_returns_empty_list(tmp_path):
@@ -249,7 +271,7 @@ def test_load_empty_scenes_returns_empty_list(tmp_path):
     assert episode.scenes == []
 ```
 
-- [ ] **Step 7: Write test for unknown environment reference**
+- [x] **Step 7: Write test for unknown environment reference**
 
 ```python
 def test_load_references_preserved_as_strings(tmp_path):
@@ -266,12 +288,12 @@ def test_load_references_preserved_as_strings(tmp_path):
     assert episode.scenes[0].environment == "NONEXISTENT"
 ```
 
-- [ ] **Step 8: Run all loader tests**
+- [x] **Step 8: Run all loader tests**
 
 Run: `python3 -m pytest tests/test_loader.py -v`
 Expected: All PASS
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/showrunner/__init__.py src/showrunner/loader.py tests/conftest.py tests/test_loader.py
@@ -288,7 +310,7 @@ git commit -m "feat: add EpisodeLoader with full test coverage"
 
 ### RED
 
-- [ ] **Step 1: Write failing test for building start/end prompts**
+- [x] **Step 1: Write failing test for building start/end prompts**
 
 ```python
 # tests/test_prompts.py
@@ -367,14 +389,14 @@ def test_build_start_prompt_no_characters():
     assert "rooftop at dusk" in prompt
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `python3 -m pytest tests/test_prompts.py -v`
 Expected: FAIL — `ModuleNotFoundError: No module named 'showrunner.prompts'`
 
 ### GREEN
 
-- [ ] **Step 3: Implement PromptBuilder**
+- [x] **Step 3: Implement PromptBuilder**
 
 ```python
 # src/showrunner/prompts.py
@@ -409,12 +431,12 @@ class PromptBuilder:
         return ", ".join(parts) + self.QUALITY_SUFFIX
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `python3 -m pytest tests/test_prompts.py -v`
 Expected: All PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/showrunner/prompts.py tests/test_prompts.py
@@ -431,7 +453,7 @@ git commit -m "feat: add PromptBuilder with full test coverage"
 
 ### RED
 
-- [ ] **Step 1: Write failing test for queuing a prompt**
+- [x] **Step 1: Write failing test for queuing a prompt**
 
 ```python
 # tests/test_comfyui_client.py
@@ -521,14 +543,14 @@ def test_wait_for_completion_returns_false_on_timeout(client):
         assert result is False
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `python3 -m pytest tests/test_comfyui_client.py -v`
 Expected: FAIL — `ModuleNotFoundError`
 
 ### GREEN
 
-- [ ] **Step 3: Implement ComfyUIClient**
+- [x] **Step 3: Implement ComfyUIClient**
 
 ```python
 # src/showrunner/comfyui_client.py
@@ -601,12 +623,12 @@ class ComfyUIClient:
         return subprocess.Popen(start_cmd, cwd=comfy_dir)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `python3 -m pytest tests/test_comfyui_client.py -v`
 Expected: All PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/showrunner/comfyui_client.py tests/test_comfyui_client.py
@@ -623,7 +645,7 @@ git commit -m "feat: add ComfyUIClient with retry and crash recovery tests"
 
 ### RED
 
-- [ ] **Step 1: Write failing tests for ShotRenderer**
+- [x] **Step 1: Write failing tests for ShotRenderer**
 
 ```python
 # tests/test_renderer.py
@@ -749,14 +771,14 @@ def test_render_episode_renders_all_scenes(episode, mock_client, workflow_templa
     assert len(results["S01"]) == 2
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `python3 -m pytest tests/test_renderer.py -v`
 Expected: FAIL — `ModuleNotFoundError`
 
 ### GREEN
 
-- [ ] **Step 3: Implement ShotRenderer**
+- [x] **Step 3: Implement ShotRenderer**
 
 ```python
 # src/showrunner/renderer.py
@@ -869,12 +891,12 @@ class ShotRenderer:
             audio_node["inputs"]["audio"] = shot.audio_path
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `python3 -m pytest tests/test_renderer.py -v`
 Expected: All PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/showrunner/renderer.py tests/test_renderer.py
@@ -891,7 +913,7 @@ git commit -m "feat: add ShotRenderer with full test coverage"
 
 ### RED
 
-- [ ] **Step 1: Write failing tests for EpisodeAssembler**
+- [x] **Step 1: Write failing tests for EpisodeAssembler**
 
 ```python
 # tests/test_assembler.py
@@ -963,14 +985,14 @@ def test_detect_no_video_toolbox():
         assert EpisodeAssembler._detect_videotoolbox() is False
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `python3 -m pytest tests/test_assembler.py -v`
 Expected: FAIL
 
 ### GREEN
 
-- [ ] **Step 3: Implement EpisodeAssembler**
+- [x] **Step 3: Implement EpisodeAssembler**
 
 ```python
 # src/showrunner/assembler.py
@@ -1027,12 +1049,12 @@ class EpisodeAssembler:
             return False
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `python3 -m pytest tests/test_assembler.py -v`
 Expected: All PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/showrunner/assembler.py tests/test_assembler.py
@@ -1048,7 +1070,7 @@ git commit -m "feat: add EpisodeAssembler with VideoToolbox detection and tests"
 
 ### Tests
 
-- [ ] **Step 1: Write integration tests**
+- [x] **Step 1: Write integration tests**
 
 ```python
 # tests/test_integration.py
@@ -1240,12 +1262,12 @@ def test_full_pipeline_loader_to_assembler(tmp_path, episode):
         assert ok is True
 ```
 
-- [ ] **Step 2: Run integration tests**
+- [x] **Step 2: Run integration tests**
 
 Run: `python3 -m pytest tests/test_integration.py -v`
 Expected: All PASS (all units already implemented)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/test_integration.py
@@ -1259,11 +1281,11 @@ git commit -m "test: add integration tests for all unit pairs"
 **Files:**
 - Create: `episode_01.json`
 
-- [ ] **Step 1: Create the Buffering episode JSON cut-sheet**
+- [x] **Step 1: Create the Buffering episode JSON cut-sheet**
 
 Convert the existing `script.py` data into the new JSON format with 6 scenes, 4 characters, 5 environments, and shots per scene. Each scene gets 2-3 shots based on dialogue beats.
 
-- [ ] **Step 2: Write test that episode_01.json loads cleanly**
+- [x] **Step 2: Write test that episode_01.json loads cleanly**
 
 ```python
 # tests/test_episode_01.py
@@ -1283,7 +1305,7 @@ def test_episode_01_loads():
     assert total_shots > 0
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add episode_01.json tests/test_episode_01.py
@@ -1297,7 +1319,7 @@ git commit -m "feat: add Buffering S01E01 episode cut-sheet in JSON format"
 **Files:**
 - Create: `src/showrunner/cli/main.py`
 
-- [ ] **Step 1: Create thin CLI wrapper**
+- [x] **Step 1: Create thin CLI wrapper**
 
 ```python
 # src/showrunner/cli/main.py
@@ -1358,7 +1380,7 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add src/showrunner/cli/main.py
@@ -1369,17 +1391,17 @@ git commit -m "feat: add CLI entry point for showrunner"
 
 ## Task 9: Run Full Test Suite
 
-- [ ] **Run all unit tests**
+- [x] **Run all unit tests**
 
 Run: `python3 -m pytest tests/test_loader.py tests/test_prompts.py tests/test_comfyui_client.py tests/test_renderer.py tests/test_assembler.py -v`
 Expected: All PASS
 
-- [ ] **Run all integration tests**
+- [x] **Run all integration tests**
 
 Run: `python3 -m pytest tests/test_integration.py -v`
 Expected: All PASS
 
-- [ ] **Run full suite**
+- [x] **Run full suite**
 
 Run: `python3 -m pytest tests/ -v --tb=short`
 Expected: All PASS

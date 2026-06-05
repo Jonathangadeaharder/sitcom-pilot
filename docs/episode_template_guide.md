@@ -99,7 +99,7 @@ Each beat is either a "speech" or "silent" beat.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `beat_id` | string | Yes | Unique beat identifier |
-| `kind` | string | Yes | Type of beat: "speech" or "silent" |
+| `kind` | string | Yes | Type of beat: "speech", "silent", or "transition" |
 | `camera` | string | No | Camera angle or shot description |
 | `action` | string | No | Action or description of what happens in the beat |
 | `seed` | integer | No | Random seed for generation |
