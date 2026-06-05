@@ -5,7 +5,6 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from aiservices import generate_image2image, generate_text2image
 from showrunner.loader import CharacterData, VoiceConfig
 
 logger = logging.getLogger(__name__)
@@ -49,6 +48,8 @@ class AIServicesClient:
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
         try:
+            from aiservices import generate_text2image
+
             result = generate_text2image(
                 prompt=prompt,
                 out_path=output,
@@ -56,9 +57,14 @@ class AIServicesClient:
                 steps=4,
             )
             return result.path
+        except ImportError:
+            pass
         except Exception as exc:
             logger.error("text2image failed: %s", exc)
             raise RuntimeError("text2image failed") from exc
+        if self._subprocess_fallback:
+            raise RuntimeError("text2image failed: aiservices package not available")
+        raise RuntimeError("text2image failed: no provider available")
 
     def image2image(
         self,
@@ -72,6 +78,8 @@ class AIServicesClient:
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
         try:
+            from aiservices import generate_image2image
+
             result = generate_image2image(
                 prompt=prompt,
                 base_image=Path(image_path),
@@ -80,9 +88,14 @@ class AIServicesClient:
                 steps=4,
             )
             return result.path
+        except ImportError:
+            pass
         except Exception as exc:
             logger.error("image2image failed: %s", exc)
             raise RuntimeError("image2image failed") from exc
+        if self._subprocess_fallback:
+            raise RuntimeError("image2image failed: aiservices package not available")
+        raise RuntimeError("image2image failed: no provider available")
 
     def image2video(
         self,
@@ -325,6 +338,12 @@ def _run_cli(cmd: list[str]) -> subprocess.CompletedProcess:
             error_msg += f"\nstdout: {stdout_preview}"
         raise RuntimeError(error_msg)
     return result
+
+
+def _div8(value: int) -> int:
+    """Round *value* down to the nearest multiple of 8, minimum 512."""
+    rounded = (value // 8) * 8
+    return max(rounded, 512)
 
 
 def _build_speech_tags(

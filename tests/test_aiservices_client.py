@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import types
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -12,8 +13,6 @@ from showrunner.loader import CharacterData, VoiceConfig
 
 def _mock_aiservice_package(name: str):
     """Create real submodule so `from pkg.client import generate` works."""
-    import types
-
     pkg_mod = types.ModuleType(name)
     pkg_mod.__path__ = [name]
     client_mod = types.ModuleType(f"{name}.client")
@@ -22,11 +21,33 @@ def _mock_aiservice_package(name: str):
     sys.modules[f"{name}.client"] = client_mod
 
 
+def _mock_aiservices_package():
+    """Create the ``aiservices`` package with ``generate_text2image``,
+    ``generate_image2image``, and ``aiservices.generate.VideoGenerator``."""
+    pkg = types.ModuleType("aiservices")
+    pkg.__path__ = ["aiservices"]
+    pkg.generate_text2image = MagicMock()
+    pkg.generate_image2image = MagicMock()
+
+    generate_mod = types.ModuleType("aiservices.generate")
+    generate_mod.VideoGenerator = MagicMock()
+    sys.modules["aiservices"] = pkg
+    sys.modules["aiservices.generate"] = generate_mod
+
+
 @pytest.fixture(autouse=True)
 def _mock_aiservice_packages():
-    for pkg in ["text2image", "image2image", "image2video", "text2speech", "audio2subtitle"]:
+    # Core aiservices package (text2image, image2image, image2video)
+    _mock_aiservices_package()
+    # Separate service packages (text2speech, audio2subtitle)
+    for pkg in ["text2speech", "audio2subtitle"]:
         if pkg not in sys.modules:
             _mock_aiservice_package(pkg)
+    yield
+    # Cleanup: remove mock modules so they don't leak between tests
+    for key in list(sys.modules):
+        if key.startswith(("aiservices", "text2speech", "audio2subtitle")):
+            del sys.modules[key]
 
 
 @pytest.fixture
@@ -68,52 +89,68 @@ class TestBuildSpeechTags:
 
 class TestText2Image:
     def test_python_api_success(self, client, tmp_path):
-        mock_result = tmp_path / "out.png"
-        gen = sys.modules["text2image.client"].generate
+        mock_result = MagicMock()
+        mock_result.path = tmp_path / "out.png"
+        gen = sys.modules["aiservices"].generate_text2image
         gen.return_value = mock_result
         result = client.text2image("a cat", tmp_path / "out.png", seed=42)
         assert isinstance(result, Path)
         gen.assert_called_once()
 
-    @patch("showrunner.aiservices_client._run_cli")
-    def test_subprocess_fallback(self, mock_cli, client, tmp_path):
-        sys.modules["text2image.client"].generate.side_effect = ImportError
-        result = client.text2image("a cat", tmp_path / "out.png", seed=42)
-        assert isinstance(result, Path)
-        mock_cli.assert_called_once()
+    def test_import_error_with_fallback_raises(self, client, tmp_path):
+        sys.modules["aiservices"].generate_text2image.side_effect = ImportError
+        with pytest.raises(RuntimeError, match="aiservices package not available"):
+            client.text2image("a cat", tmp_path / "out.png", seed=42)
 
     def test_no_fallback_raises(self, client_no_fallback, tmp_path):
-        sys.modules["text2image.client"].generate.side_effect = ImportError
+        sys.modules["aiservices"].generate_text2image.side_effect = ImportError
         with pytest.raises(RuntimeError, match="no provider"):
             client_no_fallback.text2image("a cat", tmp_path / "out.png")
 
 
 class TestImage2Image:
-    @patch("showrunner.aiservices_client._run_cli")
-    def test_subprocess_fallback(self, mock_cli, client, tmp_path):
-        sys.modules["image2image.client"].generate.side_effect = ImportError
+    def test_python_api_success(self, client, tmp_path):
+        mock_result = MagicMock()
+        mock_result.path = tmp_path / "out.png"
+        gen = sys.modules["aiservices"].generate_image2image
+        gen.return_value = mock_result
         result = client.image2image(
             tmp_path / "input.png", "edit this", tmp_path / "out.png", seed=42
         )
         assert isinstance(result, Path)
-        mock_cli.assert_called_once()
+        gen.assert_called_once()
+
+    def test_import_error_with_fallback_raises(self, client, tmp_path):
+        sys.modules["aiservices"].generate_image2image.side_effect = ImportError
+        with pytest.raises(RuntimeError, match="aiservices package not available"):
+            client.image2image(tmp_path / "input.png", "edit", tmp_path / "out.png")
 
 
 class TestImage2Video:
-    @patch("showrunner.aiservices_client._run_cli")
-    def test_subprocess_fallback(self, mock_cli, client, tmp_path):
-        sys.modules["image2video.client"].generate.side_effect = ImportError
+    def test_python_api_success(self, client, tmp_path):
+        mock_gen_instance = MagicMock()
+        mock_gen_instance.generate.return_value = tmp_path / "out.mp4"
+        sys.modules["aiservices.generate"].VideoGenerator.return_value = mock_gen_instance
         result = client.image2video(
             tmp_path / "input.png", "animate this", tmp_path / "out.mp4", seed=42
         )
         assert isinstance(result, Path)
-        mock_cli.assert_called_once()
+        mock_gen_instance.generate.assert_called_once()
+
+    def test_import_error_raises(self, client, tmp_path):
+        sys.modules["aiservices.generate"].VideoGenerator.side_effect = ImportError
+        with pytest.raises(ImportError):
+            client.image2video(
+                tmp_path / "input.png", "animate this", tmp_path / "out.mp4", seed=42
+            )
 
     @patch("showrunner.aiservices_client._mux_audio")
-    @patch("showrunner.aiservices_client._run_cli")
-    def test_audio_mux(self, mock_cli, mock_mux, client, tmp_path):
+    def test_audio_mux(self, mock_mux, client, tmp_path):
         mock_mux.return_value = tmp_path / "out.mp4"
-        sys.modules["image2video.client"].generate.side_effect = ImportError
+        mock_gen_instance = MagicMock()
+        mock_gen_instance.generate.return_value = tmp_path / "out.mp4"
+        sys.modules["aiservices.generate"].VideoGenerator.return_value = mock_gen_instance
+        (tmp_path / "audio.wav").write_text("fake audio")
         result = client.image2video(
             tmp_path / "input.png",
             "animate",
@@ -171,10 +208,11 @@ class TestDiscoverCapabilities:
 
 
 class TestOutputDirCreation:
-    @patch("showrunner.aiservices_client._run_cli")
-    def test_creates_parent_dirs(self, mock_cli, client, tmp_path):
+    def test_creates_parent_dirs(self, client, tmp_path):
         deep = tmp_path / "a" / "b" / "c" / "out.png"
-        sys.modules["text2image.client"].generate.side_effect = ImportError
+        mock_result = MagicMock()
+        mock_result.path = deep
+        sys.modules["aiservices"].generate_text2image.return_value = mock_result
         client.text2image("test", deep)
         assert deep.parent.exists()
 
