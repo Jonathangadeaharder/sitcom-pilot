@@ -4,6 +4,10 @@ from unittest.mock import patch
 
 import pytest
 
+from showrunner.assembler import EpisodeAssembler
+from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
+from showrunner.loader import EpisodeLoader
+
 
 def pytest_runtest_setup(item):
     try:
@@ -11,10 +15,6 @@ def pytest_runtest_setup(item):
         disable_socket()
     except ImportError:
         pass
-
-from showrunner.assembler import EpisodeAssembler
-from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
-from showrunner.loader import EpisodeLoader
 
 collect_ignore = []
 if "mutmut" in sys.modules:
