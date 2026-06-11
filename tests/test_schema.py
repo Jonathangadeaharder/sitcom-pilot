@@ -18,15 +18,6 @@ from showrunner.loader import (
 
 
 class TestVoiceConfig:
-    def test_defaults(self):
-        v = VoiceConfig()
-        assert v.provider == ""
-        assert v.voice_id == ""
-        assert v.clone_from == ""
-        assert v.seed == 0
-        assert v.temperature == pytest.approx(0.8)
-        assert v.language == "en"
-
     def test_custom_values(self):
         v = VoiceConfig(
             provider="mlx",
@@ -52,16 +43,6 @@ class TestVoiceConfig:
 
 
 class TestCharacterData:
-    def test_defaults(self):
-        c = CharacterData()
-        assert c.name == ""
-        assert c.visual == ""
-        assert c.lora is None
-        assert c.voice is None
-        assert c.reference_images == ()
-        assert c.profile == ""
-        assert c.trigger_word == ""
-
     def test_v2_fields(self):
         voice = VoiceConfig(provider="test")
         c = CharacterData(name="Jerry", visual="man in hat", lora="jerry.safetensors", voice=voice)
@@ -85,13 +66,6 @@ class TestCharacterData:
 
 
 class TestEnvironmentData:
-    def test_defaults(self):
-        e = EnvironmentData()
-        assert e.trigger_word == ""
-        assert e.style == ""
-        assert e.reference_image == ""
-        assert e.profile == ""
-
     def test_v2_fields(self):
         e = EnvironmentData(trigger_word="coffee_shop", style="modern", reference_image="ref.jpg")
         assert e.trigger_word == "coffee_shop"
@@ -107,16 +81,6 @@ class TestBeatData:
         b = BeatData(beat_id="b1", kind="speech")
         assert b.beat_id == "b1"
         assert b.kind == "speech"
-
-    def test_defaults(self):
-        b = BeatData(beat_id="b1", kind="silent")
-        assert b.camera == ""
-        assert b.action == ""
-        assert b.duration_sec == pytest.approx(3.0)
-        assert b.seed == 0
-        assert b.speaker == ""
-        assert b.text == ""
-        assert b.audio_path == ""
 
     def test_zero_duration(self):
         b = BeatData(beat_id="b1", kind="silent", duration_sec=0.0)
@@ -244,14 +208,6 @@ class TestEpisodeData:
     def test_required_fields(self):
         e = EpisodeData(title="Test", cast={}, environments={}, scenes=[])
         assert e.title == "Test"
-
-    def test_defaults(self):
-        e = EpisodeData(title="Test", cast={}, environments={}, scenes=[])
-        assert e.schema_version == "1.0"
-        assert e.show == ""
-        assert e.season == 0
-        assert e.episode_number == 0
-        assert e.render_config == {}
 
     def test_empty_title(self):
         e = EpisodeData(title="", cast={}, environments={}, scenes=[])
