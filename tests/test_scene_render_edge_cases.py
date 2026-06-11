@@ -6,12 +6,11 @@ import pytest
 
 from showrunner.cast_manifest import CastManifest
 from showrunner.loader import EpisodeData, SceneData
+from showrunner.reporting import SceneReport, save_report
 from showrunner.scene_render import (
     BeatJob,
     BeatStatus,
-    SceneReport,
     _render_beat,
-    _save_report,
     allocate_durations,
 )
 
@@ -64,7 +63,7 @@ class TestSaveReport:
             SceneReport(scene_id="001", total_beats=2, completed=2, duration_sec=6.0),
             SceneReport(scene_id="002", total_beats=1, completed=0, failed=1, errors=["b1: boom"]),
         ]
-        _save_report(paths, reports)
+        save_report(paths, reports)
         report_path = paths.run_dir / "render_report.json"
         assert report_path.exists()
         import json

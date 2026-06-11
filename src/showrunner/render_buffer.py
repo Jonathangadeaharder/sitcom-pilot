@@ -10,7 +10,8 @@ from showrunner.aiservices_client import AIServicesClient
 from showrunner.cast_manifest import CastManifest
 from showrunner.loader import EpisodeData, SceneData
 from showrunner.paths import RunPaths
-from showrunner.scene_render import BeatJob, BeatStatus, SceneReport, _render_beat
+from showrunner.reporting import SceneReport, save_report
+from showrunner.scene_render import BeatJob, BeatStatus, _render_beat
 
 logger = logging.getLogger(__name__)
 
@@ -202,28 +203,7 @@ def render_episode_buffered(
     )
     try:
         reports = buffer.render(jobs, episode.scenes)
-        _save_report(paths, reports)
+        save_report(paths, reports)
         return reports
     finally:
         buffer.close()
-
-
-def _save_report(paths: RunPaths, reports: list[SceneReport]) -> None:
-    import json
-
-    data = []
-    for r in reports:
-        data.append(
-            {
-                "scene_id": r.scene_id,
-                "total_beats": r.total_beats,
-                "completed": r.completed,
-                "failed": r.failed,
-                "skipped": r.skipped,
-                "duration_sec": r.duration_sec,
-                "success_rate": r.success_rate,
-                "errors": r.errors,
-            }
-        )
-    report_path = paths.run_dir / "render_report.json"
-    report_path.write_text(json.dumps(data, indent=2))
