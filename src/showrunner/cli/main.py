@@ -81,6 +81,8 @@ def validate(
     from showrunner.commands.validate import validate_episode as pydantic_validate
 
     ep_path = Path(episode_path)
+    # strict is kept for CLI backwards compatibility but has no effect
+    _ = strict
     valid, errors = pydantic_validate(ep_path)
     if not valid:
         for error in errors:
