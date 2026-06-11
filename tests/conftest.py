@@ -12,9 +12,11 @@ from showrunner.loader import EpisodeLoader
 def pytest_runtest_setup(item):
     try:
         from pytest_socket import disable_socket
+
         disable_socket()
     except ImportError:
         pass
+
 
 collect_ignore = []
 if "mutmut" in sys.modules:
