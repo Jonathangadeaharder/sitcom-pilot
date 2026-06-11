@@ -12,8 +12,6 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
 
-from showrunner.validator import EpisodeValidator
-
 logger = structlog.get_logger()
 console = Console()
 err_console = Console(stderr=True)
@@ -75,7 +73,9 @@ def _resolve_output_dir(output_dir: str | None) -> Path:
 @app.command()
 def validate(
     episode_path: str = typer.Argument(..., help=_EPISODE_PATH_HELP),
-    strict: bool = typer.Option(False, "--strict", help="Enable strict business-rule checks"),
+    strict: bool = typer.Option(
+        False, "--strict", "-s", help="Enable strict validation checks (deprecated/inert)"
+    ),
 ) -> None:
     """Validate an episode JSON file against the v2 schema."""
     from showrunner.commands.validate import validate_episode as pydantic_validate
@@ -86,13 +86,6 @@ def validate(
         for error in errors:
             err_console.print(f"[red]Error:[/red] {error}")
         raise typer.Exit(code=1)
-    if strict:
-        validator = EpisodeValidator()
-        strict_errors = validator.validate_file(ep_path, strict=True)
-        if strict_errors:
-            for error in strict_errors:
-                err_console.print(f"[red]Error:[/red] {error}")
-            raise typer.Exit(code=1)
     console.print(f"[green]Valid:[/green] {episode_path}")
 
 
@@ -106,17 +99,17 @@ def plan(
     episode_path: str = typer.Argument(..., help=_EPISODE_PATH_HELP),
 ) -> None:
     """Plan beats for an episode and output as JSON."""
+    from showrunner.commands.validate import validate_episode as pydantic_validate
     from showrunner.planner import plan_episode
-    from showrunner.validator import EpisodeValidator
 
-    data = _load_episode(Path(episode_path))
-
-    validator = EpisodeValidator()
-    errors = validator.validate(data)
-    if errors:
+    ep_path = Path(episode_path)
+    valid, errors = pydantic_validate(ep_path)
+    if not valid:
         for error in errors:
             err_console.print(f"[red]Error:[/red] {error}")
         raise typer.Exit(code=1)
+
+    data = _load_episode(ep_path)
 
     try:
         plan = plan_episode(data)
@@ -620,14 +613,13 @@ def _find_latest_run(root: Path) -> str | None:
 
 
 def _pipeline_validate(ep_path: Path, skip: bool) -> None:
-    from showrunner.validator import EpisodeValidator
+    from showrunner.commands.validate import validate_episode as pydantic_validate
 
     if skip:
         console.print("[yellow]\u26a0[/yellow]  Validation skipped")
         return
-    validator = EpisodeValidator()
-    errors = validator.validate_file(ep_path)
-    if errors:
+    valid, errors = pydantic_validate(ep_path)
+    if not valid:
         for e in errors:
             err_console.print(f"  [red]Error:[/red] {e}")
         raise typer.Exit(code=1)
