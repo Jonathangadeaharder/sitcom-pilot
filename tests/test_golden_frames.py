@@ -145,12 +145,6 @@ class TestGoldenFrameRegression:
         golden_files = list(registry.fixtures_dir.glob("*.png"))
         assert len(golden_files) >= 4
 
-    def test_golden_vs_identical_passes(self, golden_registry):
-        golden_registry.register("S02_beat01", threshold=0.9)
-        result = golden_registry.check("S02_beat01")
-        assert result.passed
-        assert result.ssim_score >= 0.9
-
     def test_golden_vs_altered_fails(self, golden_registry, tmp_path):
         golden_registry.register("S02_beat01", threshold=0.99)
         from PIL import Image

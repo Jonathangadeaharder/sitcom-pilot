@@ -477,9 +477,7 @@ sitcom-pilot/
 │       ├── render_buffer.py # Buffered concurrent render
 │       ├── beat_clip_uniformiser.py # Normalize clips before concat
 │       ├── captions.py  # SRT/caption generation
-│       ├── audio_builder.py # Audio assembly utilities
 │       ├── plate_generator.py # Plate/background generation
-│       ├── silent_renderer.py # Silent beat renderer
 │       ├── comfyui_client.py  # ComfyUI API client
 │       └── aiservices_client.py # AIServices unified facade
 ├── scripts/             # Utility scripts (build_refs.py, build_voices.py)
@@ -527,4 +525,3 @@ uv run mutmut run
 ## License
 
 Private project. All rights reserved.
-
