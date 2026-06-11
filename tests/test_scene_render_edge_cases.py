@@ -6,13 +6,13 @@ import pytest
 
 from showrunner.cast_manifest import CastManifest
 from showrunner.loader import EpisodeData, SceneData
+from showrunner.reporting import SceneReport, save_report
 from showrunner.scene_render import (
     BeatJob,
     BeatStatus,
     _render_beat,
     allocate_durations,
 )
-from showrunner.reporting import SceneReport, save_report
 
 
 class TestBeatStatus:

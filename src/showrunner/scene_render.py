@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -44,9 +43,6 @@ class BeatJob:
     video_path: Path = field(default_factory=Path)
     status: BeatStatus = BeatStatus.PENDING
     error: str = ""
-
-
-
 
 
 def plan_beats(
