@@ -15,6 +15,7 @@ from showrunner.determinism import SeedStrategy
 from showrunner.loader import EpisodeData, SceneData
 from showrunner.paths import RunPaths
 from showrunner.progress import BeatProgressEvent, NullProgressCallback, ProgressCallback
+from showrunner.reporting import SceneReport, save_report
 
 logger = structlog.get_logger()
 
@@ -45,19 +46,7 @@ class BeatJob:
     error: str = ""
 
 
-@dataclass
-class SceneReport:
-    scene_id: str
-    total_beats: int = 0
-    completed: int = 0
-    failed: int = 0
-    skipped: int = 0
-    duration_sec: float = 0.0
-    errors: list[str] = field(default_factory=list)
 
-    @property
-    def success_rate(self) -> float:
-        return self.completed / self.total_beats if self.total_beats else 0.0
 
 
 def plan_beats(
@@ -299,24 +288,5 @@ def render_episode(
             completed=report.completed,
             total=report.total_beats,
         )
-    _save_report(paths, reports)
+    save_report(paths, reports)
     return reports
-
-
-def _save_report(paths: RunPaths, reports: list[SceneReport]) -> None:
-    data = []
-    for r in reports:
-        data.append(
-            {
-                "scene_id": r.scene_id,
-                "total_beats": r.total_beats,
-                "completed": r.completed,
-                "failed": r.failed,
-                "skipped": r.skipped,
-                "duration_sec": r.duration_sec,
-                "success_rate": r.success_rate,
-                "errors": r.errors,
-            }
-        )
-    report_path = paths.run_dir / "render_report.json"
-    report_path.write_text(json.dumps(data, indent=2))
