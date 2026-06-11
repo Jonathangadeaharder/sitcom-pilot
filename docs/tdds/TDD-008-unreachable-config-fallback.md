@@ -1,6 +1,6 @@
 # TDD-008: `config.py` ships a hand-rolled fallback for a dependency that is always present
 
-- Status: Open
+- Status: Fixed in working tree
 - Date: 2026-06-11
 - Category: Reinvented wheel / Dead code
 - Severity: Medium
