@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from showrunner.aiservices_client import AIServicesClient, _build_speech_tags, _div8
+from showrunner.aiservices_client import AIServicesClient, _build_speech_tags
 from showrunner.loader import CharacterData, VoiceConfig
 
 
@@ -58,20 +58,6 @@ def client():
 @pytest.fixture
 def client_no_fallback():
     return AIServicesClient(subprocess_fallback=False)
-
-
-class TestDiv8:
-    def test_rounds_down(self):
-        assert _div8(720) == 720
-
-    def test_rounds_non_multiple(self):
-        assert _div8(721) == 720
-
-    def test_minimum_512(self):
-        assert _div8(100) == 512
-
-    def test_large_value(self):
-        assert _div8(1920) == 1920
 
 
 class TestBuildSpeechTags:

@@ -456,9 +456,7 @@ class TestDoctor:
 class TestRun:
     @patch("showrunner.assembler.concat_clips")
     @patch("showrunner.aiservices_client.AIServicesClient")
-    def test_run_validates_and_renders(
-        self, mock_client_cls, mock_concat, tmp_path: Path
-    ):
+    def test_run_validates_and_renders(self, mock_client_cls, mock_concat, tmp_path: Path):
         mock_client = MagicMock()
         mock_client.text2image.return_value = tmp_path / "img.png"
         mock_client.image2video.return_value = tmp_path / "vid.mp4"

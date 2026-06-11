@@ -251,7 +251,7 @@ class AIServicesClient:
             ("image2video", self._video_provider),
             ("text2speech", self._tts_provider),
         ]:
-            caps[op] = [reg_name]
+            caps[op] = [reg_name] if reg_name is not None else []
         if self._asr_provider:
             caps["audio2subtitle"] = [self._asr_provider]
         elif self._subprocess_fallback:
@@ -338,12 +338,6 @@ def _run_cli(cmd: list[str]) -> subprocess.CompletedProcess:
             error_msg += f"\nstdout: {stdout_preview}"
         raise RuntimeError(error_msg)
     return result
-
-
-def _div8(value: int) -> int:
-    """Round *value* down to the nearest multiple of 8, minimum 512."""
-    rounded = (value // 8) * 8
-    return max(rounded, 512)
 
 
 def _build_speech_tags(
