@@ -107,7 +107,6 @@ reportMissingParameterType = false
 reportPrivateUsage = false
 reportConstantRedefinition = false
 reportUnusedClass = false
-reportAny = false
 reportMissingImports = false
 reportUntypedFunctionDecorator = false
 reportMissingTypeArgument = false

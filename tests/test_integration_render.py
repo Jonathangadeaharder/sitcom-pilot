@@ -7,10 +7,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRef
+from showrunner.commands.validate import validate_episode
 from showrunner.loader import EpisodeLoader
 from showrunner.paths import RunPaths
 from showrunner.scene_render import BeatStatus, plan_beats, render_episode, render_scene
-from showrunner.validator import EpisodeValidator
 
 EPISODE_02 = Path(__file__).resolve().parent.parent / "episode_02.json"
 
@@ -153,10 +153,8 @@ class TestIntegrationRenderScene001:
     """Integration test: load → validate → plan → render → verify for scene 001."""
 
     def test_full_pipeline(self, episode_02, manifest_02, paths, mock_client):
-        data = _read_episode_02_data()
-        validator = EpisodeValidator()
-        errors = validator.validate(data)
-        assert not errors, f"Validation errors: {errors}"
+        valid, errors = validate_episode(EPISODE_02)
+        assert valid, f"Validation errors: {errors}"
 
         jobs = plan_beats(episode_02, manifest_02, paths, episode_id="002")
         scene = episode_02.scenes[0]
@@ -200,14 +198,16 @@ class TestIntegrationRenderScene001:
             assert j.beat_id == beat.beat_id
             assert j.kind == beat.kind
 
-    def test_validation_rejects_bad_schema(self):
-        data = _read_episode_02_data()
-        validator = EpisodeValidator()
-        errors = validator.validate(data)
-        assert not errors
+    def test_validation_rejects_bad_schema(self, tmp_path):
+        valid, errors = validate_episode(EPISODE_02)
+        assert valid
 
+        data = _read_episode_02_data()
         bad = dict(data)
         bad["schema_version"] = "1.5"
-        errors = validator.validate(bad)
+        bad_path = tmp_path / "bad.json"
+        bad_path.write_text(json.dumps(bad))
+        valid, errors = validate_episode(bad_path)
+        assert not valid
         assert errors
         assert any("schema_version" in e for e in errors)

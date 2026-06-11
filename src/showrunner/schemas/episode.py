@@ -93,4 +93,9 @@ class Episode(BaseModel):
                 if beat.beat_id in beat_ids:
                     raise ValueError(f"Duplicate beat_id: '{beat.beat_id}'")
                 beat_ids.add(beat.beat_id)
+                if beat.kind == "speech" and beat.speaker not in cast_keys:
+                    raise ValueError(
+                        f"Beat '{beat.beat_id}' in scene '{scene.scene_id}' "
+                        f"references unknown speaker '{beat.speaker}'"
+                    )
         return self
