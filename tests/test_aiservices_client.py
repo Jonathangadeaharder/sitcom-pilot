@@ -60,8 +60,6 @@ def client_no_fallback():
     return AIServicesClient(subprocess_fallback=False)
 
 
-
-
 class TestBuildSpeechTags:
     def test_all_tags(self):
         assert (
