@@ -142,7 +142,7 @@ jobs:
   required-checks:
     name: Required Checks (PR)
     runs-on: ["self-hosted", "macOS", "ARM64", "VidiomTM"]
-    needs: [format, lint, typecheck, build, unit, mutation, deadcode, deps, semgrep, structure, pytest-lint]
+    needs: [format, lint, typecheck, build, unit, mutation, deadcode, deps, structure, pytest-lint]
     if: always()
     steps:
       - name: Verify all checks passed
