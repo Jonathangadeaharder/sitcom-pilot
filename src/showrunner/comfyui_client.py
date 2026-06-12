@@ -68,9 +68,7 @@ class ComfyUIClient:
         last_error: Exception | None = None
         for attempt in range(max_retries):
             try:
-                resp = self._http.post(
-                    "/prompt", json={"prompt": workflow}, timeout=_QUEUE_TIMEOUT
-                )
+                resp = self._http.post("/prompt", json={"prompt": workflow}, timeout=_QUEUE_TIMEOUT)
                 resp.raise_for_status()
                 prompt_id = str(resp.json().get("prompt_id", ""))
                 if not prompt_id:
@@ -78,9 +76,7 @@ class ComfyUIClient:
                 return prompt_id
             except _RECOVERABLE as exc:
                 last_error = exc
-                logger.warning(
-                    "Queue attempt %d/%d failed: %s", attempt + 1, max_retries, exc
-                )
+                logger.warning("Queue attempt %d/%d failed: %s", attempt + 1, max_retries, exc)
                 time.sleep(2**attempt)
         assert last_error is not None
         raise last_error

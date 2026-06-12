@@ -57,9 +57,7 @@ class RenderBuffer:
         """Map a final output path to a corresponding buffer path."""
         return self._buffer_dir / final_path.relative_to(self._paths.run_dir)
 
-    def _build_reports(
-        self, jobs: list[BeatJob], scenes: list[Scene]
-    ) -> dict[str, SceneReport]:
+    def _build_reports(self, jobs: list[BeatJob], scenes: list[Scene]) -> dict[str, SceneReport]:
         reports: dict[str, SceneReport] = {}
         for sc in scenes:
             reports[sc.scene_id] = SceneReport(

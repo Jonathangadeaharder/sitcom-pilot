@@ -134,9 +134,7 @@ class Episode(BaseModel):
                             f"Beat '{beat.beat_id}' is a speech beat but has no speaker"
                         )
                     if not beat.text:
-                        raise ValueError(
-                            f"Beat '{beat.beat_id}' is a speech beat but has no text"
-                        )
+                        raise ValueError(f"Beat '{beat.beat_id}' is a speech beat but has no text")
                     if beat.speaker not in cast_keys:
                         raise ValueError(
                             f"Beat '{beat.beat_id}' in scene '{scene.scene_id}' "
