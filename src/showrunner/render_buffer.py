@@ -8,10 +8,10 @@ from pathlib import Path
 
 from showrunner.aiservices_client import AIServicesClient
 from showrunner.cast_manifest import CastManifest
-from showrunner.schemas.episode import EpisodeData, Scene
 from showrunner.paths import RunPaths
 from showrunner.reporting import SceneReport, save_report
 from showrunner.scene_render import BeatJob, BeatStatus, _render_beat
+from showrunner.schemas.episode import EpisodeData, Scene
 
 logger = logging.getLogger(__name__)
 

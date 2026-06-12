@@ -5,8 +5,8 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from showrunner.schemas.episode import Beat
 from showrunner.paths import RunPaths
+from showrunner.schemas.episode import Beat
 
 logger = logging.getLogger(__name__)
 

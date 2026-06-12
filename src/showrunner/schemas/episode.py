@@ -123,7 +123,8 @@ class Episode(BaseModel):
             for beat in scene.beats:
                 if beat.kind not in valid_kinds:
                     raise ValueError(
-                        f"Beat '{beat.beat_id}' has invalid kind '{beat.kind}', must be one of {valid_kinds}"
+                        f"Beat '{beat.beat_id}' has invalid kind "
+                        f"'{beat.kind}', must be one of {valid_kinds}"
                     )
                 if beat.beat_id in beat_ids:
                     raise ValueError(f"Duplicate beat_id: '{beat.beat_id}'")
