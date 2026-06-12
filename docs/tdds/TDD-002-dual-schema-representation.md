@@ -1,6 +1,6 @@
 # TDD-002: Two parallel object graphs for the domain (loader dataclasses vs Pydantic schemas)
 
-- Status: Open
+- Status: Fixed (verified 2026-06-12: unified on Pydantic models; dataclass layer deleted; test files merged)
 - Date: 2026-06-11
 - Category: Unnecessary complexity
 - Severity: High

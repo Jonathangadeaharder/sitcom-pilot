@@ -7,13 +7,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from showrunner.cast_manifest import CastManifest, CharacterProfile
-from showrunner.loader import (
-    BeatData,
-    CharacterData,
-    EpisodeData,
-    SceneData,
-    VoiceConfig,
-)
 from showrunner.paths import RunPaths
 from showrunner.scene_render import (
     BeatJob,
@@ -25,6 +18,13 @@ from showrunner.scene_render import (
     plan_beats,
     render_episode,
     render_scene,
+)
+from showrunner.schemas.episode import (
+    Beat,
+    Character,
+    EpisodeData,
+    Scene,
+    VoiceConfig,
 )
 
 
@@ -46,7 +46,7 @@ def episode():
     return EpisodeData(
         title="Test",
         cast={
-            "maya": CharacterData(
+            "maya": Character(
                 name="Maya",
                 visual="woman in hoodie",
                 voice=VoiceConfig(provider="mlx-audio", voice_id="maya_v1"),
@@ -54,12 +54,12 @@ def episode():
         },
         environments={},
         scenes=[
-            SceneData(
+            Scene(
                 scene_id="001",
                 environment="office",
                 characters_present=["maya"],
                 beats=[
-                    BeatData(
+                    Beat(
                         beat_id="001_001",
                         kind="speech",
                         speaker="maya",
@@ -67,7 +67,7 @@ def episode():
                         seed=42,
                         duration_sec=3.0,
                     ),
-                    BeatData(
+                    Beat(
                         beat_id="001_002",
                         kind="silent",
                         action="Maya walks to desk",

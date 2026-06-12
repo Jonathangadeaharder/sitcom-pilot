@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from showrunner.loader import BeatData
+from showrunner.schemas.episode import Beat
 
 logger = logging.getLogger(__name__)
 
@@ -187,7 +187,7 @@ def extract_thumbnail(
 
 
 def generate_srt(
-    beats: list[tuple[BeatData, float]],
+    beats: list[tuple[Beat, float]],
     output_path: Path,
 ) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,6 +1,6 @@
 # TDD-010: `ComfyUIClient` hand-rolls retry, polling, and server lifecycle over `urllib`
 
-- Status: Open
+- Status: Fixed in working tree (2026-06-12 — decision: v1 path stays). Rewritten on httpx: narrow `httpx.HTTPError`/`JSONDecodeError` handling, every failure logged, blind `sleep(10)` startup replaced with readiness polling (60s deadline), `close()` added. Public API unchanged (verified against `renderer.py` + mock-based tests; smoke-tested via `httpx.MockTransport`). Remaining: run `uv lock` to register the new direct `httpx>=0.27.0` dep; `node_map.py` platform-migration note stands.
 - Date: 2026-06-11
 - Category: Reinvented wheel / Bad practice
 - Severity: Medium

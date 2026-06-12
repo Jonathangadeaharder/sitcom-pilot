@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from showrunner.comfyui_client import ComfyUIClient
-from showrunner.loader import EpisodeData, SceneData, ShotData
+from showrunner.schemas.episode import EpisodeData, Scene, Shot
 from showrunner.node_map import NodeMap
 from showrunner.prompts import PromptBuilder
 
@@ -53,7 +53,7 @@ class ShotRenderer:
             logger.warning("Workflow missing node '%s'; %s not injected", node_id, label)
 
     def _inject_environment_lora(
-        self, workflow: dict[str, Any], scene: SceneData, episode: EpisodeData
+        self, workflow: dict[str, Any], scene: Scene, episode: EpisodeData
     ) -> None:
         env_data = episode.environments.get(scene.environment)
         if env_data:
@@ -66,7 +66,7 @@ class ShotRenderer:
             )
 
     def _inject_character_loras(
-        self, workflow: dict[str, Any], scene: SceneData, episode: EpisodeData
+        self, workflow: dict[str, Any], scene: Scene, episode: EpisodeData
     ) -> None:
         nm = self._node_map
         for idx, char_name in enumerate(scene.characters_present):
@@ -84,8 +84,8 @@ class ShotRenderer:
 
     def _inject_workflow(
         self,
-        shot: ShotData,
-        scene: SceneData,
+        shot: Shot,
+        scene: Scene,
         episode: EpisodeData,
         workflow_template: dict[str, Any],
     ) -> dict[str, Any]:
@@ -110,8 +110,8 @@ class ShotRenderer:
 
     def render_shot(
         self,
-        shot: ShotData,
-        scene: SceneData,
+        shot: Shot,
+        scene: Scene,
         episode: EpisodeData,
         workflow_template: dict[str, Any],
     ) -> RenderResult:
@@ -139,7 +139,7 @@ class ShotRenderer:
 
     def render_scene(
         self,
-        scene: SceneData,
+        scene: Scene,
         episode: EpisodeData,
         workflow_template: dict[str, Any],
     ) -> list[RenderResult]:

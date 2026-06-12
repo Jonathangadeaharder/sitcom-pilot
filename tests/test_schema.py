@@ -5,14 +5,14 @@ from pathlib import Path
 
 import pytest
 
-from showrunner.loader import (
-    BeatData,
-    CharacterData,
-    EnvironmentData,
+from showrunner.loader import EpisodeLoader
+from showrunner.schemas.episode import (
+    Beat,
+    Character,
+    Environment,
     EpisodeData,
-    EpisodeLoader,
-    SceneData,
-    ShotData,
+    Scene,
+    Shot,
     VoiceConfig,
 )
 
@@ -45,75 +45,71 @@ class TestVoiceConfig:
 class TestCharacterData:
     def test_v2_fields(self):
         voice = VoiceConfig(provider="test")
-        c = CharacterData(name="Jerry", visual="man in hat", lora="jerry.safetensors", voice=voice)
+        c = Character(name="Jerry", visual="man in hat", lora="jerry.safetensors", voice=voice)
         assert c.name == "Jerry"
         assert c.lora == "jerry.safetensors"
         assert c.voice is not None
         assert c.voice.provider == "test"
 
     def test_none_lora(self):
-        c = CharacterData(lora=None)
+        c = Character(lora=None)
         assert c.lora is None
 
     def test_empty_reference_images(self):
-        c = CharacterData(reference_images=())
-        assert c.reference_images == ()
+        c = Character(reference_images=())
+        assert c.reference_images == []
 
     def test_populated_reference_images(self):
-        c = CharacterData(reference_images=("front.png", "side.png"))
+        c = Character(reference_images=("front.png", "side.png"))
         assert len(c.reference_images) == 2
         assert c.reference_images[0] == "front.png"
 
 
 class TestEnvironmentData:
     def test_v2_fields(self):
-        e = EnvironmentData(trigger_word="coffee_shop", style="modern", reference_image="ref.jpg")
+        e = Environment(trigger_word="coffee_shop", style="modern", reference_image="ref.jpg")
         assert e.trigger_word == "coffee_shop"
         assert e.reference_image == "ref.jpg"
 
     def test_v1_profile(self):
-        e = EnvironmentData(profile="cafe_v1")
+        e = Environment(profile="cafe_v1")
         assert e.profile == "cafe_v1"
 
 
 class TestBeatData:
     def test_required_fields(self):
-        b = BeatData(beat_id="b1", kind="speech")
+        b = Beat(beat_id="b1", kind="speech")
         assert b.beat_id == "b1"
         assert b.kind == "speech"
 
     def test_zero_duration(self):
-        b = BeatData(beat_id="b1", kind="silent", duration_sec=0.0)
+        b = Beat(beat_id="b1", kind="silent", duration_sec=0.0)
         assert b.duration_sec == pytest.approx(0.0)
 
     def test_negative_duration(self):
-        b = BeatData(beat_id="b1", kind="silent", duration_sec=-1.0)
+        b = Beat(beat_id="b1", kind="silent", duration_sec=-1.0)
         assert b.duration_sec == pytest.approx(-1.0)
 
     def test_kind_values(self):
-        assert BeatData(beat_id="b1", kind="speech").kind == "speech"
-        assert BeatData(beat_id="b2", kind="silent").kind == "silent"
+        assert Beat(beat_id="b1", kind="speech").kind == "speech"
+        assert Beat(beat_id="b2", kind="silent").kind == "silent"
 
     def test_empty_beat_id(self):
-        assert BeatData(beat_id="", kind="silent").beat_id == ""
+        assert Beat(beat_id="", kind="silent").beat_id == ""
 
 
 class TestShotData:
     def test_required_fields(self):
-        s = ShotData(
-            shot_id="s1", camera_angle="wide", action_start="enter", action_end="exit", seed=0
-        )
+        s = Shot(shot_id="s1", camera_angle="wide", action_start="enter", action_end="exit", seed=0)
         assert s.shot_id == "s1"
         assert s.seed == 0
 
     def test_dialogue_defaults_empty_list(self):
-        s = ShotData(
-            shot_id="s1", camera_angle="wide", action_start="enter", action_end="exit", seed=0
-        )
+        s = Shot(shot_id="s1", camera_angle="wide", action_start="enter", action_end="exit", seed=0)
         assert s.dialogue == []
 
     def test_dialogue_provided(self):
-        s = ShotData(
+        s = Shot(
             shot_id="s1",
             camera_angle="wide",
             action_start="enter",
@@ -125,19 +121,17 @@ class TestShotData:
         assert s.dialogue[0]["speaker"] == "Jerry"
 
     def test_audio_path_default(self):
-        s = ShotData(
-            shot_id="s1", camera_angle="wide", action_start="enter", action_end="exit", seed=0
-        )
+        s = Shot(shot_id="s1", camera_angle="wide", action_start="enter", action_end="exit", seed=0)
         assert s.audio_path == ""
 
     def test_negative_seed(self):
-        s = ShotData(
+        s = Shot(
             shot_id="s1", camera_angle="wide", action_start="enter", action_end="exit", seed=-5
         )
         assert s.seed == -5
 
     def test_none_dialogue_becomes_empty(self):
-        s = ShotData(
+        s = Shot(
             shot_id="s1",
             camera_angle="wide",
             action_start="enter",
@@ -150,57 +144,53 @@ class TestShotData:
 
 class TestSceneData:
     def test_required_fields(self):
-        s = SceneData(scene_id="s1", environment="office", characters_present=["Jerry"])
+        s = Scene(scene_id="s1", environment="office", characters_present=["Jerry"])
         assert s.scene_id == "s1"
         assert s.characters_present == ["Jerry"]
 
     def test_empty_beats(self):
-        s = SceneData(scene_id="s1", environment="office", characters_present=[])
+        s = Scene(scene_id="s1", environment="office", characters_present=[])
         assert s.beats == []
 
     def test_empty_shots(self):
-        s = SceneData(scene_id="s1", environment="office", characters_present=[])
+        s = Scene(scene_id="s1", environment="office", characters_present=[])
         assert s.shots == []
 
     def test_target_duration_default(self):
-        s = SceneData(scene_id="s1", environment="office", characters_present=[])
+        s = Scene(scene_id="s1", environment="office", characters_present=[])
         assert s.target_duration_sec == 60
 
     def test_custom_target_duration(self):
-        s = SceneData(
+        s = Scene(
             scene_id="s1", environment="office", characters_present=[], target_duration_sec=120
         )
         assert s.target_duration_sec == 120
 
     def test_zero_target_duration(self):
-        s = SceneData(
-            scene_id="s1", environment="office", characters_present=[], target_duration_sec=0
-        )
+        s = Scene(scene_id="s1", environment="office", characters_present=[], target_duration_sec=0)
         assert s.target_duration_sec == 0
 
     def test_title_and_mood_defaults(self):
-        s = SceneData(scene_id="s1", environment="office", characters_present=[])
+        s = Scene(scene_id="s1", environment="office", characters_present=[])
         assert s.title == ""
         assert s.mood == ""
 
     def test_with_beats(self):
-        beats = [BeatData(beat_id="b1", kind="speech"), BeatData(beat_id="b2", kind="silent")]
-        s = SceneData(scene_id="s1", environment="office", characters_present=[], beats=beats)
+        beats = [Beat(beat_id="b1", kind="speech"), Beat(beat_id="b2", kind="silent")]
+        s = Scene(scene_id="s1", environment="office", characters_present=[], beats=beats)
         assert len(s.beats) == 2
 
     def test_mixed_beats_and_shots(self):
-        beats = [BeatData(beat_id="b1", kind="speech")]
-        shots = [
-            ShotData(shot_id="sh1", camera_angle="wide", action_start="a", action_end="b", seed=0)
-        ]
-        s = SceneData(
+        beats = [Beat(beat_id="b1", kind="speech")]
+        shots = [Shot(shot_id="sh1", camera_angle="wide", action_start="a", action_end="b", seed=0)]
+        s = Scene(
             scene_id="s1", environment="office", characters_present=[], beats=beats, shots=shots
         )
         assert len(s.beats) == 1
         assert len(s.shots) == 1
 
     def test_empty_characters(self):
-        s = SceneData(scene_id="s1", environment="office", characters_present=[])
+        s = Scene(scene_id="s1", environment="office", characters_present=[])
         assert s.characters_present == []
 
 

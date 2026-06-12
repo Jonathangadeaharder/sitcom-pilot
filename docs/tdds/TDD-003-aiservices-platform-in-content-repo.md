@@ -1,6 +1,6 @@
 # TDD-003: Full `aiservices` platform clone nested inside the content project
 
-- Status: Open
+- Status: Fixed (verified 2026-06-12: aiservices/ directory deleted)
 - Date: 2026-06-11
 - Category: Unnecessary complexity / Architecture
 - Severity: High

@@ -6,13 +6,13 @@ from pathlib import Path
 from showrunner.aiservices_client import AIServicesClient
 from showrunner.beat_prompts import build_beat_prompt, build_scene_prompt
 from showrunner.cast_manifest import CastManifest
-from showrunner.loader import BeatData, EpisodeData, SceneData
+from showrunner.schemas.episode import Beat, EpisodeData, Scene
 
 logger = logging.getLogger(__name__)
 
 
 def generate_scene_plate(
-    scene: SceneData,
+    scene: Scene,
     episode: EpisodeData,
     manifest: CastManifest,
     client: AIServicesClient,
@@ -34,8 +34,8 @@ def generate_scene_plate(
 
 
 def generate_beat_plate(
-    beat: BeatData,
-    scene: SceneData,
+    beat: Beat,
+    scene: Scene,
     episode: EpisodeData,
     manifest: CastManifest,
     client: AIServicesClient,

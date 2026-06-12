@@ -138,7 +138,7 @@ class TestComputeManifestHash:
         assert len(h) == 64
 
     def test_different_episode_title_changes_hash(self, episode_manifest):
-        from showrunner.loader import EpisodeData
+        from showrunner.schemas.episode import EpisodeData
 
         episode, manifest = episode_manifest
         h1 = compute_manifest_hash(episode, manifest)

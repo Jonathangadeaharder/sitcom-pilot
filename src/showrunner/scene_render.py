@@ -11,10 +11,10 @@ from showrunner.aiservices_client import AIServicesClient
 from showrunner.beat_prompts import build_beat_prompt
 from showrunner.cast_manifest import CastManifest
 from showrunner.determinism import SeedStrategy
-from showrunner.loader import EpisodeData, SceneData
 from showrunner.paths import RunPaths
 from showrunner.progress import BeatProgressEvent, NullProgressCallback, ProgressCallback
 from showrunner.reporting import SceneReport, save_report
+from showrunner.schemas.episode import EpisodeData, Scene
 
 logger = structlog.get_logger()
 
@@ -145,7 +145,7 @@ def _render_beat(
     client: AIServicesClient,
     manifest: CastManifest,
     episode: EpisodeData,
-    scene: SceneData,
+    scene: Scene,
     *,
     max_retries: int = 1,
 ) -> BeatJob:
@@ -180,7 +180,7 @@ def _render_beat(
 
 
 def render_scene(
-    scene: SceneData,
+    scene: Scene,
     jobs: list[BeatJob],
     client: AIServicesClient,
     manifest: CastManifest,

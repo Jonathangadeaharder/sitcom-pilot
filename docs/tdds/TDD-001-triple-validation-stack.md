@@ -1,6 +1,6 @@
 # TDD-001: Three parallel validation systems for the same episode structure
 
-- Status: Open
+- Status: Fixed in working tree (verified 2026-06-12: `validator.py` and `schemas/episode_v2.schema.json` deleted; CLI `validate` delegates to Pydantic via `commands/validate.py`)
 - Date: 2026-06-11
 - Category: Unnecessary complexity / Duplication
 - Severity: High

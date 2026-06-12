@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from showrunner.captions import generate_srt, split_text_for_subtitles, timecode
-from showrunner.loader import BeatData
+from showrunner.schemas.episode import Beat
 
 
 class TestTimecode:
@@ -82,7 +82,7 @@ class TestSplitTextForSubtitles:
 class TestGenerateSrt:
     def test_single_beat(self):
         beats = [
-            BeatData(
+            Beat(
                 beat_id="1",
                 kind="speech",
                 speaker="Maya",
@@ -95,8 +95,8 @@ class TestGenerateSrt:
 
     def test_multiple_beats_sequential_numbering(self):
         beats = [
-            BeatData(beat_id="1", kind="speech", speaker="Maya", text="First", duration_sec=3.0),
-            BeatData(beat_id="2", kind="speech", speaker="Derek", text="Second", duration_sec=2.0),
+            Beat(beat_id="1", kind="speech", speaker="Maya", text="First", duration_sec=3.0),
+            Beat(beat_id="2", kind="speech", speaker="Derek", text="Second", duration_sec=2.0),
         ]
         result = generate_srt(beats)
         lines = result.strip().split("\n\n")
@@ -108,8 +108,8 @@ class TestGenerateSrt:
 
     def test_timing_sequential(self):
         beats = [
-            BeatData(beat_id="1", kind="speech", text="First", duration_sec=3.0),
-            BeatData(beat_id="2", kind="speech", text="Second", duration_sec=2.0),
+            Beat(beat_id="1", kind="speech", text="First", duration_sec=3.0),
+            Beat(beat_id="2", kind="speech", text="Second", duration_sec=2.0),
         ]
         result = generate_srt(beats)
         assert "00:00:00,000 --> 00:00:03,000" in result
@@ -121,7 +121,7 @@ class TestGenerateSrt:
             "into multiple subtitle entries for the viewer to read comfortably"
         )
         beats = [
-            BeatData(
+            Beat(
                 beat_id="1",
                 kind="speech",
                 speaker="Maya",
@@ -138,7 +138,7 @@ class TestGenerateSrt:
     def test_split_entries_have_proper_timing(self):
         text = "This is a very long dialogue that will need to be split into two entries"
         beats = [
-            BeatData(beat_id="1", kind="speech", speaker="Maya", text=text, duration_sec=6.0),
+            Beat(beat_id="1", kind="speech", speaker="Maya", text=text, duration_sec=6.0),
         ]
         result = generate_srt(beats, max_chars=42)
         entries = result.strip().split("\n\n")
@@ -151,9 +151,9 @@ class TestGenerateSrt:
 
     def test_silent_beats_skipped(self):
         beats = [
-            BeatData(beat_id="1", kind="speech", speaker="Maya", text="Hello", duration_sec=2.0),
-            BeatData(beat_id="2", kind="silent", duration_sec=3.0),
-            BeatData(beat_id="3", kind="speech", speaker="Derek", text="Hi", duration_sec=2.0),
+            Beat(beat_id="1", kind="speech", speaker="Maya", text="Hello", duration_sec=2.0),
+            Beat(beat_id="2", kind="silent", duration_sec=3.0),
+            Beat(beat_id="3", kind="speech", speaker="Derek", text="Hi", duration_sec=2.0),
         ]
         result = generate_srt(beats)
         entries = result.strip().split("\n\n")
@@ -167,7 +167,7 @@ class TestGenerateSrt:
 
     def test_text_with_newlines_sanitized(self):
         beats = [
-            BeatData(
+            Beat(
                 beat_id="1",
                 kind="speech",
                 speaker="Maya",
@@ -182,7 +182,7 @@ class TestGenerateSrt:
 
     def test_missing_speaker_omits_prefix(self):
         beats = [
-            BeatData(beat_id="1", kind="speech", text="Hello", duration_sec=2.0),
+            Beat(beat_id="1", kind="speech", text="Hello", duration_sec=2.0),
         ]
         result = generate_srt(beats)
         assert result.startswith("1\n")

@@ -5,7 +5,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from showrunner.loader import BeatData
+from showrunner.schemas.episode import Beat
 from showrunner.paths import RunPaths
 
 logger = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ class BeatClipUniformiser:
 
     def uniformise_beats(
         self,
-        beats: list[BeatData],
+        beats: list[Beat],
         paths: RunPaths,
         scene_id: str,
     ) -> list[Path]:

@@ -110,13 +110,13 @@ def test_speech_beat_missing_speaker_returns_false(tmp_path):
         "episode": 2,
         "title": "Test",
         "schema_version": "2.0",
-        "cast": {},
-        "environments": {},
+        "cast": {"maya": {"name": "Maya"}},
+        "environments": {"x": {"trigger_word": "x"}},
         "scenes": [
             {
                 "scene_id": "001",
                 "environment": "x",
-                "characters_present": ["a"],
+                "characters_present": ["maya"],
                 "beats": [
                     {"beat_id": "b1", "kind": "speech", "text": "Hello"},
                 ],
@@ -137,13 +137,13 @@ def test_speech_beat_missing_text_returns_false(tmp_path):
         "episode": 2,
         "title": "Test",
         "schema_version": "2.0",
-        "cast": {},
-        "environments": {},
+        "cast": {"maya": {"name": "Maya"}},
+        "environments": {"x": {"trigger_word": "x"}},
         "scenes": [
             {
                 "scene_id": "001",
                 "environment": "x",
-                "characters_present": ["a"],
+                "characters_present": ["maya"],
                 "beats": [
                     {"beat_id": "b1", "kind": "speech", "speaker": "maya"},
                 ],
@@ -164,13 +164,13 @@ def test_invalid_beat_kind_returns_false(tmp_path):
         "episode": 2,
         "title": "Test",
         "schema_version": "2.0",
-        "cast": {},
-        "environments": {},
+        "cast": {"maya": {"name": "Maya"}},
+        "environments": {"x": {"trigger_word": "x"}},
         "scenes": [
             {
                 "scene_id": "001",
                 "environment": "x",
-                "characters_present": ["a"],
+                "characters_present": ["maya"],
                 "beats": [
                     {"beat_id": "b1", "kind": "invalid_kind"},
                 ],
