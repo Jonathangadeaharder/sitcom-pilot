@@ -5,7 +5,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from showrunner.cast_manifest import CastManifest
-from showrunner.loader import EpisodeData, SceneData
 from showrunner.reporting import SceneReport, save_report
 from showrunner.scene_render import (
     BeatJob,
@@ -13,6 +12,7 @@ from showrunner.scene_render import (
     _render_beat,
     allocate_durations,
 )
+from showrunner.schemas.episode import EpisodeData, Scene
 
 
 class TestBeatStatus:
@@ -83,7 +83,7 @@ class TestRenderBeatEdgeCases:
         client.text2image.side_effect = [RuntimeError("first fail"), tmp_path / "img.png"]
         client.image2video.return_value = tmp_path / "vid.mp4"
 
-        scene = SceneData(scene_id="001", environment="office", characters_present=[])
+        scene = Scene(scene_id="001", environment="office", characters_present=[])
         episode = EpisodeData(title="T", cast={}, environments={}, scenes=[scene])
         manifest = CastManifest()
         job = BeatJob(
@@ -106,7 +106,7 @@ class TestRenderBeatEdgeCases:
         client = MagicMock()
         client.text2image.side_effect = RuntimeError("always fail")
 
-        scene = SceneData(scene_id="001", environment="office", characters_present=[])
+        scene = Scene(scene_id="001", environment="office", characters_present=[])
         episode = EpisodeData(title="T", cast={}, environments={}, scenes=[scene])
         manifest = CastManifest()
         job = BeatJob(

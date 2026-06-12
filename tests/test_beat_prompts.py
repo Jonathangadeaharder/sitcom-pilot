@@ -4,7 +4,7 @@ import pytest
 
 from showrunner.beat_prompts import build_beat_prompt, build_character_prompt, build_scene_prompt
 from showrunner.cast_manifest import CastManifest, CharacterProfile, WardrobeEntry
-from showrunner.loader import BeatData, EpisodeData, SceneData
+from showrunner.schemas.episode import Beat, Character, Environment, EpisodeData, Scene
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def episode():
     return EpisodeData(
         title="Test Episode",
         scenes=[
-            SceneData(
+            Scene(
                 scene_id="001",
                 environment="office",
                 characters_present=["maya", "derek"],
@@ -55,21 +55,20 @@ def episode_with_env_and_cast():
     return EpisodeData(
         title="Test Episode",
         scenes=[
-            SceneData(
+            Scene(
                 scene_id="001",
                 environment="office",
                 characters_present=["maya", "extra"],
             ),
         ],
         cast={
-            "extra": CharacterProfile(
+            "extra": Character(
                 name="Extra",
-                slug="extra",
                 visual="background actor",
             ),
         },
         environments={
-            "office": type("Env", (), {"trigger_word": "in the office"})(),
+            "office": Environment(trigger_word="in the office"),
         },
     )
 
@@ -147,9 +146,9 @@ class TestBuildScenePrompt:
         scene = episode_with_env_and_cast.scenes[0]
         ep_no_visual = EpisodeData(
             title="Test",
-            scenes=[SceneData(scene_id="001", environment="room", characters_present=["extra"])],
+            scenes=[Scene(scene_id="001", environment="room", characters_present=["extra"])],
             cast={
-                "extra": CharacterProfile(name="Extra Person", slug="extra", visual=""),
+                "extra": Character(name="Extra Person", visual=""),
             },
             environments={},
         )
@@ -192,7 +191,7 @@ class TestBuildScenePrompt:
     def test_no_characters_returns_just_env(self, episode):
         empty_ep = EpisodeData(
             title="Test",
-            scenes=[SceneData(scene_id="001", environment="void", characters_present=[])],
+            scenes=[Scene(scene_id="001", environment="void", characters_present=[])],
             cast={},
             environments={},
         )
@@ -204,27 +203,27 @@ class TestBuildScenePrompt:
 class TestBuildBeatPrompt:
     def test_beat_prompt(self, manifest, episode):
         scene = episode.scenes[0]
-        beat = BeatData(beat_id="001_001", kind="speech", action="Maya enters the room")
+        beat = Beat(beat_id="001_001", kind="speech", action="Maya enters the room")
         prompt = build_beat_prompt(beat, scene, episode, manifest)
         assert "Maya enters" in prompt
         assert "8k" in prompt
 
     def test_uses_scene_and_character_information(self, manifest, episode):
         scene = episode.scenes[0]
-        beat = BeatData(beat_id="001_001", kind="speech", action="speaks")
+        beat = Beat(beat_id="001_001", kind="speech", action="speaks")
         prompt = build_beat_prompt(beat, scene, episode, manifest)
         assert "East Asian woman" in prompt
         assert "Black man" in prompt
 
     def test_action_falls_back_to_text(self, manifest, episode):
         scene = episode.scenes[0]
-        beat = BeatData(beat_id="001_001", kind="speech", action="", text="Maya waves")
+        beat = Beat(beat_id="001_001", kind="speech", action="", text="Maya waves")
         prompt = build_beat_prompt(beat, scene, episode, manifest)
         assert "Maya waves" in prompt
 
     def test_action_and_text_empty_omits_action_part(self, manifest, episode):
         scene = episode.scenes[0]
-        beat = BeatData(beat_id="001_001", kind="speech", action="", text="")
+        beat = Beat(beat_id="001_001", kind="speech", action="", text="")
         prompt = build_beat_prompt(beat, scene, episode, manifest)
         # action part empty: scene_prompt + quality = 2 logical parts joined by comma-space
         assert prompt.startswith("office, East Asian")
@@ -233,7 +232,7 @@ class TestBuildBeatPrompt:
 
     def test_quality_string_always_present(self, manifest, episode):
         scene = episode.scenes[0]
-        beat = BeatData(beat_id="001_001", kind="silent", action="", text="")
+        beat = Beat(beat_id="001_001", kind="silent", action="", text="")
         prompt = build_beat_prompt(beat, scene, episode, manifest)
         assert "RAW" in prompt
         assert "8k" in prompt
@@ -241,14 +240,14 @@ class TestBuildBeatPrompt:
 
     def test_quality_string_case_sensitive(self, manifest, episode):
         scene = episode.scenes[0]
-        beat = BeatData(beat_id="001_001", kind="speech", action="looks left")
+        beat = Beat(beat_id="001_001", kind="speech", action="looks left")
         prompt = build_beat_prompt(beat, scene, episode, manifest)
         assert "RAW photo" in prompt
         assert "raw photo" not in prompt
 
     def test_join_separator_comma_space(self, manifest, episode):
         scene = episode.scenes[0]
-        beat = BeatData(beat_id="001_001", kind="speech", action="acts")
+        beat = Beat(beat_id="001_001", kind="speech", action="acts")
         prompt = build_beat_prompt(beat, scene, episode, manifest)
         assert prompt.endswith("cinematic lighting")
         assert "acts" in prompt
@@ -256,12 +255,12 @@ class TestBuildBeatPrompt:
 
     def test_join_separator_not_contains_xx(self, manifest, episode):
         scene = episode.scenes[0]
-        beat = BeatData(beat_id="001_001", kind="speech", action="acts")
+        beat = Beat(beat_id="001_001", kind="speech", action="acts")
         prompt = build_beat_prompt(beat, scene, episode, manifest)
         assert "XX" not in prompt
 
     def test_beat_prompt_passes_episode_id(self, manifest, episode):
         scene = episode.scenes[0]
-        beat = BeatData(beat_id="001_001", kind="speech", action="waves")
+        beat = Beat(beat_id="001_001", kind="speech", action="waves")
         prompt = build_beat_prompt(beat, scene, episode, manifest, episode_id="s01e01")
         assert "dark purple hoodie" in prompt

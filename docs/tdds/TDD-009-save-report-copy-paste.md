@@ -1,6 +1,6 @@
 # TDD-009: `_save_report` is copy-pasted between `scene_render.py` and `render_buffer.py`
 
-- Status: Open
+- Status: Fixed in working tree (verified 2026-06-12: extracted to `showrunner/reporting.py:24`; both `scene_render.py` and `render_buffer.py` import it)
 - Date: 2026-06-11
 - Category: Duplication
 - Severity: Medium

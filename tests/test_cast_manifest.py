@@ -6,7 +6,7 @@ from showrunner.cast_manifest import (
     CharacterRef,
     WardrobeEntry,
 )
-from showrunner.loader import VoiceConfig
+from showrunner.schemas.episode import VoiceConfig
 
 
 class TestCharacterRef:

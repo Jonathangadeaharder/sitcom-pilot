@@ -4,7 +4,7 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from showrunner.loader import VoiceConfig
+from showrunner.schemas.episode import VoiceConfig
 
 
 @dataclass(frozen=True)

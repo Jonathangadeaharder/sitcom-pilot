@@ -16,7 +16,7 @@ from showrunner.assembler import (
     mux_audio,
     uniformize_clip,
 )
-from showrunner.loader import BeatData
+from showrunner.schemas.episode import Beat
 
 
 @pytest.fixture
@@ -95,14 +95,12 @@ class TestGenerateSrt:
     def test_generates_srt(self, tmp_path):
         beats = [
             (
-                BeatData(
-                    beat_id="1", kind="speech", speaker="Maya", text="Hello!", duration_sec=3.0
-                ),
+                Beat(beat_id="1", kind="speech", speaker="Maya", text="Hello!", duration_sec=3.0),
                 3.0,
             ),
-            (BeatData(beat_id="2", kind="silent", duration_sec=2.0), 2.0),
+            (Beat(beat_id="2", kind="silent", duration_sec=2.0), 2.0),
             (
-                BeatData(
+                Beat(
                     beat_id="3", kind="speech", speaker="Derek", text="Hi there", duration_sec=2.5
                 ),
                 2.5,
@@ -118,8 +116,8 @@ class TestGenerateSrt:
 
     def test_srt_timing(self, tmp_path):
         beats = [
-            (BeatData(beat_id="1", kind="speech", text="First", duration_sec=3.0), 3.0),
-            (BeatData(beat_id="2", kind="speech", text="Second", duration_sec=2.0), 2.0),
+            (Beat(beat_id="1", kind="speech", text="First", duration_sec=3.0), 3.0),
+            (Beat(beat_id="2", kind="speech", text="Second", duration_sec=2.0), 2.0),
         ]
         out = tmp_path / "subs.srt"
         generate_srt(beats, out)
@@ -130,7 +128,7 @@ class TestGenerateSrt:
     def test_srt_newlines_sanitized(self, tmp_path):
         beats = [
             (
-                BeatData(
+                Beat(
                     beat_id="1",
                     kind="speech",
                     speaker="Maya",
@@ -150,7 +148,7 @@ class TestGenerateSrt:
     def test_srt_utf8_encoding(self, tmp_path):
         beats = [
             (
-                BeatData(
+                Beat(
                     beat_id="1",
                     kind="speech",
                     text="Ünïcödé: ça va?",

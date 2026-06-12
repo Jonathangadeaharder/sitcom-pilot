@@ -8,8 +8,8 @@ from showrunner.beat_clip_uniformiser import (
     BeatClipUniformiser,
     UniformiserConfig,
 )
-from showrunner.loader import BeatData
 from showrunner.paths import RunPaths
+from showrunner.schemas.episode import Beat
 
 
 @pytest.fixture
@@ -165,9 +165,9 @@ class TestBeatClipUniformiser:
     def test_uniformise_beats_batch(self, mock_run, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
         beat_data_list = [
-            BeatData(beat_id="b1", kind="speech", text="Hi"),
-            BeatData(beat_id="b2", kind="silent"),
-            BeatData(beat_id="b3", kind="speech", text="Bye"),
+            Beat(beat_id="b1", kind="speech", text="Hi"),
+            Beat(beat_id="b2", kind="silent"),
+            Beat(beat_id="b3", kind="speech", text="Bye"),
         ]
         for bd in beat_data_list:
             paths.ensure_scene_dirs("s001")
@@ -183,7 +183,7 @@ class TestBeatClipUniformiser:
 
     def test_uniformise_beats_missing_video_skipped(self, mock_run, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
-        beat = BeatData(beat_id="missing", kind="silent")
+        beat = Beat(beat_id="missing", kind="silent")
         uniformiser = BeatClipUniformiser()
 
         result = uniformiser.uniformise_beats([beat], paths, scene_id="s001")

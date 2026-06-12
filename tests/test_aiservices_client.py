@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from showrunner.aiservices_client import AIServicesClient, _build_speech_tags
-from showrunner.loader import CharacterData, VoiceConfig
+from showrunner.schemas.episode import Character, VoiceConfig
 
 
 def _mock_aiservice_package(name: str):
@@ -160,9 +160,9 @@ class TestText2Speech:
         mock_cli.assert_called_once()
 
     def test_character_voice_extraction(self, client, tmp_path):
-        from showrunner.loader import CharacterData
+        from showrunner.schemas.episode import Character
 
-        char = CharacterData(
+        char = Character(
             name="Maya",
             voice=VoiceConfig(provider="mlx-audio", voice_id="maya_v1", clone_from="ref.wav"),
         )
@@ -225,7 +225,7 @@ class TestResolveVoiceConfig:
 
     def test_no_voice_uses_character_voice(self):
         char_voice = VoiceConfig(provider="test", voice_id="char_v1")
-        char = CharacterData(name="Test", voice=char_voice)
+        char = Character(name="Test", voice=char_voice)
         result = AIServicesClient._resolve_voice_config(None, char)
         assert result is char_voice
 
@@ -234,6 +234,6 @@ class TestResolveVoiceConfig:
         assert result is None
 
     def test_no_voice_character_no_voice_returns_none(self):
-        char = CharacterData(name="Test", voice=None)
+        char = Character(name="Test", voice=None)
         result = AIServicesClient._resolve_voice_config(None, char)
         assert result is None

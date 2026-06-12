@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from showrunner.loader import BeatData
+from showrunner.schemas.episode import Beat
 
 
 def timecode(seconds: float) -> str:
@@ -31,7 +31,7 @@ def split_text_for_subtitles(text: str, max_chars: int = 42) -> list[str]:
 
 
 def generate_srt(
-    beats: list[BeatData],
+    beats: list[Beat],
     max_chars: int = 42,
 ) -> str:
     lines: list[str] = []

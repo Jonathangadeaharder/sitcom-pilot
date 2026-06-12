@@ -1,6 +1,6 @@
 # TDD-005: `cli/main.py` is an 873-line god module with a half-finished refactor
 
-- Status: Open
+- Status: Fixed (verified 2026-06-12: pipeline helpers extracted to cli/pipeline.py; suppress replaced with logger.warning)
 - Date: 2026-06-11
 - Category: Unnecessary complexity
 - Severity: Medium-High

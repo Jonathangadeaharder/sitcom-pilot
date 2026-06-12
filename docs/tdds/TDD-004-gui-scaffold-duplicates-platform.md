@@ -1,6 +1,6 @@
 # TDD-004: Tauri GUI scaffold in the content project duplicates scriptforge's role
 
-- Status: Open
+- Status: Fixed (verified 2026-06-12: gui/ directory deleted)
 - Date: 2026-06-11
 - Category: Unnecessary complexity / Architecture
 - Severity: Medium

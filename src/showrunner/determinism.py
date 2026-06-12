@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from showrunner.cast_manifest import CastManifest
-from showrunner.loader import EpisodeData
+from showrunner.schemas.episode import EpisodeData
 
 # ---------------------------------------------------------------------------
 # SeedStrategy — deterministic seed derivation per beat / scene / episode

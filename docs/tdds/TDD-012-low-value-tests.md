@@ -1,6 +1,6 @@
 # TDD-012: Low-value test patterns inflating a 793-function suite
 
-- Status: Partially fixed in working tree
+- Status: Fixed (verified 2026-06-12: all 5 item categories resolved — dead code tests deleted, golden-self removed, open-set assertions gone, loader tests merged via TDD-002, default-value change-detectors gone)
 - Date: 2026-06-11
 - Category: Meaningless tests
 - Severity: Medium

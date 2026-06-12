@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from showrunner.loader import CharacterData, VoiceConfig
+from showrunner.schemas.episode import Character, VoiceConfig
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +28,6 @@ class AIServicesClient:
         asr_provider: str | None = None,
         subprocess_fallback: bool = True,
     ):
-        if isinstance(image_provider, bool):
-            subprocess_fallback, image_provider = image_provider, "mlx-flux"
         self._image_provider = image_provider
         self._image_edit_provider = image_edit_provider  # deprecated
         self._video_provider = video_provider
@@ -135,7 +133,7 @@ class AIServicesClient:
     @staticmethod
     def _resolve_voice_config(
         voice: VoiceConfig | None,
-        character: CharacterData | None,
+        character: Character | None,
     ) -> VoiceConfig | None:
         if voice:
             return voice
@@ -152,7 +150,7 @@ class AIServicesClient:
         emotion: str | None = None,
         tone: str | None = None,
         effect: str | None = None,
-        character: CharacterData | None = None,
+        character: Character | None = None,
     ) -> Path:
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)

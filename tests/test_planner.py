@@ -7,16 +7,16 @@ import pytest
 
 from showrunner.cast_manifest import CastManifest, CharacterProfile
 from showrunner.determinism import SeedStrategy
-from showrunner.loader import (
-    BeatData,
-    EnvironmentData,
-    EpisodeData,
-    SceneData,
-    VoiceConfig,
-)
 from showrunner.paths import RunPaths
 from showrunner.planner import plan_episode
 from showrunner.scene_render import BeatJob, BeatStatus, SceneReport, allocate_durations, plan_beats
+from showrunner.schemas.episode import (
+    Beat,
+    Environment,
+    EpisodeData,
+    Scene,
+    VoiceConfig,
+)
 
 
 @pytest.fixture
@@ -42,13 +42,13 @@ def single_beat_episode():
     return EpisodeData(
         title="Single",
         cast={},
-        environments={"room": EnvironmentData(trigger_word="room")},
+        environments={"room": Environment(trigger_word="room")},
         scenes=[
-            SceneData(
+            Scene(
                 scene_id="001",
                 environment="room",
                 characters_present=[],
-                beats=[BeatData(beat_id="001_001", kind="silent", duration_sec=5.0)],
+                beats=[Beat(beat_id="001_001", kind="silent", duration_sec=5.0)],
             ),
         ],
     )
@@ -60,31 +60,31 @@ def multi_scene_episode():
         title="Multi",
         cast={},
         environments={
-            "room": EnvironmentData(trigger_word="room"),
-            "office": EnvironmentData(trigger_word="office"),
+            "room": Environment(trigger_word="room"),
+            "office": Environment(trigger_word="office"),
         },
         scenes=[
-            SceneData(
+            Scene(
                 scene_id="001",
                 environment="room",
                 characters_present=[],
                 beats=[
-                    BeatData(
+                    Beat(
                         beat_id="001_001",
                         kind="speech",
                         speaker="maya",
                         text="Hi",
                         duration_sec=2.0,
                     ),
-                    BeatData(beat_id="001_002", kind="silent", duration_sec=3.0),
+                    Beat(beat_id="001_002", kind="silent", duration_sec=3.0),
                 ],
             ),
-            SceneData(
+            Scene(
                 scene_id="002",
                 environment="office",
                 characters_present=[],
                 beats=[
-                    BeatData(
+                    Beat(
                         beat_id="002_001",
                         kind="speech",
                         speaker="maya",
@@ -192,7 +192,7 @@ class TestPlanBeats:
             title="E",
             cast={},
             environments={},
-            scenes=[SceneData(scene_id="001", environment="room", characters_present=[], beats=[])],
+            scenes=[Scene(scene_id="001", environment="room", characters_present=[], beats=[])],
         )
         paths = RunPaths(tmp_path, "test-run")
         jobs = plan_beats(ep, manifest, paths)
@@ -257,13 +257,13 @@ class TestPlanBeats:
         ep = EpisodeData(
             title="E",
             cast={},
-            environments={"room": EnvironmentData(trigger_word="room")},
+            environments={"room": Environment(trigger_word="room")},
             scenes=[
-                SceneData(
+                Scene(
                     scene_id="001",
                     environment="room",
                     characters_present=[],
-                    beats=[BeatData(beat_id="b1", kind="speech", speaker="maya", text="")],
+                    beats=[Beat(beat_id="b1", kind="speech", speaker="maya", text="")],
                 ),
             ],
         )

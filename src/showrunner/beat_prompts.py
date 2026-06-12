@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from showrunner.cast_manifest import CastManifest, CharacterProfile
-from showrunner.loader import BeatData, EpisodeData, SceneData
+from showrunner.schemas.episode import Beat, EpisodeData, Scene
 
 
 def build_character_prompt(
@@ -22,7 +22,7 @@ def build_character_prompt(
 
 
 def build_scene_prompt(
-    scene: SceneData,
+    scene: Scene,
     episode: EpisodeData,
     manifest: CastManifest,
     *,
@@ -44,8 +44,8 @@ def build_scene_prompt(
 
 
 def build_beat_prompt(
-    beat: BeatData,
-    scene: SceneData,
+    beat: Beat,
+    scene: Scene,
     episode: EpisodeData,
     manifest: CastManifest,
     *,

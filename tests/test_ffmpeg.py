@@ -14,7 +14,7 @@ from showrunner.assembler import (
 )
 from showrunner.beat_clip_uniformiser import BeatClipUniformiser, UniformiserConfig
 from showrunner.beat_clip_uniformiser import _run as _uniformiser_run
-from showrunner.loader import BeatData
+from showrunner.schemas.episode import Beat
 
 
 class TestFmtSrtTime:
@@ -136,8 +136,8 @@ class TestGenerateSrtEdgeCases:
 
     def test_all_silent_beats(self, tmp_path):
         beats = [
-            (BeatData(beat_id="b1", kind="silent", duration_sec=2.0), 2.0),
-            (BeatData(beat_id="b2", kind="silent", duration_sec=3.0), 3.0),
+            (Beat(beat_id="b1", kind="silent", duration_sec=2.0), 2.0),
+            (Beat(beat_id="b2", kind="silent", duration_sec=3.0), 3.0),
         ]
         out = tmp_path / "subs.srt"
         generate_srt(beats, out)
@@ -146,14 +146,12 @@ class TestGenerateSrtEdgeCases:
     def test_mixed_speech_silent(self, tmp_path):
         beats = [
             (
-                BeatData(
-                    beat_id="b1", kind="speech", speaker="Maya", text="Hello", duration_sec=2.0
-                ),
+                Beat(beat_id="b1", kind="speech", speaker="Maya", text="Hello", duration_sec=2.0),
                 2.0,
             ),
-            (BeatData(beat_id="b2", kind="silent", duration_sec=1.0), 1.0),
+            (Beat(beat_id="b2", kind="silent", duration_sec=1.0), 1.0),
             (
-                BeatData(beat_id="b3", kind="speech", speaker="Derek", text="Hi", duration_sec=2.0),
+                Beat(beat_id="b3", kind="speech", speaker="Derek", text="Hi", duration_sec=2.0),
                 2.0,
             ),
         ]
@@ -166,7 +164,7 @@ class TestGenerateSrtEdgeCases:
 
     def test_speech_without_speaker(self, tmp_path):
         beats = [
-            (BeatData(beat_id="b1", kind="speech", text="Hello", duration_sec=2.0), 2.0),
+            (Beat(beat_id="b1", kind="speech", text="Hello", duration_sec=2.0), 2.0),
         ]
         out = tmp_path / "subs.srt"
         generate_srt(beats, out)
@@ -176,8 +174,8 @@ class TestGenerateSrtEdgeCases:
 
     def test_timing_accumulates(self, tmp_path):
         beats = [
-            (BeatData(beat_id="b1", kind="speech", text="A", duration_sec=2.5), 2.5),
-            (BeatData(beat_id="b2", kind="speech", text="B", duration_sec=1.5), 1.5),
+            (Beat(beat_id="b1", kind="speech", text="A", duration_sec=2.5), 2.5),
+            (Beat(beat_id="b2", kind="speech", text="B", duration_sec=1.5), 1.5),
         ]
         out = tmp_path / "subs.srt"
         generate_srt(beats, out)
@@ -324,8 +322,8 @@ class TestBeatClipUniformiser:
     def test_uniformise_beats_missing_skipped(self, tmp_path):
         u = BeatClipUniformiser()
         beats = [
-            BeatData(beat_id="b1", kind="speech"),
-            BeatData(beat_id="b2", kind="silent"),
+            Beat(beat_id="b1", kind="speech"),
+            Beat(beat_id="b2", kind="silent"),
         ]
         paths = MagicMock()
         paths.beat_video.return_value = tmp_path / "nonexistent.mp4"

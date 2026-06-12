@@ -8,10 +8,10 @@ from pathlib import Path
 
 from showrunner.aiservices_client import AIServicesClient
 from showrunner.cast_manifest import CastManifest
-from showrunner.loader import EpisodeData, SceneData
 from showrunner.paths import RunPaths
 from showrunner.reporting import SceneReport, save_report
 from showrunner.scene_render import BeatJob, BeatStatus, _render_beat
+from showrunner.schemas.episode import EpisodeData, Scene
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +57,7 @@ class RenderBuffer:
         """Map a final output path to a corresponding buffer path."""
         return self._buffer_dir / final_path.relative_to(self._paths.run_dir)
 
-    def _build_reports(
-        self, jobs: list[BeatJob], scenes: list[SceneData]
-    ) -> dict[str, SceneReport]:
+    def _build_reports(self, jobs: list[BeatJob], scenes: list[Scene]) -> dict[str, SceneReport]:
         reports: dict[str, SceneReport] = {}
         for sc in scenes:
             reports[sc.scene_id] = SceneReport(
@@ -93,7 +91,7 @@ class RenderBuffer:
     def _submit_buffer_job(
         self,
         j: BeatJob,
-        scenes: list[SceneData],
+        scenes: list[Scene],
         futures: dict,
         submitted_ids: set[str],
     ) -> None:
@@ -110,7 +108,7 @@ class RenderBuffer:
     def render(
         self,
         jobs: list[BeatJob],
-        scenes: list[SceneData],
+        scenes: list[Scene],
     ) -> list[SceneReport]:
         reports = self._build_reports(jobs, scenes)
         if not jobs:
@@ -149,7 +147,7 @@ class RenderBuffer:
         return list(reports.values())
 
 
-def _find_scene(scenes: list[SceneData], scene_id: str) -> SceneData | None:
+def _find_scene(scenes: list[Scene], scene_id: str) -> Scene | None:
     for sc in scenes:
         if sc.scene_id == scene_id:
             return sc
