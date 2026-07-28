@@ -249,7 +249,7 @@ showrunner doctor [--json] [-v]
 
 ## Episode Format (v2.0)
 
-Episodes are JSON files using the beat-based schema. See `schemas/episode_v2.schema.json` for the full JSON Schema.
+Episodes are JSON files using the beat-based schema. The authoritative schema is defined by the pydantic models in `src/showrunner/schemas/episode.py`.
 
 ### Minimal Example
 
@@ -383,9 +383,9 @@ Stored as `cast_manifest.json` and loadable via `CastManifest.load()`.
 
 ## Pipeline Stages
 
-### 1. Validate (`validator.py`)
+### 1. Validate (`commands/validate.py`)
 
-Validates episode JSON against `schemas/episode_v2.schema.json`. Strict mode adds business-rule checks (e.g., all referenced characters/environments must exist, speech beats have speaker + text).
+Validates episode JSON against the pydantic models in `src/showrunner/schemas/episode.py`. Strict mode adds business-rule checks (e.g., all referenced characters/environments must exist, speech beats have speaker + text).
 
 ### 2. Plan (`scene_render.py:plan_beats`)
 
@@ -442,7 +442,6 @@ output/
 
 ```
 sitcom-pilot/
-├── assets/              # Cast reference images, voice samples
 ├── docs/                # Guides, references, and architecture docs
 │   ├── architecture/    # ADRs (architecture decision records)
 │   ├── specs/           # Design specs
@@ -451,8 +450,6 @@ sitcom-pilot/
 │   ├── episode_schema_reference.md
 │   ├── writers_guide.md
 │   └── reference_asset_checklist.md
-├── schemas/             # JSON Schema definitions
-│   └── episode_v2.schema.json
 ├── src/
 │   └── showrunner/      # Main package
 │       ├── cli/         # Typer CLI entry point
@@ -464,7 +461,6 @@ sitcom-pilot/
 │       ├── scene_render.py  # BeatJob orchestration, render_scene/episode
 │       ├── renderer.py  # ShotRenderer (v1 legacy, ComfyUI driver)
 │       ├── assembler.py # FFmpeg assembly (concat, SRT, captions, music)
-│       ├── validator.py # EpisodeValidator (jsonschema + business rules)
 │       ├── planner.py   # Plan episode beats with cost estimation
 │       ├── paths.py     # RunPaths — output directory layout
 │       ├── config.py    # PipelineConfig (pydantic-settings + fallback)
@@ -520,7 +516,7 @@ uv run mutmut run
 - `docs/episode_schema_reference.md` — Full schema field reference
 - `docs/reference_asset_checklist.md` — Asset preparation guide
 - `docs/architecture/` — Deep-dive architecture docs
-- `schemas/episode_v2.schema.json` — JSON Schema Draft 2020-12
+- `src/showrunner/schemas/episode.py` — Pydantic models defining the episode schema
 
 ## License
 
