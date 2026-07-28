@@ -11,8 +11,6 @@ dependencies = [
     "structlog>=25.1.0",
     # ComfyUI HTTP client (v1 render path)
     "httpx>=0.27.0",
-    # Episode schema validation
-    "jsonschema>=4.21.0",
     # Image processing (continuity checks)
     "pillow>=12.2.0",
     "scikit-image>=0.20.0",
@@ -31,12 +29,12 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-aiservices-core = { git = "https://github.com/Jonathangadeaharder/AIServices.git", subdirectory = "packages/aiservices_core" }
-text2image = { git = "https://github.com/Jonathangadeaharder/AIServices.git", subdirectory = "packages/text2image" }
-image2image = { git = "https://github.com/Jonathangadeaharder/AIServices.git", subdirectory = "packages/image2image" }
-image2video = { git = "https://github.com/Jonathangadeaharder/AIServices.git", subdirectory = "packages/image2video" }
-text2speech = { git = "https://github.com/Jonathangadeaharder/AIServices.git", subdirectory = "packages/text2speech" }
-audio2subtitle = { git = "https://github.com/Jonathangadeaharder/AIServices.git", subdirectory = "packages/audio2subtitle" }
+aiservices-core = { git = "https://github.com/Jonathangadeaharder/AIServices.git", rev = "0703ef8568a3ad53e7a5cd6277ccaddda7591f48", subdirectory = "packages/aiservices_core" }
+text2image = { git = "https://github.com/Jonathangadeaharder/AIServices.git", rev = "0703ef8568a3ad53e7a5cd6277ccaddda7591f48", subdirectory = "packages/text2image" }
+image2image = { git = "https://github.com/Jonathangadeaharder/AIServices.git", rev = "0703ef8568a3ad53e7a5cd6277ccaddda7591f48", subdirectory = "packages/image2image" }
+image2video = { git = "https://github.com/Jonathangadeaharder/AIServices.git", rev = "0703ef8568a3ad53e7a5cd6277ccaddda7591f48", subdirectory = "packages/image2video" }
+text2speech = { git = "https://github.com/Jonathangadeaharder/AIServices.git", rev = "0703ef8568a3ad53e7a5cd6277ccaddda7591f48", subdirectory = "packages/text2speech" }
+audio2subtitle = { git = "https://github.com/Jonathangadeaharder/AIServices.git", rev = "0703ef8568a3ad53e7a5cd6277ccaddda7591f48", subdirectory = "packages/audio2subtitle" }
 
 [dependency-groups]
 dev = [
@@ -61,8 +59,8 @@ source = ["src/showrunner"]
 relative_files = true
 
 [tool.coverage.report]
-# fail_under enforced by --cov-fail-under=90 in CI workflow commands (pr-gate.yml lines 47, 51)
-# Removed from here to prevent mutmut's internal test runs from failing on pre-imported modules
+# fail_under is enforced via --cov-fail-under=90 in the CI workflows.
+# Kept out of here so mutmut's internal test runs don't fail on it.
 
 [tool.ruff]
 line-length = 100
