@@ -10,7 +10,13 @@ from showrunner.cast_manifest import CastManifest, CharacterProfile, CharacterRe
 from showrunner.commands.validate import validate_episode
 from showrunner.loader import EpisodeLoader
 from showrunner.paths import RunPaths
-from showrunner.scene_render import BeatStatus, plan_beats, render_episode, render_scene
+from showrunner.scene_render import (
+    BeatStatus,
+    _seed_marker,
+    plan_beats,
+    render_episode,
+    render_scene,
+)
 
 EPISODE_02 = Path(__file__).resolve().parent.parent / "episode_02.json"
 
@@ -137,6 +143,7 @@ class TestRenderEpisode:
         for j in jobs:
             if j.scene_id == "001":
                 _write_dummy(j.image_path)
+                _seed_marker(j.image_path).write_text(str(j.seed))
         scene = episode_02.scenes[0]
         scene_jobs = [j for j in jobs if j.scene_id == "001"]
         render_scene(scene, scene_jobs, mock_client, manifest_02, episode_02)

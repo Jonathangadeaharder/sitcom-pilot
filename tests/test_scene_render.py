@@ -14,6 +14,7 @@ from showrunner.scene_render import (
     _render_audio,
     _render_image,
     _render_video,
+    _seed_marker,
     allocate_durations,
     plan_beats,
     render_episode,
@@ -26,6 +27,30 @@ from showrunner.schemas.episode import (
     Scene,
     VoiceConfig,
 )
+
+
+def _write_artefact(path):
+    """Write a dummy artefact file (mirrors what a real provider does)."""
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_bytes(b"data")
+    return p
+
+
+def _writing_client():
+    """MagicMock client whose render calls create the output artefact files."""
+    client = MagicMock()
+    client.text2image.side_effect = lambda prompt, path, **kw: _write_artefact(path)
+    client.text2speech.side_effect = lambda text, path, **kw: _write_artefact(path)
+    client.image2video.side_effect = lambda img, prompt, path, **kw: _write_artefact(path)
+    return client
+
+
+def _write_cached(path, seed):
+    """Write an artefact plus its seed marker so it counts as a valid cache hit."""
+    p = _write_artefact(path)
+    _seed_marker(p).write_text(str(seed))
+    return p
 
 
 @pytest.fixture
@@ -145,10 +170,7 @@ class TestRenderScene:
     def test_renders_beats(self, episode, manifest, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
         jobs = plan_beats(episode, manifest, paths)
-        client = MagicMock()
-        client.text2image.return_value = tmp_path / "img.png"
-        client.text2speech.return_value = tmp_path / "aud.wav"
-        client.image2video.return_value = tmp_path / "vid.mp4"
+        client = _writing_client()
 
         report = render_scene(episode.scenes[0], jobs, client, manifest, episode)
         assert report.total_beats == 2
@@ -178,10 +200,7 @@ class TestSceneReport:
 class TestRenderEpisode:
     def test_full_pipeline(self, episode, manifest, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
-        client = MagicMock()
-        client.text2image.return_value = tmp_path / "img.png"
-        client.text2speech.return_value = tmp_path / "aud.wav"
-        client.image2video.return_value = tmp_path / "vid.mp4"
+        client = _writing_client()
 
         reports = render_episode(episode, manifest, paths, client)
         assert len(reports) == 1
@@ -196,10 +215,7 @@ class TestProgressCallback:
     def test_render_scene_calls_progress(self, episode, manifest, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
         jobs = plan_beats(episode, manifest, paths)
-        client = MagicMock()
-        client.text2image.return_value = tmp_path / "img.png"
-        client.text2speech.return_value = tmp_path / "aud.wav"
-        client.image2video.return_value = tmp_path / "vid.mp4"
+        client = _writing_client()
 
         events: list = []
         report = render_scene(
@@ -219,10 +235,7 @@ class TestProgressCallback:
 
     def test_render_episode_calls_progress(self, episode, manifest, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
-        client = MagicMock()
-        client.text2image.return_value = tmp_path / "img.png"
-        client.text2speech.return_value = tmp_path / "aud.wav"
-        client.image2video.return_value = tmp_path / "vid.mp4"
+        client = _writing_client()
 
         events: list = []
         reports = render_episode(
@@ -316,23 +329,31 @@ class TestCacheResume:
     def test_skips_existing_image(self, episode, manifest, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
         jobs = plan_beats(episode, manifest, paths)
-        jobs[0].image_path.parent.mkdir(parents=True, exist_ok=True)
-        jobs[0].image_path.write_bytes(b"fake")
-        client = MagicMock()
+        _write_cached(jobs[0].image_path, jobs[0].seed)
+        client = _writing_client()
 
         render_scene(episode.scenes[0], jobs, client, manifest, episode)
+        # jobs[0] is a cache hit; only jobs[1] re-renders its image.
         client.text2image.assert_called_once()
+
+    def test_rerenders_image_when_seed_changed(self, episode, manifest, tmp_path):
+        paths = RunPaths(tmp_path, "test-run")
+        jobs = plan_beats(episode, manifest, paths)
+        # Cached under a different seed (e.g. after an edit or --seed override).
+        _write_cached(jobs[0].image_path, jobs[0].seed + 1)
+        client = _writing_client()
+
+        render_scene(episode.scenes[0], jobs, client, manifest, episode)
+        rendered_paths = [str(c[0][1]) for c in client.text2image.call_args_list]
+        assert str(jobs[0].image_path) in rendered_paths
 
     def test_skips_existing_audio(self, episode, manifest, tmp_path):
         paths = RunPaths(tmp_path, "test-run")
         jobs = plan_beats(episode, manifest, paths)
         speech_job = [j for j in jobs if j.needs_audio][0]
-        speech_job.image_path.parent.mkdir(parents=True, exist_ok=True)
-        speech_job.audio_path.parent.mkdir(parents=True, exist_ok=True)
-        speech_job.image_path.write_bytes(b"fake")
-        speech_job.audio_path.write_bytes(b"fake")
-        client = MagicMock()
-        client.image2video.return_value = tmp_path / "vid.mp4"
+        _write_cached(speech_job.image_path, speech_job.seed)
+        _write_cached(speech_job.audio_path, speech_job.seed)
+        client = _writing_client()
 
         render_scene(episode.scenes[0], jobs, client, manifest, episode)
 
@@ -359,7 +380,7 @@ class TestRenderImage:
 
     def test_skips_when_image_exists(self, tmp_path):
         img = tmp_path / "img.png"
-        img.write_bytes(b"data")
+        _write_cached(img, 42)
         job = BeatJob(
             scene_id="001",
             beat_id="b1",
@@ -373,6 +394,41 @@ class TestRenderImage:
         client = MagicMock()
         _render_image(job, client)
         client.text2image.assert_not_called()
+
+    def test_rerenders_when_image_seed_mismatch(self, tmp_path):
+        img = tmp_path / "img.png"
+        _write_cached(img, 99)  # cached under a different seed
+        job = BeatJob(
+            scene_id="001",
+            beat_id="b1",
+            kind="silent",
+            prompt="test",
+            seed=42,
+            duration_sec=3.0,
+            needs_audio=False,
+            image_path=img,
+        )
+        client = MagicMock()
+        _render_image(job, client)
+        client.text2image.assert_called_once_with("test", job.image_path, seed=42)
+
+    def test_rerenders_when_image_exists_without_marker(self, tmp_path):
+        # Legacy artefact with no seed marker is not trusted as a cache hit.
+        img = tmp_path / "img.png"
+        img.write_bytes(b"data")
+        job = BeatJob(
+            scene_id="001",
+            beat_id="b1",
+            kind="silent",
+            prompt="test",
+            seed=42,
+            duration_sec=3.0,
+            needs_audio=False,
+            image_path=img,
+        )
+        client = MagicMock()
+        _render_image(job, client)
+        client.text2image.assert_called_once()
 
 
 class TestRenderAudio:
@@ -412,7 +468,7 @@ class TestRenderAudio:
 
     def test_skips_when_audio_exists(self, tmp_path, manifest, episode):
         aud = tmp_path / "aud.wav"
-        aud.write_bytes(b"data")
+        _write_cached(aud, 42)
         job = BeatJob(
             scene_id="001",
             beat_id="b1",
@@ -452,7 +508,7 @@ class TestRenderVideo:
 
     def test_skips_when_video_exists(self, tmp_path):
         vid = tmp_path / "vid.mp4"
-        vid.write_bytes(b"data")
+        _write_cached(vid, 42)
         img = tmp_path / "img.png"
         img.write_bytes(b"data")
         job = BeatJob(
@@ -470,7 +526,7 @@ class TestRenderVideo:
         _render_video(job, client)
         client.image2video.assert_not_called()
 
-    def test_skips_when_image_missing(self, tmp_path):
+    def test_raises_when_image_missing(self, tmp_path):
         job = BeatJob(
             scene_id="001",
             beat_id="b1",
@@ -483,5 +539,6 @@ class TestRenderVideo:
             video_path=tmp_path / "vid.mp4",
         )
         client = MagicMock()
-        _render_video(job, client)
+        with pytest.raises(FileNotFoundError):
+            _render_video(job, client)
         client.image2video.assert_not_called()

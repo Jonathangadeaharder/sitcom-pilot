@@ -75,6 +75,14 @@ def _write_episode(tmp_path: Path, data: dict | None = None) -> Path:
     return ep
 
 
+def _write_artefact(path):
+    """Write a dummy artefact file (mirrors what a real provider does)."""
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_bytes(b"data")
+    return p
+
+
 # ---------------------------------------------------------------------------
 # E7.1: validate
 # ---------------------------------------------------------------------------
@@ -224,9 +232,8 @@ class TestRenderBeat:
     @patch("showrunner.aiservices_client.AIServicesClient")
     def test_render_beat_success(self, mock_client_cls, tmp_path: Path):
         mock_client = MagicMock()
-        img_path = tmp_path / "img.png"
         vid_path = tmp_path / "vid.mp4"
-        mock_client.text2image.return_value = img_path
+        mock_client.text2image.side_effect = lambda prompt, path, **kw: _write_artefact(path)
         mock_client.image2video.return_value = vid_path
         mock_client_cls.return_value = mock_client
 
@@ -458,7 +465,7 @@ class TestRun:
     @patch("showrunner.aiservices_client.AIServicesClient")
     def test_run_validates_and_renders(self, mock_client_cls, mock_concat, tmp_path: Path):
         mock_client = MagicMock()
-        mock_client.text2image.return_value = tmp_path / "img.png"
+        mock_client.text2image.side_effect = lambda prompt, path, **kw: _write_artefact(path)
         mock_client.image2video.return_value = tmp_path / "vid.mp4"
         mock_client_cls.return_value = mock_client
         mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
@@ -485,7 +492,7 @@ class TestRun:
     @patch("showrunner.aiservices_client.AIServicesClient")
     def test_run_bootstrap_skipped(self, mock_client_cls, mock_concat, tmp_path: Path):
         mock_client = MagicMock()
-        mock_client.text2image.return_value = tmp_path / "img.png"
+        mock_client.text2image.side_effect = lambda prompt, path, **kw: _write_artefact(path)
         mock_client.image2video.return_value = tmp_path / "vid.mp4"
         mock_client_cls.return_value = mock_client
         mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
@@ -500,7 +507,7 @@ class TestRun:
     @patch("showrunner.aiservices_client.AIServicesClient")
     def test_run_skip_validate(self, mock_client_cls, mock_concat, tmp_path: Path):
         mock_client = MagicMock()
-        mock_client.text2image.return_value = tmp_path / "img.png"
+        mock_client.text2image.side_effect = lambda prompt, path, **kw: _write_artefact(path)
         mock_client.image2video.return_value = tmp_path / "vid.mp4"
         mock_client_cls.return_value = mock_client
         mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"
@@ -518,7 +525,7 @@ class TestRun:
     @patch("showrunner.aiservices_client.AIServicesClient")
     def test_run_verbose(self, mock_client_cls, mock_concat, tmp_path: Path):
         mock_client = MagicMock()
-        mock_client.text2image.return_value = tmp_path / "img.png"
+        mock_client.text2image.side_effect = lambda prompt, path, **kw: _write_artefact(path)
         mock_client.image2video.return_value = tmp_path / "vid.mp4"
         mock_client_cls.return_value = mock_client
         mock_concat.return_value = tmp_path / "output" / "run" / "assembly" / "episode_raw.mp4"

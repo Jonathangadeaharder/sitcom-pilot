@@ -10,7 +10,7 @@ from showrunner.aiservices_client import AIServicesClient
 from showrunner.cast_manifest import CastManifest
 from showrunner.paths import RunPaths
 from showrunner.reporting import SceneReport, save_report
-from showrunner.scene_render import BeatJob, BeatStatus, _render_beat
+from showrunner.scene_render import BeatJob, BeatStatus, _render_beat, _seed_marker
 from showrunner.schemas.episode import EpisodeData, Scene
 
 logger = logging.getLogger(__name__)
@@ -164,6 +164,12 @@ def _flush_beat(job: BeatJob, paths: RunPaths) -> None:
             final_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(buf_path, final_path)
             buf_path.unlink(missing_ok=True)
+        # Flush the seed marker too so the cache stays coherent across runs.
+        buf_marker = _seed_marker(buf_path)
+        if buf_marker.exists():
+            final_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(buf_marker, _seed_marker(final_path))
+            buf_marker.unlink(missing_ok=True)
 
 
 def _record_beat(reports: dict[str, SceneReport], job: BeatJob) -> None:

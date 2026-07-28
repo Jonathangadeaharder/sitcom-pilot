@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -13,6 +14,14 @@ from showrunner.scene_render import (
     allocate_durations,
 )
 from showrunner.schemas.episode import EpisodeData, Scene
+
+
+def _write_artefact(path):
+    """Write a dummy artefact file (mirrors what a real provider does)."""
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_bytes(b"data")
+    return p
 
 
 class TestBeatStatus:
@@ -80,8 +89,16 @@ class TestSaveReport:
 class TestRenderBeatEdgeCases:
     def test_retry_then_succeeds(self, tmp_path):
         client = MagicMock()
-        client.text2image.side_effect = [RuntimeError("first fail"), tmp_path / "img.png"]
-        client.image2video.return_value = tmp_path / "vid.mp4"
+        calls = {"n": 0}
+
+        def flaky_text2image(prompt, path, **kw):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise RuntimeError("first fail")
+            return _write_artefact(path)
+
+        client.text2image.side_effect = flaky_text2image
+        client.image2video.side_effect = lambda img, prompt, path, **kw: _write_artefact(path)
 
         scene = Scene(scene_id="001", environment="office", characters_present=[])
         episode = EpisodeData(title="T", cast={}, environments={}, scenes=[scene])

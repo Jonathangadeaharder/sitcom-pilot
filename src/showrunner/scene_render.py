@@ -100,12 +100,40 @@ def allocate_durations(
     return jobs
 
 
+def _seed_marker(artefact: Path) -> Path:
+    """Sidecar path recording the seed an artefact was rendered with."""
+    return artefact.with_name(artefact.name + ".seed")
+
+
+def _cache_is_valid(artefact: Path, seed: int) -> bool:
+    """A cached artefact is reusable only if it exists and matches the seed.
+
+    The seed is derived from the episode content (and any ``--seed`` override),
+    so comparing it ensures edits and seed changes re-render instead of silently
+    reusing a stale artefact written under a different seed.
+    """
+    if not artefact.exists():
+        return False
+    try:
+        return _seed_marker(artefact).read_text().strip() == str(seed)
+    except OSError:
+        return False
+
+
+def _write_seed_marker(artefact: Path, seed: int) -> None:
+    try:
+        _seed_marker(artefact).write_text(str(seed))
+    except OSError:
+        logger.warning("failed to write seed marker", path=str(artefact))
+
+
 def _render_image(job: BeatJob, client: AIServicesClient) -> None:
     img_path = Path(job.image_path)
-    if img_path.exists():
+    if _cache_is_valid(img_path, job.seed):
         logger.info("image cache hit", path=str(img_path))
         return
     client.text2image(job.prompt, job.image_path, seed=job.seed)
+    _write_seed_marker(img_path, job.seed)
 
 
 def _render_audio(
@@ -116,7 +144,7 @@ def _render_audio(
 ) -> None:
     if not job.needs_audio or not job.text:
         return
-    if job.audio_path.exists():
+    if _cache_is_valid(job.audio_path, job.seed):
         logger.info("audio cache hit", path=str(job.audio_path))
         return
     voice = None
@@ -126,18 +154,22 @@ def _render_audio(
     client.text2speech(
         job.text, job.audio_path, voice=voice, character=episode.cast.get(job.speaker)
     )
+    _write_seed_marker(job.audio_path, job.seed)
 
 
 def _render_video(job: BeatJob, client: AIServicesClient) -> None:
-    if job.video_path.exists():
+    if _cache_is_valid(job.video_path, job.seed):
         logger.info("video cache hit", path=str(job.video_path))
         return
     if not job.image_path.exists():
-        return
+        raise FileNotFoundError(
+            f"cannot render video for beat {job.beat_id}: missing required image {job.image_path}"
+        )
     audio_arg = job.audio_path if job.audio_path.exists() else None
     client.image2video(
         job.image_path, job.prompt, job.video_path, audio_path=audio_arg, seed=job.seed
     )
+    _write_seed_marker(job.video_path, job.seed)
 
 
 def _render_beat(
