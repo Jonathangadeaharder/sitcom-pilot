@@ -6,13 +6,13 @@ requires-python = ">=3.11"
 dependencies = [
     # Data modelling & config
     "pydantic>=2.0.0",
-    "pydantic-settings>=2.0.0",
+    "pydantic-settings>=2.14.2",
     # Structured logging
     "structlog>=25.1.0",
     # ComfyUI HTTP client (v1 render path)
     "httpx>=0.27.0",
     # Image processing (continuity checks)
-    "pillow>=12.2.0",
+    "pillow>=12.3.0",
     "scikit-image>=0.20.0",
     "rich>=15.0.0",
     "typer>=0.24.2",
