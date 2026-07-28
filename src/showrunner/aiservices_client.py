@@ -15,8 +15,9 @@ class AIServicesClient:
 
     Wraps text2image, image2image, image2video, text2speech (TTS),
     and audio2subtitle into a single interface consumed by the render
-    pipeline.  Falls back to CLI subprocess when the Python API is
-    unavailable.
+    pipeline.  TTS and ASR fall back to a CLI subprocess when the Python
+    API is unavailable; the image and video paths have no CLI fallback and
+    raise ``RuntimeError`` when their provider package is missing.
     """
 
     def __init__(
@@ -109,26 +110,32 @@ class AIServicesClient:
         num_inference_steps: int = 4,
         fps: int = 16,
     ) -> Path:
-        from aiservices.generate import VideoGenerator
-
         output = Path(output_path)
         output.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            from aiservices.generate import VideoGenerator
 
-        gen = VideoGenerator(seed=seed or 0, fps=fps, num_inference_steps=num_inference_steps)
-        result = gen.generate(
-            prompt=prompt,
-            output=output_path,
-            image=str(image_path),
-            width=width,
-            height=height,
-            num_frames=num_frames,
-        )
-
-        # optionally attach audio
-        if audio_path and Path(audio_path).exists():
-            self._attach_audio(result, audio_path)
-
-        return result
+            gen = VideoGenerator(seed=seed or 0, fps=fps, num_inference_steps=num_inference_steps)
+            result = gen.generate(
+                prompt=prompt,
+                output=output,
+                image=str(image_path),
+                width=width,
+                height=height,
+                num_frames=num_frames,
+            )
+            # optionally attach audio
+            if audio_path and Path(audio_path).exists():
+                self._attach_audio(result.path, audio_path)
+            return result.path
+        except ImportError:
+            pass
+        except Exception as exc:
+            logger.error("image2video failed: %s", exc)
+            raise RuntimeError("image2video failed") from exc
+        if self._subprocess_fallback:
+            raise RuntimeError("image2video failed: aiservices package not available")
+        raise RuntimeError("image2video failed: no provider available")
 
     @staticmethod
     def _resolve_voice_config(

@@ -114,27 +114,39 @@ class TestImage2Image:
 
 class TestImage2Video:
     def test_python_api_success(self, client, tmp_path):
+        mock_result = MagicMock()
+        mock_result.path = tmp_path / "out.mp4"
         mock_gen_instance = MagicMock()
-        mock_gen_instance.generate.return_value = tmp_path / "out.mp4"
+        mock_gen_instance.generate.return_value = mock_result
         sys.modules["aiservices.generate"].VideoGenerator.return_value = mock_gen_instance
         result = client.image2video(
             tmp_path / "input.png", "animate this", tmp_path / "out.mp4", seed=42
         )
         assert isinstance(result, Path)
+        assert result == tmp_path / "out.mp4"
         mock_gen_instance.generate.assert_called_once()
 
-    def test_import_error_raises(self, client, tmp_path):
+    def test_import_error_with_fallback_raises(self, client, tmp_path):
         sys.modules["aiservices.generate"].VideoGenerator.side_effect = ImportError
-        with pytest.raises(ImportError):
+        with pytest.raises(RuntimeError, match="aiservices package not available"):
             client.image2video(
+                tmp_path / "input.png", "animate this", tmp_path / "out.mp4", seed=42
+            )
+
+    def test_no_fallback_raises(self, client_no_fallback, tmp_path):
+        sys.modules["aiservices.generate"].VideoGenerator.side_effect = ImportError
+        with pytest.raises(RuntimeError, match="no provider"):
+            client_no_fallback.image2video(
                 tmp_path / "input.png", "animate this", tmp_path / "out.mp4", seed=42
             )
 
     @patch("showrunner.aiservices_client._mux_audio")
     def test_audio_mux(self, mock_mux, client, tmp_path):
         mock_mux.return_value = tmp_path / "out.mp4"
+        mock_result = MagicMock()
+        mock_result.path = tmp_path / "out.mp4"
         mock_gen_instance = MagicMock()
-        mock_gen_instance.generate.return_value = tmp_path / "out.mp4"
+        mock_gen_instance.generate.return_value = mock_result
         sys.modules["aiservices.generate"].VideoGenerator.return_value = mock_gen_instance
         (tmp_path / "audio.wav").write_text("fake audio")
         result = client.image2video(
